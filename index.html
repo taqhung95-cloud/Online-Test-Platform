@@ -698,11 +698,24 @@
     .history-list { display: grid; gap: 8px; }
 
     .history-item {
+      width: 100%;
       border: 1px solid var(--line);
       border-radius: 8px;
       background: var(--soft);
+      color: var(--ink);
       padding: 12px;
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
     }
+
+    .history-item:hover { border-color: #9fb2c2; background: #fff; }
+    .history-item.active {
+      border-color: var(--orange);
+      background: #fff7f1;
+      box-shadow: inset 3px 0 0 var(--orange);
+    }
+    .history-item:disabled { cursor: wait; opacity: 0.65; }
 
     .history-score { font-size: 13px; font-weight: 800; }
     .history-time { margin-top: 5px; color: var(--muted); font-size: 11px; }
@@ -1519,6 +1532,18 @@
       renderResult(data);
     }
 
+    async function viewAttemptResult(attemptToken) {
+      const data = await callApi("getAttemptResult", {
+        email: state.email,
+        courseId: state.course ? state.course.id : "",
+        attemptToken,
+        deviceId: state.deviceId
+      });
+      state.course = data.course;
+      state.history = data.history || [];
+      renderResult(data);
+    }
+
     async function saveAttemptProgress(force = false) {
       if (!state.active || state.submitting) return;
       const snapshot = JSON.stringify(state.answers);
@@ -1834,13 +1859,19 @@
       const rankingAvailable = Number(ranking.rank) > 0 && Number(ranking.totalParticipants) > 0;
       const historyHtml = history.length
         ? history.map((item) => `
-            <div class="history-item">
+            <button
+              class="history-item${item.attemptToken === data.attemptToken ? " active" : ""}"
+              type="button"
+              data-history-token="${escapeHtml(item.attemptToken || "")}"
+              ${item.attemptToken ? "" : "disabled"}
+              ${item.attemptToken === data.attemptToken ? 'aria-current="true"' : ""}
+            >
               <div class="history-score">
                 ${escapeHtml(item.score)}/${escapeHtml(item.total)}
                 <span class="${item.result === "PASS" ? "pass-text" : "failed-text"}">${escapeHtml(item.result)}</span>
               </div>
               <div class="history-time">${escapeHtml(item.submittedAt)}</div>
-            </div>
+            </button>
           `).join("")
         : '<p class="intro">Chưa có lịch sử.</p>';
       const wrongQuestions = Array.isArray(data.wrongQuestions) ? data.wrongQuestions : [];
@@ -2118,6 +2149,18 @@
     });
 
     resultView.addEventListener("click", (event) => {
+      const historyButton = event.target.closest("[data-history-token]");
+      if (historyButton && historyButton.dataset.historyToken) {
+        const previousText = historyButton.innerHTML;
+        historyButton.disabled = true;
+        viewAttemptResult(historyButton.dataset.historyToken)
+          .catch((error) => {
+            historyButton.disabled = false;
+            historyButton.innerHTML = previousText;
+            window.alert(error.message);
+          });
+        return;
+      }
       const button = event.target.closest('[data-action="restart-exam"]');
       if (button) returnToCourseSelection();
     });
