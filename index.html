@@ -412,6 +412,12 @@
 
     .course-card .button {
       width: 100%;
+      margin-top: 0;
+    }
+
+    .course-actions {
+      display: grid;
+      gap: 8px;
       margin-top: 18px;
     }
 
@@ -1125,7 +1131,10 @@
       tabViolations: 0,
       timerId: null,
       tabTimerId: null,
-      inactivityTimerId: null
+      inactivityTimerId: null,
+      progressSaveTimerId: null,
+      progressSyncTimerId: null,
+      lastProgressSnapshot: ""
     };
 
     const loginView = document.getElementById("loginView");
@@ -1215,71 +1224,51 @@
         throw new Error("Hệ thống chưa được cấu hình Google Apps Script.");
       }
       return new Promise((resolve, reject) => {
-        const requestId = `mgrl_${Date.now()}_${Math.random().toString(16).slice(2)}`;
-        const iframe = document.createElement("iframe");
-        iframe.hidden = true;
-        iframe.setAttribute("aria-hidden", "true");
-        iframe.tabIndex = -1;
+        const callbackName = `mgrl_callback_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+        const script = document.createElement("script");
+        script.async = true;
 
         const timeoutId = window.setTimeout(() => {
           cleanup();
           reject(new Error(
-            "Không nhận được phản hồi từ Google Apps Script. Hãy kiểm tra deployment đang chạy đúng phiên bản mới nhất rồi thử lại."
+            "Không thể kết nối đến Google Apps Script. Hãy kiểm tra mạng, tiện ích chặn nội dung hoặc chính sách truy cập script.google.com rồi thử lại."
           ));
         }, 20000);
 
         function cleanup() {
           window.clearTimeout(timeoutId);
-          window.removeEventListener("message", handleMessage);
-          iframe.remove();
-        }
-
-        function isGoogleAppsScriptOrigin(origin) {
-          if (origin === "null") {
-            return true;
-          }
+          script.remove();
           try {
-            const host = new URL(origin).hostname.toLowerCase();
-            return host === "script.google.com" ||
-              host === "script.googleusercontent.com" ||
-              host.endsWith(".googleusercontent.com");
+            delete window[callbackName];
           } catch (error) {
-            return false;
+            window[callbackName] = undefined;
           }
         }
 
-        function handleMessage(event) {
-          if (!isGoogleAppsScriptOrigin(event.origin)) return;
-          if (!event.data || event.data.source !== "MGRL_APPS_SCRIPT") return;
-          if (event.data.requestId !== requestId) return;
-
-          const data = event.data.data;
+        window[callbackName] = (data) => {
           cleanup();
           if (!data || !data.ok) {
             reject(new Error(data && data.message ? data.message : "Yêu cầu không được xử lý."));
             return;
           }
           resolve(data);
-        }
-
-        window.addEventListener("message", handleMessage);
+        };
 
         const query = new URLSearchParams({
           action,
           payload: JSON.stringify(payload),
-          transport: "iframe",
-          requestId,
+          callback: callbackName,
           _: Date.now().toString()
         });
-        iframe.onerror = (event) => {
+        script.onerror = (event) => {
           console.error("Không tải được Google Apps Script Web App:", APPS_SCRIPT_URL, event);
           cleanup();
           reject(new Error(
-            "Không thể mở kênh kết nối đến Google Apps Script. Hãy kiểm tra lại URL Web App và quyền truy cập “Anyone”."
+            "Trình duyệt hoặc mạng đang chặn Google Apps Script. Hãy tắt tiện ích chặn nội dung hoặc cho phép script.google.com."
           ));
         };
-        iframe.src = `${APPS_SCRIPT_URL}?${query.toString()}`;
-        document.body.appendChild(iframe);
+        script.src = `${APPS_SCRIPT_URL}?${query.toString()}`;
+        document.head.appendChild(script);
       });
     }
 
@@ -1320,7 +1309,10 @@
       state.participant = data.participant;
       state.course = data.course;
       state.questions = data.questions;
-      state.answers = localAnswers;
+      state.answers = {
+        ...(data.savedAnswers || {}),
+        ...localAnswers
+      };
       state.history = data.history || [];
       state.attemptNumber = data.attemptNumber;
       state.maxAttempts = data.maxAttempts;
@@ -1330,6 +1322,7 @@
       state.attentionReason = "";
       state.lastInteractionAt = Date.now();
       state.tabViolations = Number(data.tabViolations || 0);
+      state.lastProgressSnapshot = "";
       saveSession();
       renderExam();
     }
@@ -1363,9 +1356,14 @@
       `;
 
       courseGrid.innerHTML = state.courses.length
-        ? state.courses.map((course) => {
-            const remaining = Math.max(0, Number(course.remainingAttempts || 0));
-            const canStart = Boolean(course.canStart);
+          ? state.courses.map((course) => {
+              const remaining = Math.max(0, Number(course.remainingAttempts || 0));
+              const canStart = Boolean(course.canStart);
+              const hasResult = Boolean(
+                course.hasResult ||
+                course.latestResult ||
+                Number(course.attemptsUsed || 0) > 0
+              );
             return `
               <article class="course-card${canStart ? "" : " unavailable"}">
                 <div class="course-code">${escapeHtml(course.id)}</div>
@@ -1377,12 +1375,21 @@
                   <div class="course-fact"><span>Ngưỡng đạt</span><strong>${escapeHtml(course.passPercent)}%</strong></div>
                   <div class="course-fact"><span>Lượt còn lại</span><strong>${escapeHtml(remaining)}/${escapeHtml(course.maxAttempts)}</strong></div>
                 </div>
-                <button
-                  class="button"
-                  type="button"
-                  data-course-id="${escapeHtml(course.id)}"
-                  ${canStart ? "" : "disabled"}
-                >${canStart ? "Bắt đầu kiểm tra" : "Đã hết lượt"}</button>
+                <div class="course-actions">
+                  <button
+                    class="button"
+                    type="button"
+                    data-start-course-id="${escapeHtml(course.id)}"
+                    ${canStart ? "" : "disabled"}
+                  >${canStart ? "Bắt đầu kiểm tra" : "Đã hết lượt"}</button>
+                  ${hasResult ? `
+                    <button
+                      class="button secondary-button"
+                      type="button"
+                      data-result-course-id="${escapeHtml(course.id)}"
+                    >Xem kết quả mới nhất</button>
+                  ` : ""}
+                </div>
               </article>
             `;
           }).join("")
@@ -1440,6 +1447,7 @@
       updateProgress();
       startTimer();
       startInactivityWatcher();
+      startProgressSync();
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
@@ -1493,6 +1501,57 @@
         clientTimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Ho_Chi_Minh"
       });
       applyAttempt(data);
+    }
+
+    async function viewLatestResult(courseId) {
+      const data = await callApi("getLatestResult", {
+        email: state.email,
+        courseId,
+        deviceId: state.deviceId
+      });
+      state.course = data.course;
+      state.history = data.history || [];
+      renderResult(data);
+    }
+
+    async function saveAttemptProgress(force = false) {
+      if (!state.active || state.submitting) return;
+      const snapshot = JSON.stringify(state.answers);
+      if (!force && snapshot === state.lastProgressSnapshot) return;
+      try {
+        const data = await callApi("saveAttemptProgress", {
+          attemptToken: state.token,
+          email: state.email,
+          deviceId: state.deviceId,
+          answers: state.answers,
+          tabViolations: state.tabViolations
+        });
+        state.lastProgressSnapshot = snapshot;
+        if (data.finished) {
+          state.active = false;
+          clearSession();
+          clearInterval(state.timerId);
+          clearInterval(state.inactivityTimerId);
+          clearInterval(state.progressSyncTimerId);
+          await viewLatestResult(state.course.id);
+        }
+      } catch (error) {
+        console.warn("Không thể lưu tiến độ bài thi:", error.message);
+      }
+    }
+
+    function scheduleProgressSave() {
+      clearTimeout(state.progressSaveTimerId);
+      state.progressSaveTimerId = setTimeout(() => {
+        saveAttemptProgress();
+      }, 700);
+    }
+
+    function startProgressSync() {
+      clearInterval(state.progressSyncTimerId);
+      state.progressSyncTimerId = setInterval(() => {
+        saveAttemptProgress();
+      }, 15000);
     }
 
     function showRegistrationForm() {
@@ -1650,6 +1709,8 @@
       clearInterval(state.timerId);
       clearInterval(state.tabTimerId);
       clearInterval(state.inactivityTimerId);
+      clearTimeout(state.progressSaveTimerId);
+      clearInterval(state.progressSyncTimerId);
       tabOverlay.hidden = true;
 
       try {
@@ -1674,6 +1735,7 @@
         submitButton.textContent = "Nộp bài";
         startTimer();
         startInactivityWatcher();
+        startProgressSync();
         window.alert(error.message);
       }
     }
@@ -1875,6 +1937,9 @@
       clearInterval(state.timerId);
       clearInterval(state.tabTimerId);
       clearInterval(state.inactivityTimerId);
+      clearTimeout(state.progressSaveTimerId);
+      clearInterval(state.progressSyncTimerId);
+      state.lastProgressSnapshot = "";
       tabOverlay.hidden = true;
       clearSession();
       resultView.hidden = true;
@@ -1953,14 +2018,30 @@
     logoutButton.addEventListener("click", logoutParticipant);
 
     courseGrid.addEventListener("click", async (event) => {
-      const button = event.target.closest("[data-course-id]");
+      const resultButton = event.target.closest("[data-result-course-id]");
+      if (resultButton) {
+        courseMessage.textContent = "";
+        resultButton.disabled = true;
+        const previousText = resultButton.textContent;
+        resultButton.textContent = "Đang tải kết quả...";
+        try {
+          await viewLatestResult(resultButton.dataset.resultCourseId);
+        } catch (error) {
+          courseMessage.textContent = error.message;
+          resultButton.disabled = false;
+          resultButton.textContent = previousText;
+        }
+        return;
+      }
+
+      const button = event.target.closest("[data-start-course-id]");
       if (!button || button.disabled) return;
       courseMessage.textContent = "";
       button.disabled = true;
       const previousText = button.textContent;
       button.textContent = "Đang tạo đề...";
       try {
-        await startAttempt(state.email, button.dataset.courseId);
+        await startAttempt(state.email, button.dataset.startCourseId);
       } catch (error) {
         courseMessage.textContent = error.message;
         button.disabled = false;
@@ -2018,6 +2099,7 @@
       state.answers[event.target.name] = event.target.value;
       saveSession();
       updateProgress();
+      scheduleProgressSave();
     });
 
     questionNavGrid.addEventListener("click", (event) => {
@@ -2124,6 +2206,7 @@
 
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) {
+        saveAttemptProgress(true);
         beginAwayCountdown("TAB_HIDDEN");
         return;
       }
