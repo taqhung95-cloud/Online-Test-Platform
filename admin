@@ -1,0 +1,691 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f06f22">
+  <title>Quản trị kết quả đánh giá Sungrow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --panel: #fff;
+      --ink: #172333;
+      --muted: #687684;
+      --line: #dbe3ea;
+      --orange: #f06f22;
+      --orange-dark: #c65311;
+      --blue: #1268a9;
+      --green: #168251;
+      --red: #c8322b;
+      --soft: #eef3f6;
+      --shadow: 0 8px 24px rgba(23, 35, 51, 0.07);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Montserrat", Arial, sans-serif;
+    }
+    button, input, select { font: inherit; }
+    [hidden] { display: none !important; }
+
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.97);
+    }
+    .header-inner {
+      width: min(1420px, calc(100% - 32px));
+      min-height: 74px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+    .brand { display: flex; align-items: center; min-width: 0; gap: 18px; }
+    .brand img { width: 142px; height: auto; display: block; }
+    .brand-copy { min-width: 0; padding-left: 18px; border-left: 1px solid var(--line); }
+    .brand-copy h1 { margin: 0; font-size: 17px; line-height: 1.35; }
+    .brand-copy p { margin: 3px 0 0; color: var(--muted); font-size: 11px; }
+
+    main { width: min(1420px, calc(100% - 32px)); margin: 0 auto; padding: 28px 0 54px; }
+    .panel { border: 1px solid var(--line); border-radius: 8px; background: var(--panel); box-shadow: var(--shadow); }
+    .button {
+      min-height: 42px;
+      border: 0;
+      border-radius: 8px;
+      padding: 9px 16px;
+      background: var(--orange);
+      color: #fff;
+      cursor: pointer;
+      font-weight: 800;
+    }
+    .button:hover { background: var(--orange-dark); }
+    .button:disabled { cursor: wait; opacity: 0.58; }
+    .button.secondary { border: 1px solid #cbd6df; background: #fff; color: var(--ink); }
+    .button.secondary:hover { background: var(--soft); }
+
+    .login-panel { width: min(520px, 100%); margin: 54px auto 0; padding: 32px; }
+    .eyebrow { margin: 0 0 8px; color: var(--orange-dark); font-size: 11px; font-weight: 800; text-transform: uppercase; }
+    h2 { margin: 0; font-size: 24px; }
+    .intro { margin: 10px 0 22px; color: var(--muted); font-size: 13px; line-height: 1.6; }
+    .form-grid { display: grid; gap: 14px; }
+    label { display: block; margin-bottom: 7px; color: #40505f; font-size: 12px; font-weight: 700; }
+    input, select {
+      width: 100%;
+      min-height: 44px;
+      border: 1px solid #cbd6df;
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      padding: 9px 11px;
+      outline: none;
+    }
+    input:focus, select:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(18, 104, 169, 0.12); }
+    .otp-row { display: grid; grid-template-columns: minmax(0, 1fr) 142px; gap: 9px; align-items: end; }
+    #adminOtp { letter-spacing: 5px; text-align: center; font-weight: 700; }
+    .login-message { min-height: 20px; margin: 12px 0 0; color: var(--red); font-size: 12px; font-weight: 600; line-height: 1.5; }
+    .login-message.success { color: var(--green); }
+
+    .admin-meta { display: flex; align-items: center; gap: 14px; color: var(--muted); font-size: 12px; }
+    .dashboard { display: grid; gap: 20px; }
+    .toolbar { padding: 18px; }
+    .filters {
+      display: grid;
+      grid-template-columns: 1.25fr 1fr 1.15fr 0.85fr 0.85fr auto;
+      gap: 10px;
+      align-items: end;
+    }
+    .filter-actions { display: flex; gap: 8px; }
+    .filter-actions .button { white-space: nowrap; }
+    .toolbar-footer { margin-top: 13px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }
+    .status { color: var(--muted); font-size: 11px; line-height: 1.5; }
+    .export-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+    .metrics { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }
+    .metric { min-width: 0; padding: 17px; border-top: 3px solid var(--orange); }
+    .metric-label { color: var(--muted); font-size: 10px; font-weight: 700; text-transform: uppercase; }
+    .metric-value { margin-top: 8px; font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; }
+    .metric-note { margin-top: 4px; color: var(--muted); font-size: 10px; }
+
+    .tabs { display: inline-flex; gap: 2px; padding: 3px; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+    .tab-button { min-height: 36px; border: 0; border-radius: 6px; padding: 7px 14px; background: transparent; color: var(--muted); cursor: pointer; font-weight: 700; }
+    .tab-button.active { background: var(--ink); color: #fff; }
+    .tab-panel { display: grid; gap: 16px; }
+    .section { padding: 20px; }
+    .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+    .section h3 { margin: 0; font-size: 16px; }
+    .section-note { color: var(--muted); font-size: 11px; }
+    .overview-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); gap: 16px; }
+
+    .category-list { display: grid; gap: 15px; }
+    .category-head { display: flex; justify-content: space-between; gap: 12px; font-size: 12px; }
+    .category-name { font-weight: 700; }
+    .category-score { color: var(--muted); font-variant-numeric: tabular-nums; }
+    .bar { height: 9px; margin-top: 7px; overflow: hidden; border-radius: 999px; background: #e5ebef; }
+    .bar span { display: block; height: 100%; background: var(--orange); }
+
+    .table-wrap { overflow: auto; border: 1px solid var(--line); border-radius: 8px; }
+    table { width: 100%; border-collapse: collapse; font-size: 11px; }
+    th, td { padding: 10px 11px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: middle; white-space: nowrap; }
+    th { position: sticky; top: 0; z-index: 1; background: #edf2f5; color: #40505f; font-size: 10px; text-transform: uppercase; }
+    tbody tr:last-child td { border-bottom: 0; }
+    tbody tr:hover { background: #f8fafb; }
+    .number { text-align: right; font-variant-numeric: tabular-nums; }
+    .pass { color: var(--green); font-weight: 800; }
+    .failed { color: var(--red); font-weight: 800; }
+    .empty { padding: 28px; color: var(--muted); text-align: center; font-size: 12px; }
+
+    @media (max-width: 1120px) {
+      .filters { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    @media (max-width: 760px) {
+      .header-inner { align-items: flex-start; padding: 12px 0; }
+      .brand img { width: 112px; }
+      .brand-copy h1 { font-size: 13px; }
+      .admin-meta { align-items: flex-end; flex-direction: column; }
+      .filters { grid-template-columns: 1fr; }
+      .filter-actions, .filter-actions .button { width: 100%; }
+      .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .overview-grid { grid-template-columns: 1fr; }
+      .toolbar-footer { align-items: stretch; flex-direction: column; }
+      .export-actions .button { flex: 1; }
+    }
+    @media (max-width: 480px) {
+      main, .header-inner { width: min(100% - 20px, 1420px); }
+      .brand-copy { padding-left: 10px; }
+      .brand img { width: 94px; }
+      .metrics { grid-template-columns: 1fr; }
+      .otp-row { grid-template-columns: 1fr; }
+      .login-panel { padding: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <div class="brand">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/a/a2/Sungrow_Power_Supply.svg" alt="Sungrow">
+        <div class="brand-copy">
+          <h1>QUẢN TRỊ KẾT QUẢ ĐÁNH GIÁ</h1>
+          <p>Product Training Assessment</p>
+        </div>
+      </div>
+      <div id="adminMeta" class="admin-meta" hidden>
+        <span id="adminIdentity"></span>
+        <button id="logoutButton" class="button secondary" type="button">Đăng xuất</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="loginView" class="panel login-panel">
+      <p class="eyebrow">Tài khoản quản trị</p>
+      <h2>Đăng nhập bằng OTP</h2>
+      <p class="intro">Chỉ email đã được kích hoạt trong sheet Admins mới nhận được mã đăng nhập.</p>
+      <form id="loginForm" class="form-grid" novalidate>
+        <div>
+          <label for="adminEmail">Email quản trị</label>
+          <input id="adminEmail" type="email" autocomplete="email" placeholder="admin@congty.com" required>
+        </div>
+        <div class="otp-row">
+          <div>
+            <label for="adminOtp">Mã OTP</label>
+            <input id="adminOtp" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" placeholder="000000" required>
+          </div>
+          <button id="sendOtpButton" class="button secondary" type="button">Gửi mã OTP</button>
+        </div>
+        <button id="loginButton" class="button" type="submit">Đăng nhập quản trị</button>
+      </form>
+      <p id="loginMessage" class="login-message" role="alert"></p>
+    </section>
+
+    <section id="dashboardView" class="dashboard" hidden>
+      <section class="panel toolbar">
+        <div class="filters">
+          <div>
+            <label for="courseFilter">Khóa học</label>
+            <select id="courseFilter"><option value="">Tất cả khóa học</option></select>
+          </div>
+          <div>
+            <label for="companyFilter">Công ty</label>
+            <select id="companyFilter"><option value="">Tất cả công ty</option></select>
+          </div>
+          <div>
+            <label for="emailFilter">Email</label>
+            <input id="emailFilter" type="text" placeholder="Tìm theo email">
+          </div>
+          <div>
+            <label for="dateFromFilter">Từ ngày</label>
+            <input id="dateFromFilter" type="date">
+          </div>
+          <div>
+            <label for="dateToFilter">Đến ngày</label>
+            <input id="dateToFilter" type="date">
+          </div>
+          <div class="filter-actions">
+            <button id="applyFilterButton" class="button" type="button">Cập nhật</button>
+            <button id="resetFilterButton" class="button secondary" type="button">Xóa lọc</button>
+          </div>
+        </div>
+        <div class="toolbar-footer">
+          <div id="dashboardStatus" class="status">Chưa tải dữ liệu.</div>
+          <div class="export-actions">
+            <button id="exportRankingButton" class="button secondary" type="button">Xuất xếp hạng CSV</button>
+            <button id="exportAttemptsButton" class="button secondary" type="button">Xuất lịch sử CSV</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="metricsGrid" class="metrics"></section>
+
+      <nav class="tabs" aria-label="Nội dung báo cáo">
+        <button class="tab-button active" type="button" data-tab="overview">Tổng quan</button>
+        <button class="tab-button" type="button" data-tab="ranking">Xếp hạng</button>
+        <button class="tab-button" type="button" data-tab="attempts">Lịch sử thi</button>
+      </nav>
+
+      <div id="overviewTab" class="tab-panel">
+        <div class="overview-grid">
+          <section class="panel section">
+            <div class="section-head">
+              <h3>Tỷ lệ chính xác theo phần</h3>
+              <span class="section-note">Tính theo bài tốt nhất của mỗi email</span>
+            </div>
+            <div id="categoryList" class="category-list"></div>
+          </section>
+          <section class="panel section">
+            <div class="section-head">
+              <h3>Chất lượng theo công ty</h3>
+            </div>
+            <div id="companyTable"></div>
+          </section>
+        </div>
+      </div>
+
+      <div id="rankingTab" class="tab-panel" hidden>
+        <section class="panel section">
+          <div class="section-head">
+            <h3>Xếp hạng theo email</h3>
+            <span class="section-note">Mỗi email chỉ được tính một người</span>
+          </div>
+          <div id="rankingTable"></div>
+        </section>
+      </div>
+
+      <div id="attemptsTab" class="tab-panel" hidden>
+        <section class="panel section">
+          <div class="section-head">
+            <h3>Lịch sử các lượt thi</h3>
+            <span class="section-note">Tối đa 1.000 dòng theo bộ lọc</span>
+          </div>
+          <div id="attemptTable"></div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzh0vDk-fN86u1_g3wm7ti7MpDTQWIGZjqx-XqVLfuRvR_piNAQ1waysZtEW8_AMWyWNQ/exec";
+    const ADMIN_SESSION_KEY = "sungrow_admin_session_v1";
+    let adminToken = sessionStorage.getItem(ADMIN_SESSION_KEY) || "";
+    let dashboardData = null;
+    let otpCooldown = 0;
+    let otpTimer = null;
+    let refreshTimer = null;
+
+    const loginView = document.getElementById("loginView");
+    const dashboardView = document.getElementById("dashboardView");
+    const adminMeta = document.getElementById("adminMeta");
+    const adminIdentity = document.getElementById("adminIdentity");
+    const loginForm = document.getElementById("loginForm");
+    const adminEmail = document.getElementById("adminEmail");
+    const adminOtp = document.getElementById("adminOtp");
+    const sendOtpButton = document.getElementById("sendOtpButton");
+    const loginButton = document.getElementById("loginButton");
+    const loginMessage = document.getElementById("loginMessage");
+    const logoutButton = document.getElementById("logoutButton");
+    const courseFilter = document.getElementById("courseFilter");
+    const companyFilter = document.getElementById("companyFilter");
+    const emailFilter = document.getElementById("emailFilter");
+    const dateFromFilter = document.getElementById("dateFromFilter");
+    const dateToFilter = document.getElementById("dateToFilter");
+    const applyFilterButton = document.getElementById("applyFilterButton");
+    const resetFilterButton = document.getElementById("resetFilterButton");
+    const dashboardStatus = document.getElementById("dashboardStatus");
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function callApi(action, payload = {}) {
+      return new Promise((resolve, reject) => {
+        const callbackName = `admin_callback_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+        const script = document.createElement("script");
+        const timeoutId = setTimeout(() => {
+          cleanup();
+          reject(new Error("Không nhận được phản hồi từ Google Apps Script."));
+        }, 30000);
+        function cleanup() {
+          clearTimeout(timeoutId);
+          script.remove();
+          try { delete window[callbackName]; } catch (error) { window[callbackName] = undefined; }
+        }
+        window[callbackName] = (data) => {
+          cleanup();
+          if (!data || !data.ok) {
+            reject(new Error(data && data.message ? data.message : "Yêu cầu không được xử lý."));
+            return;
+          }
+          resolve(data);
+        };
+        const query = new URLSearchParams({
+          action,
+          payload: JSON.stringify(payload),
+          callback: callbackName,
+          _: Date.now().toString()
+        });
+        script.onerror = () => {
+          cleanup();
+          reject(new Error("Trình duyệt hoặc mạng đang chặn Google Apps Script."));
+        };
+        script.src = `${APPS_SCRIPT_URL}?${query.toString()}`;
+        document.head.appendChild(script);
+      });
+    }
+
+    function currentFilters() {
+      return {
+        courseId: courseFilter.value,
+        company: companyFilter.value,
+        email: emailFilter.value.trim(),
+        dateFrom: dateFromFilter.value,
+        dateTo: dateToFilter.value
+      };
+    }
+
+    async function sendAdminOtp() {
+      loginMessage.classList.remove("success");
+      loginMessage.textContent = "";
+      if (!adminEmail.checkValidity()) {
+        adminEmail.reportValidity();
+        return;
+      }
+      sendOtpButton.disabled = true;
+      sendOtpButton.textContent = "Đang gửi...";
+      try {
+        const data = await callApi("sendAdminOtp", { email: adminEmail.value.trim() });
+        loginMessage.classList.add("success");
+        loginMessage.textContent = data.message;
+        otpCooldown = Number(data.resendAfterSeconds || 60);
+        updateOtpButton();
+        clearInterval(otpTimer);
+        otpTimer = setInterval(() => {
+          otpCooldown -= 1;
+          updateOtpButton();
+          if (otpCooldown <= 0) clearInterval(otpTimer);
+        }, 1000);
+        adminOtp.focus();
+      } catch (error) {
+        loginMessage.textContent = error.message;
+        sendOtpButton.disabled = false;
+        sendOtpButton.textContent = "Gửi mã OTP";
+      }
+    }
+
+    function updateOtpButton() {
+      sendOtpButton.disabled = otpCooldown > 0;
+      sendOtpButton.textContent = otpCooldown > 0 ? `Gửi lại sau ${otpCooldown}s` : "Gửi mã OTP";
+    }
+
+    async function loginAdmin() {
+      loginMessage.classList.remove("success");
+      loginMessage.textContent = "";
+      if (!adminEmail.checkValidity() || !adminOtp.checkValidity()) {
+        (!adminEmail.checkValidity() ? adminEmail : adminOtp).reportValidity();
+        return;
+      }
+      loginButton.disabled = true;
+      loginButton.textContent = "Đang xác thực...";
+      try {
+        const data = await callApi("loginAdmin", {
+          email: adminEmail.value.trim(),
+          otp: adminOtp.value
+        });
+        adminToken = data.adminToken;
+        sessionStorage.setItem(ADMIN_SESSION_KEY, adminToken);
+        showDashboard(data.admin);
+        await loadDashboard();
+      } catch (error) {
+        loginMessage.textContent = error.message;
+      } finally {
+        loginButton.disabled = false;
+        loginButton.textContent = "Đăng nhập quản trị";
+      }
+    }
+
+    function showDashboard(admin) {
+      loginView.hidden = true;
+      dashboardView.hidden = false;
+      adminMeta.hidden = false;
+      adminIdentity.textContent = admin ? `${admin.name} · ${admin.email}` : "Quản trị viên";
+      clearInterval(refreshTimer);
+      refreshTimer = setInterval(() => loadDashboard(true), 5 * 60 * 1000);
+    }
+
+    function showLogin(message = "") {
+      adminToken = "";
+      sessionStorage.removeItem(ADMIN_SESSION_KEY);
+      clearInterval(refreshTimer);
+      loginView.hidden = false;
+      dashboardView.hidden = true;
+      adminMeta.hidden = true;
+      loginMessage.textContent = message;
+    }
+
+    async function loadDashboard(silent = false) {
+      if (!adminToken) return;
+      if (!silent) {
+        applyFilterButton.disabled = true;
+        applyFilterButton.textContent = "Đang tải...";
+      }
+      dashboardStatus.textContent = "Đang tổng hợp dữ liệu từ Google Sheet...";
+      try {
+        const data = await callApi("getAdminDashboard", {
+          adminToken,
+          filters: currentFilters()
+        });
+        dashboardData = data;
+        showDashboard(data.admin);
+        renderFilterOptions(data.options || {});
+        renderDashboard(data);
+      } catch (error) {
+        if (/Phiên quản trị/.test(error.message)) {
+          showLogin(error.message);
+          return;
+        }
+        dashboardStatus.textContent = error.message;
+      } finally {
+        applyFilterButton.disabled = false;
+        applyFilterButton.textContent = "Cập nhật";
+      }
+    }
+
+    function renderFilterOptions(options) {
+      const selectedCourse = courseFilter.value;
+      const selectedCompany = companyFilter.value;
+      courseFilter.innerHTML = '<option value="">Tất cả khóa học</option>' +
+        (options.courses || []).map((course) =>
+          `<option value="${escapeHtml(course.id)}">${escapeHtml(course.title)}${course.active ? "" : " (đã đóng)"}</option>`
+        ).join("");
+      companyFilter.innerHTML = '<option value="">Tất cả công ty</option>' +
+        (options.companies || []).map((company) =>
+          `<option value="${escapeHtml(company)}">${escapeHtml(company)}</option>`
+        ).join("");
+      courseFilter.value = selectedCourse;
+      companyFilter.value = selectedCompany;
+    }
+
+    function renderDashboard(data) {
+      const metrics = data.metrics || {};
+      const metricItems = [
+        ["Email đăng ký", metrics.registeredParticipants, "Theo bộ lọc email/công ty"],
+        ["Người tham gia", metrics.participatingEmails, "Mỗi email tính một người"],
+        ["Lượt hoàn thành", metrics.completedAttempts, `${metrics.activeAttempts || 0} lượt đang làm`],
+        ["Tỷ lệ tham gia", `${metrics.completionRate || 0}%`, "Người tham gia / email đăng ký"],
+        ["Tỷ lệ đạt", `${metrics.passRate || 0}%`, `${metrics.passedParticipants || 0} người đạt`],
+        ["Điểm tốt nhất TB", `${metrics.averageBestPercent || 0}%`, "Trung bình theo email"]
+      ];
+      document.getElementById("metricsGrid").innerHTML = metricItems.map((item) => `
+        <article class="panel metric">
+          <div class="metric-label">${escapeHtml(item[0])}</div>
+          <div class="metric-value">${escapeHtml(item[1])}</div>
+          <div class="metric-note">${escapeHtml(item[2])}</div>
+        </article>
+      `).join("");
+
+      const categories = data.categories || [];
+      document.getElementById("categoryList").innerHTML = categories.length
+        ? categories.map((item) => `
+            <div>
+              <div class="category-head">
+                <span class="category-name">${escapeHtml(item.category)}</span>
+                <span class="category-score">${escapeHtml(item.correct)}/${escapeHtml(item.total)} · ${escapeHtml(item.percent)}%</span>
+              </div>
+              <div class="bar"><span style="width:${Math.max(0, Math.min(100, Number(item.percent) || 0))}%"></span></div>
+            </div>
+          `).join("")
+        : '<div class="empty">Chưa có dữ liệu theo phần.</div>';
+
+      renderCompanyTable(data.companies || []);
+      renderRankingTable(data.rankings || []);
+      renderAttemptTable(data.attempts || []);
+      dashboardStatus.textContent = `Cập nhật lúc ${new Date(data.generatedAt).toLocaleString("vi-VN")}. Xếp hạng và thống kê đã được tính lại từ dữ liệu hiện tại.`;
+    }
+
+    function tableHtml(headers, rows) {
+      if (!rows.length) return '<div class="empty">Không có dữ liệu phù hợp.</div>';
+      return `<div class="table-wrap"><table><thead><tr>${headers.map((header) => `<th>${escapeHtml(header)}</th>`).join("")}</tr></thead><tbody>${rows.join("")}</tbody></table></div>`;
+    }
+
+    function renderCompanyTable(rows) {
+      document.getElementById("companyTable").innerHTML = tableHtml(
+        ["Công ty", "Người", "Đạt", "Tỷ lệ đạt", "Điểm TB"],
+        rows.map((row) => `<tr>
+          <td>${escapeHtml(row.company)}</td>
+          <td class="number">${escapeHtml(row.participants)}</td>
+          <td class="number">${escapeHtml(row.passed)}</td>
+          <td class="number">${escapeHtml(row.passRate)}%</td>
+          <td class="number">${escapeHtml(row.averagePercent)}%</td>
+        </tr>`)
+      );
+    }
+
+    function renderRankingTable(rows) {
+      document.getElementById("rankingTable").innerHTML = tableHtml(
+        ["Hạng", "Họ tên", "Email", "Công ty", "Khóa học", "Điểm", "%", "Kết quả", "Số lượt", "Thời gian", "Ngày nộp"],
+        rows.map((row) => `<tr>
+          <td class="number"><strong>${escapeHtml(row.rank)}</strong></td>
+          <td>${escapeHtml(row.name)}</td>
+          <td>${escapeHtml(row.email)}</td>
+          <td>${escapeHtml(row.company)}</td>
+          <td>${escapeHtml(row.courseTitle || row.courseId)}</td>
+          <td class="number">${escapeHtml(row.score)}/${escapeHtml(row.total)}</td>
+          <td class="number">${escapeHtml(row.percent)}%</td>
+          <td class="${row.result === "PASS" ? "pass" : "failed"}">${escapeHtml(row.result)}</td>
+          <td class="number">${escapeHtml(row.attempts)}</td>
+          <td class="number">${escapeHtml(formatDuration(row.durationSeconds))}</td>
+          <td>${escapeHtml(row.submittedAt)}</td>
+        </tr>`)
+      );
+    }
+
+    function renderAttemptTable(rows) {
+      document.getElementById("attemptTable").innerHTML = tableHtml(
+        ["Ngày nộp", "Họ tên", "Email", "Công ty", "Khóa học", "Lượt", "Điểm", "%", "Kết quả", "Thời gian", "Kết thúc", "Rời tab"],
+        rows.map((row) => `<tr>
+          <td>${escapeHtml(row.submittedAt)}</td>
+          <td>${escapeHtml(row.name)}</td>
+          <td>${escapeHtml(row.email)}</td>
+          <td>${escapeHtml(row.company)}</td>
+          <td>${escapeHtml(row.courseTitle || row.courseId)}</td>
+          <td class="number">${escapeHtml(row.attemptNumber)}</td>
+          <td class="number">${escapeHtml(row.score)}/${escapeHtml(row.total)}</td>
+          <td class="number">${escapeHtml(row.percent)}%</td>
+          <td class="${row.result === "PASS" ? "pass" : "failed"}">${escapeHtml(row.result)}</td>
+          <td class="number">${escapeHtml(formatDuration(row.durationSeconds))}</td>
+          <td>${escapeHtml(row.terminationReason)}</td>
+          <td class="number">${escapeHtml(row.tabViolations)}</td>
+        </tr>`)
+      );
+    }
+
+    function formatDuration(seconds) {
+      const safe = Math.max(0, Number(seconds) || 0);
+      return `${Math.floor(safe / 60)}m ${Math.floor(safe % 60)}s`;
+    }
+
+    function csvCell(value) {
+      return `"${String(value ?? "").replace(/"/g, '""')}"`;
+    }
+
+    function downloadCsv(filename, headers, rows) {
+      const content = [headers, ...rows]
+        .map((row) => row.map(csvCell).join(","))
+        .join("\r\n");
+      const blob = new Blob(["\ufeff" + content], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function exportRanking() {
+      if (!dashboardData) return;
+      const rows = (dashboardData.rankings || []).map((row) => [
+        row.rank, row.name, row.email, row.company, row.courseId, row.courseTitle,
+        row.score, row.total, row.percent, row.result, row.attempts,
+        row.durationSeconds, row.submittedAt
+      ]);
+      downloadCsv(
+        `sungrow-ranking-${new Date().toISOString().slice(0, 10)}.csv`,
+        ["Rank", "FullName", "Email", "Company", "CourseID", "CourseTitle", "Score", "Total", "Percent", "Result", "Attempts", "DurationSeconds", "SubmittedAt"],
+        rows
+      );
+    }
+
+    function exportAttempts() {
+      if (!dashboardData) return;
+      const rows = (dashboardData.attempts || []).map((row) => [
+        row.submittedAt, row.name, row.email, row.company, row.courseId,
+        row.courseTitle, row.attemptNumber, row.score, row.total, row.percent,
+        row.result, row.durationSeconds, row.terminationReason, row.tabViolations
+      ]);
+      downloadCsv(
+        `sungrow-attempts-${new Date().toISOString().slice(0, 10)}.csv`,
+        ["SubmittedAt", "FullName", "Email", "Company", "CourseID", "CourseTitle", "AttemptNumber", "Score", "Total", "Percent", "Result", "DurationSeconds", "TerminationReason", "TabViolations"],
+        rows
+      );
+    }
+
+    sendOtpButton.addEventListener("click", sendAdminOtp);
+    loginForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      loginAdmin();
+    });
+    adminOtp.addEventListener("input", () => {
+      adminOtp.value = adminOtp.value.replace(/\D/g, "").slice(0, 6);
+    });
+    logoutButton.addEventListener("click", async () => {
+      try { await callApi("logoutAdmin", { adminToken }); } catch (error) {}
+      showLogin("Đã đăng xuất khỏi trang quản trị.");
+    });
+    applyFilterButton.addEventListener("click", () => loadDashboard());
+    resetFilterButton.addEventListener("click", () => {
+      courseFilter.value = "";
+      companyFilter.value = "";
+      emailFilter.value = "";
+      dateFromFilter.value = "";
+      dateToFilter.value = "";
+      loadDashboard();
+    });
+    document.getElementById("exportRankingButton").addEventListener("click", exportRanking);
+    document.getElementById("exportAttemptsButton").addEventListener("click", exportAttempts);
+    document.querySelectorAll("[data-tab]").forEach((button) => {
+      button.addEventListener("click", () => {
+        document.querySelectorAll("[data-tab]").forEach((item) => item.classList.toggle("active", item === button));
+        ["overview", "ranking", "attempts"].forEach((tab) => {
+          document.getElementById(`${tab}Tab`).hidden = tab !== button.dataset.tab;
+        });
+      });
+    });
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden && adminToken) loadDashboard(true);
+    });
+
+    if (adminToken) {
+      showDashboard();
+      loadDashboard();
+    }
+  </script>
+</body>
+</html>
