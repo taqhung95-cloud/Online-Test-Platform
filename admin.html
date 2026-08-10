@@ -31,6 +31,7 @@
       background: var(--bg);
       color: var(--ink);
       font-family: "Montserrat", Arial, sans-serif;
+      font-size: 14px;
     }
     button, input, select { font: inherit; }
     [hidden] { display: none !important; }
@@ -54,8 +55,8 @@
     .brand { display: flex; align-items: center; min-width: 0; gap: 18px; }
     .brand img { width: 142px; height: auto; display: block; }
     .brand-copy { min-width: 0; padding-left: 18px; border-left: 1px solid var(--line); }
-    .brand-copy h1 { margin: 0; font-size: 17px; line-height: 1.35; }
-    .brand-copy p { margin: 3px 0 0; color: var(--muted); font-size: 11px; }
+    .brand-copy h1 { margin: 0; font-size: 18px; line-height: 1.35; }
+    .brand-copy p { margin: 3px 0 0; color: var(--muted); font-size: 12px; }
 
     main { width: min(1420px, calc(100% - 32px)); margin: 0 auto; padding: 28px 0 54px; }
     .panel { border: 1px solid var(--line); border-radius: 8px; background: var(--panel); box-shadow: var(--shadow); }
@@ -75,11 +76,11 @@
     .button.secondary:hover { background: var(--soft); }
 
     .login-panel { width: min(520px, 100%); margin: 54px auto 0; padding: 32px; }
-    .eyebrow { margin: 0 0 8px; color: var(--orange-dark); font-size: 11px; font-weight: 800; text-transform: uppercase; }
-    h2 { margin: 0; font-size: 24px; }
-    .intro { margin: 10px 0 22px; color: var(--muted); font-size: 13px; line-height: 1.6; }
+    .eyebrow { margin: 0 0 8px; color: var(--orange-dark); font-size: 12px; font-weight: 800; text-transform: uppercase; }
+    h2 { margin: 0; font-size: 25px; }
+    .intro { margin: 10px 0 22px; color: var(--muted); font-size: 14px; line-height: 1.6; }
     .form-grid { display: grid; gap: 14px; }
-    label { display: block; margin-bottom: 7px; color: #40505f; font-size: 12px; font-weight: 700; }
+    label { display: block; margin-bottom: 7px; color: #40505f; font-size: 13px; font-weight: 700; }
     input, select {
       width: 100%;
       min-height: 44px;
@@ -91,12 +92,10 @@
       outline: none;
     }
     input:focus, select:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(18, 104, 169, 0.12); }
-    .otp-row { display: grid; grid-template-columns: minmax(0, 1fr) 142px; gap: 9px; align-items: end; }
-    #adminOtp { letter-spacing: 5px; text-align: center; font-weight: 700; }
-    .login-message { min-height: 20px; margin: 12px 0 0; color: var(--red); font-size: 12px; font-weight: 600; line-height: 1.5; }
+    .login-message { min-height: 20px; margin: 12px 0 0; color: var(--red); font-size: 13px; font-weight: 600; line-height: 1.5; }
     .login-message.success { color: var(--green); }
 
-    .admin-meta { display: flex; align-items: center; gap: 14px; color: var(--muted); font-size: 12px; }
+    .admin-meta { display: flex; align-items: center; gap: 14px; color: var(--muted); font-size: 13px; }
     .dashboard { display: grid; gap: 20px; }
     .toolbar { padding: 18px; }
     .filters {
@@ -108,36 +107,50 @@
     .filter-actions { display: flex; gap: 8px; }
     .filter-actions .button { white-space: nowrap; }
     .toolbar-footer { margin-top: 13px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }
-    .status { color: var(--muted); font-size: 11px; line-height: 1.5; }
+    .status { color: var(--muted); font-size: 12px; line-height: 1.5; }
     .export-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 
     .metrics { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }
     .metric { min-width: 0; padding: 17px; border-top: 3px solid var(--orange); }
-    .metric-label { color: var(--muted); font-size: 10px; font-weight: 700; text-transform: uppercase; }
-    .metric-value { margin-top: 8px; font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; }
-    .metric-note { margin-top: 4px; color: var(--muted); font-size: 10px; }
+    .metric-label { color: var(--muted); font-size: 11px; font-weight: 700; text-transform: uppercase; }
+    .metric-value { margin-top: 8px; font-size: 26px; font-weight: 800; font-variant-numeric: tabular-nums; }
+    .metric-note { margin-top: 5px; color: var(--muted); font-size: 11px; line-height: 1.4; }
 
     .tabs { display: inline-flex; gap: 2px; padding: 3px; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
-    .tab-button { min-height: 36px; border: 0; border-radius: 6px; padding: 7px 14px; background: transparent; color: var(--muted); cursor: pointer; font-weight: 700; }
+    .tab-button { min-height: 38px; border: 0; border-radius: 6px; padding: 8px 15px; background: transparent; color: var(--muted); cursor: pointer; font-size: 14px; font-weight: 700; }
     .tab-button.active { background: var(--ink); color: #fff; }
     .tab-panel { display: grid; gap: 16px; }
     .section { padding: 20px; }
     .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
-    .section h3 { margin: 0; font-size: 16px; }
-    .section-note { color: var(--muted); font-size: 11px; }
+    .section h3 { margin: 0; font-size: 18px; }
+    .section-note { color: var(--muted); font-size: 12px; }
     .overview-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); gap: 16px; }
 
     .category-list { display: grid; gap: 15px; }
-    .category-head { display: flex; justify-content: space-between; gap: 12px; font-size: 12px; }
+    .category-head { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; }
     .category-name { font-weight: 700; }
     .category-score { color: var(--muted); font-variant-numeric: tabular-nums; }
     .bar { height: 9px; margin-top: 7px; overflow: hidden; border-radius: 999px; background: #e5ebef; }
     .bar span { display: block; height: 100%; background: var(--orange); }
 
     .table-wrap { overflow: auto; border: 1px solid var(--line); border-radius: 8px; }
-    table { width: 100%; border-collapse: collapse; font-size: 11px; }
-    th, td { padding: 10px 11px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: middle; white-space: nowrap; }
-    th { position: sticky; top: 0; z-index: 1; background: #edf2f5; color: #40505f; font-size: 10px; text-transform: uppercase; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th, td { padding: 11px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: middle; white-space: nowrap; }
+    th { position: sticky; top: 0; z-index: 1; background: #edf2f5; color: #40505f; font-size: 11px; text-transform: uppercase; }
+    .company-table-wrap { overflow: hidden; }
+    .company-table { table-layout: fixed; }
+    .company-table th, .company-table td { white-space: normal; }
+    .company-table th:first-child, .company-table td:first-child {
+      width: 52%;
+      overflow-wrap: anywhere;
+      line-height: 1.45;
+    }
+    .company-table th:not(:first-child), .company-table td:not(:first-child) {
+      width: 12%;
+      padding-inline: 8px;
+      text-align: right;
+      white-space: nowrap;
+    }
     tbody tr:last-child td { border-bottom: 0; }
     tbody tr:hover { background: #f8fafb; }
     .number { text-align: right; font-variant-numeric: tabular-nums; }
@@ -160,13 +173,14 @@
       .overview-grid { grid-template-columns: 1fr; }
       .toolbar-footer { align-items: stretch; flex-direction: column; }
       .export-actions .button { flex: 1; }
+      .company-table-wrap { overflow-x: auto; }
+      .company-table { min-width: 560px; }
     }
     @media (max-width: 480px) {
       main, .header-inner { width: min(100% - 20px, 1420px); }
       .brand-copy { padding-left: 10px; }
       .brand img { width: 94px; }
       .metrics { grid-template-columns: 1fr; }
-      .otp-row { grid-template-columns: 1fr; }
       .login-panel { padding: 24px; }
     }
   </style>
@@ -191,19 +205,16 @@
   <main>
     <section id="loginView" class="panel login-panel">
       <p class="eyebrow">Tài khoản quản trị</p>
-      <h2>Đăng nhập bằng OTP</h2>
-      <p class="intro">Chỉ email đã được kích hoạt trong sheet Admins mới nhận được mã đăng nhập.</p>
+      <h2>Đăng nhập quản trị</h2>
+      <p class="intro">Sử dụng email đã được kích hoạt và mật khẩu trong sheet Admins.</p>
       <form id="loginForm" class="form-grid" novalidate>
         <div>
           <label for="adminEmail">Email quản trị</label>
           <input id="adminEmail" type="email" autocomplete="email" placeholder="admin@congty.com" required>
         </div>
-        <div class="otp-row">
-          <div>
-            <label for="adminOtp">Mã OTP</label>
-            <input id="adminOtp" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" placeholder="000000" required>
-          </div>
-          <button id="sendOtpButton" class="button secondary" type="button">Gửi mã OTP</button>
+        <div>
+          <label for="adminPassword">Mật khẩu</label>
+          <input id="adminPassword" type="password" autocomplete="current-password" minlength="8" maxlength="128" placeholder="Nhập mật khẩu quản trị" required>
         </div>
         <button id="loginButton" class="button" type="submit">Đăng nhập quản trị</button>
       </form>
@@ -300,8 +311,6 @@
     const ADMIN_SESSION_KEY = "sungrow_admin_session_v1";
     let adminToken = sessionStorage.getItem(ADMIN_SESSION_KEY) || "";
     let dashboardData = null;
-    let otpCooldown = 0;
-    let otpTimer = null;
     let refreshTimer = null;
 
     const loginView = document.getElementById("loginView");
@@ -310,8 +319,7 @@
     const adminIdentity = document.getElementById("adminIdentity");
     const loginForm = document.getElementById("loginForm");
     const adminEmail = document.getElementById("adminEmail");
-    const adminOtp = document.getElementById("adminOtp");
-    const sendOtpButton = document.getElementById("sendOtpButton");
+    const adminPassword = document.getElementById("adminPassword");
     const loginButton = document.getElementById("loginButton");
     const loginMessage = document.getElementById("loginMessage");
     const logoutButton = document.getElementById("logoutButton");
@@ -335,37 +343,65 @@
 
     function callApi(action, payload = {}) {
       return new Promise((resolve, reject) => {
-        const callbackName = `admin_callback_${Date.now()}_${Math.random().toString(16).slice(2)}`;
-        const script = document.createElement("script");
+        const requestId = `admin_request_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+        const iframe = document.createElement("iframe");
+        const form = document.createElement("form");
+        iframe.name = requestId;
+        iframe.hidden = true;
+        form.hidden = true;
+        form.method = "POST";
+        form.action = APPS_SCRIPT_URL;
+        form.target = requestId;
+
+        [
+          ["action", action],
+          ["payload", JSON.stringify(payload)],
+          ["transport", "iframe"],
+          ["requestId", requestId]
+        ].forEach(([name, value]) => {
+          const input = document.createElement("input");
+          input.type = "hidden";
+          input.name = name;
+          input.value = value;
+          form.appendChild(input);
+        });
+
         const timeoutId = setTimeout(() => {
           cleanup();
           reject(new Error("Không nhận được phản hồi từ Google Apps Script."));
         }, 30000);
+
         function cleanup() {
           clearTimeout(timeoutId);
-          script.remove();
-          try { delete window[callbackName]; } catch (error) { window[callbackName] = undefined; }
+          window.removeEventListener("message", handleMessage);
+          form.remove();
+          iframe.remove();
         }
-        window[callbackName] = (data) => {
+
+        function handleMessage(event) {
+          const message = event.data;
+          if (
+            !message ||
+            message.source !== "MGRL_APPS_SCRIPT" ||
+            message.requestId !== requestId
+          ) return;
           cleanup();
+          const data = message.data;
           if (!data || !data.ok) {
             reject(new Error(data && data.message ? data.message : "Yêu cầu không được xử lý."));
             return;
           }
           resolve(data);
-        };
-        const query = new URLSearchParams({
-          action,
-          payload: JSON.stringify(payload),
-          callback: callbackName,
-          _: Date.now().toString()
-        });
-        script.onerror = () => {
+        }
+
+        iframe.addEventListener("error", () => {
           cleanup();
           reject(new Error("Trình duyệt hoặc mạng đang chặn Google Apps Script."));
-        };
-        script.src = `${APPS_SCRIPT_URL}?${query.toString()}`;
-        document.head.appendChild(script);
+        });
+        window.addEventListener("message", handleMessage);
+        document.body.appendChild(iframe);
+        document.body.appendChild(form);
+        form.submit();
       });
     }
 
@@ -379,45 +415,11 @@
       };
     }
 
-    async function sendAdminOtp() {
-      loginMessage.classList.remove("success");
-      loginMessage.textContent = "";
-      if (!adminEmail.checkValidity()) {
-        adminEmail.reportValidity();
-        return;
-      }
-      sendOtpButton.disabled = true;
-      sendOtpButton.textContent = "Đang gửi...";
-      try {
-        const data = await callApi("sendAdminOtp", { email: adminEmail.value.trim() });
-        loginMessage.classList.add("success");
-        loginMessage.textContent = data.message;
-        otpCooldown = Number(data.resendAfterSeconds || 60);
-        updateOtpButton();
-        clearInterval(otpTimer);
-        otpTimer = setInterval(() => {
-          otpCooldown -= 1;
-          updateOtpButton();
-          if (otpCooldown <= 0) clearInterval(otpTimer);
-        }, 1000);
-        adminOtp.focus();
-      } catch (error) {
-        loginMessage.textContent = error.message;
-        sendOtpButton.disabled = false;
-        sendOtpButton.textContent = "Gửi mã OTP";
-      }
-    }
-
-    function updateOtpButton() {
-      sendOtpButton.disabled = otpCooldown > 0;
-      sendOtpButton.textContent = otpCooldown > 0 ? `Gửi lại sau ${otpCooldown}s` : "Gửi mã OTP";
-    }
-
     async function loginAdmin() {
       loginMessage.classList.remove("success");
       loginMessage.textContent = "";
-      if (!adminEmail.checkValidity() || !adminOtp.checkValidity()) {
-        (!adminEmail.checkValidity() ? adminEmail : adminOtp).reportValidity();
+      if (!adminEmail.checkValidity() || !adminPassword.checkValidity()) {
+        (!adminEmail.checkValidity() ? adminEmail : adminPassword).reportValidity();
         return;
       }
       loginButton.disabled = true;
@@ -425,8 +427,9 @@
       try {
         const data = await callApi("loginAdmin", {
           email: adminEmail.value.trim(),
-          otp: adminOtp.value
+          password: adminPassword.value
         });
+        adminPassword.value = "";
         adminToken = data.adminToken;
         sessionStorage.setItem(ADMIN_SESSION_KEY, adminToken);
         showDashboard(data.admin);
@@ -538,9 +541,11 @@
       dashboardStatus.textContent = `Cập nhật lúc ${new Date(data.generatedAt).toLocaleString("vi-VN")}. Xếp hạng và thống kê đã được tính lại từ dữ liệu hiện tại.`;
     }
 
-    function tableHtml(headers, rows) {
+    function tableHtml(headers, rows, tableClass = "") {
       if (!rows.length) return '<div class="empty">Không có dữ liệu phù hợp.</div>';
-      return `<div class="table-wrap"><table><thead><tr>${headers.map((header) => `<th>${escapeHtml(header)}</th>`).join("")}</tr></thead><tbody>${rows.join("")}</tbody></table></div>`;
+      const className = String(tableClass || "").replace(/[^a-z0-9_-]/gi, "");
+      const wrapClass = className ? `table-wrap ${className}-wrap` : "table-wrap";
+      return `<div class="${wrapClass}"><table class="${className}"><thead><tr>${headers.map((header) => `<th>${escapeHtml(header)}</th>`).join("")}</tr></thead><tbody>${rows.join("")}</tbody></table></div>`;
     }
 
     function renderCompanyTable(rows) {
@@ -552,7 +557,8 @@
           <td class="number">${escapeHtml(row.passed)}</td>
           <td class="number">${escapeHtml(row.passRate)}%</td>
           <td class="number">${escapeHtml(row.averagePercent)}%</td>
-        </tr>`)
+        </tr>`),
+        "company-table"
       );
     }
 
@@ -647,13 +653,9 @@
       );
     }
 
-    sendOtpButton.addEventListener("click", sendAdminOtp);
     loginForm.addEventListener("submit", (event) => {
       event.preventDefault();
       loginAdmin();
-    });
-    adminOtp.addEventListener("input", () => {
-      adminOtp.value = adminOtp.value.replace(/\D/g, "").slice(0, 6);
     });
     logoutButton.addEventListener("click", async () => {
       try { await callApi("logoutAdmin", { adminToken }); } catch (error) {}
