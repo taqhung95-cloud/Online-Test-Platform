@@ -340,6 +340,7 @@
         <div class="toolbar-footer">
           <div id="dashboardStatus" class="status">Chưa tải dữ liệu.</div>
           <div class="export-actions">
+            <button id="exportParticipantsButton" class="button secondary" type="button">Xuất danh sách tham gia CSV</button>
             <button id="exportRankingButton" class="button secondary" type="button">Xuất xếp hạng CSV</button>
             <button id="exportAttemptsButton" class="button secondary" type="button">Xuất lịch sử CSV</button>
           </div>
@@ -766,6 +767,34 @@
       );
     }
 
+    function exportParticipants() {
+      if (!dashboardData) return;
+      const rows = (dashboardData.rankings || [])
+        .slice()
+        .sort((left, right) => {
+          const companyOrder = String(left.company || "").localeCompare(String(right.company || ""), "vi");
+          return companyOrder || String(left.name || "").localeCompare(String(right.name || ""), "vi");
+        })
+        .map((row, index) => [
+          index + 1,
+          row.name,
+          row.email,
+          row.company,
+          row.courseTitle || row.courseId,
+          row.attempts,
+          `${row.score}/${row.total}`,
+          row.percent,
+          row.result,
+          row.rank,
+          row.submittedAt
+        ]);
+      downloadCsv(
+        `sungrow-danh-sach-tham-gia-${new Date().toISOString().slice(0, 10)}.csv`,
+        ["STT", "Họ và tên", "Email", "Công ty", "Khóa học", "Số lượt đã làm", "Điểm tốt nhất", "Tỷ lệ (%)", "Kết quả", "Xếp hạng", "Ngày nộp bài tốt nhất"],
+        rows
+      );
+    }
+
     function exportAttempts() {
       if (!dashboardData) return;
       const rows = (dashboardData.attempts || []).map((row) => [
@@ -797,6 +826,7 @@
       dateToFilter.value = "";
       loadDashboard();
     });
+    document.getElementById("exportParticipantsButton").addEventListener("click", exportParticipants);
     document.getElementById("exportRankingButton").addEventListener("click", exportRanking);
     document.getElementById("exportAttemptsButton").addEventListener("click", exportAttempts);
     document.getElementById("companyTable").addEventListener("click", (event) => {
