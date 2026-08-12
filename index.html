@@ -933,6 +933,11 @@
     .tab-dialog h2 { font-size: 21px; }
     .tab-countdown { margin: 16px 0 0; color: var(--red); font-size: 34px; font-weight: 800; }
 
+    .violation-count {
+      color: var(--orange-dark);
+      font-weight: 800;
+    }
+
     @media (max-width: 850px) {
       .brand-logo { width: 122px; }
       h1 { font-size: 15px; }
@@ -1059,7 +1064,7 @@
         </div>
         <p id="registrationMessage" class="login-message registration-message" role="alert"></p>
       </form>
-      <div class="security-note">Mỗi email và mỗi thiết bị được tham gia tối đa 3 lần cho từng bài kiểm tra. Khi rời tab, chuyển sang ứng dụng khác quá 60 giây hoặc tải lại trang, bài thi sẽ tự động kết thúc. Sau 5 phút không thao tác, hệ thống sẽ cảnh báo và đếm ngược 60 giây.</div>
+      <div class="security-note">Mỗi email và mỗi thiết bị được tham gia tối đa 3 lần cho từng bài kiểm tra. Khi rời tab hoặc chuyển sang ứng dụng khác quá 60 giây, bài thi sẽ tự động kết thúc. Hệ thống cảnh báo khi rời bài thi từ 10 lần. Tải lại trang trong khi làm bài sẽ kết thúc và tính lượt thi sau khi người làm bài xác nhận.</div>
     </section>
 
     <section id="courseView" class="course-view" hidden>
@@ -1113,16 +1118,27 @@
     </div>
   </div>
 
+  <div id="violationWarningOverlay" class="tab-overlay" role="alertdialog" aria-modal="true" aria-labelledby="violationWarningTitle" hidden>
+    <div class="tab-dialog">
+      <p class="eyebrow">Cảnh báo giám sát bài thi</p>
+      <h2 id="violationWarningTitle">Bạn đã rời bài thi nhiều lần</h2>
+      <p class="intro">Hệ thống đã ghi nhận <span id="violationWarningCount" class="violation-count">10</span> lần rời tab hoặc chuyển sang ứng dụng khác. Đây chỉ là cảnh báo và bài thi chưa bị nộp.</p>
+      <button id="violationAcknowledgeButton" class="button" type="button">Tôi đã hiểu</button>
+    </div>
+  </div>
+
   <button id="backToTopButton" class="back-to-top" type="button" title="Trở về đầu trang" aria-label="Trở về đầu trang" hidden>↑</button>
 
   <script>
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzh0vDk-fN86u1_g3wm7ti7MpDTQWIGZjqx-XqVLfuRvR_piNAQ1waysZtEW8_AMWyWNQ/exec";
     const ACTIVE_SESSION_KEY = "mgrl_active_attempt_v2";
     const TAB_GRACE_SECONDS = 60;
+    const TAB_WARNING_THRESHOLD = 10;
     const INACTIVITY_TRIGGER_SECONDS = 5 * 60;
     const INACTIVITY_GRACE_SECONDS = 60;
     let registrationRedirectTimer = null;
     let registrationOtpSent = false;
+    let confirmedPageReload = false;
     let registrationLoading = false;
     let otpCooldownTimer = null;
     let otpCooldownRemaining = 0;
@@ -1147,6 +1163,7 @@
       attentionReason: "",
       lastInteractionAt: 0,
       tabViolations: 0,
+      tabWarningShown: false,
       timerId: null,
       tabTimerId: null,
       inactivityTimerId: null,
@@ -1193,7 +1210,9 @@
     const attentionEyebrow = document.getElementById("attentionEyebrow");
     const attentionTitle = document.getElementById("attentionTitle");
     const attentionMessage = document.getElementById("attentionMessage");
-
+    const violationWarningOverlay = document.getElementById("violationWarningOverlay");
+    const violationWarningCount = document.getElementById("violationWarningCount");
+    const violationAcknowledgeButton = document.getElementById("violationAcknowledgeButton");
     function getDeviceId() {
       const signature = [
         navigator.userAgent,
@@ -1311,7 +1330,8 @@
         expiresAt: state.expiresAt,
         startedAt: state.startedAt,
         hiddenAt: state.hiddenAt,
-        tabViolations: state.tabViolations
+        tabViolations: state.tabViolations,
+        tabWarningShown: state.tabWarningShown
       }));
     }
 
@@ -1319,7 +1339,7 @@
       localStorage.removeItem(ACTIVE_SESSION_KEY);
     }
 
-    function applyAttempt(data, localAnswers = {}) {
+    function applyAttempt(data, localAnswers = {}, localMeta = {}) {
       state.active = true;
       state.submitting = false;
       state.token = data.attemptToken;
@@ -1339,7 +1359,11 @@
       state.hiddenAt = 0;
       state.attentionReason = "";
       state.lastInteractionAt = Date.now();
-      state.tabViolations = Number(data.tabViolations || 0);
+      state.tabViolations = Math.max(
+        Number(data.tabViolations || 0),
+        Number(localMeta.tabViolations || 0)
+      );
+      state.tabWarningShown = Boolean(localMeta.tabWarningShown);
       state.lastProgressSnapshot = "";
       saveSession();
       renderExam();
@@ -1968,6 +1992,8 @@
       state.hiddenAt = 0;
       state.attentionReason = "";
       state.lastInteractionAt = 0;
+      state.tabViolations = 0;
+      state.tabWarningShown = false;
       submitButton.disabled = false;
       submitButton.textContent = "Nộp bài";
       clearInterval(state.timerId);
@@ -1977,6 +2003,7 @@
       clearInterval(state.progressSyncTimerId);
       state.lastProgressSnapshot = "";
       tabOverlay.hidden = true;
+      violationWarningOverlay.hidden = true;
       clearSession();
       resultView.hidden = true;
       resultView.innerHTML = "";
@@ -2052,6 +2079,10 @@
     registrationBackButton.addEventListener("click", showLoginForm);
     registrationOtpButton.addEventListener("click", sendRegistrationOtp);
     logoutButton.addEventListener("click", logoutParticipant);
+    violationAcknowledgeButton.addEventListener("click", () => {
+      violationWarningOverlay.hidden = true;
+      state.lastInteractionAt = Date.now();
+    });
 
     courseGrid.addEventListener("click", async (event) => {
       const resultButton = event.target.closest("[data-result-course-id]");
@@ -2222,6 +2253,20 @@
       state.lastInteractionAt = Date.now();
       saveSession();
       tabOverlay.hidden = true;
+      showTabViolationWarningIfNeeded();
+    }
+
+    function showTabViolationWarningIfNeeded() {
+      if (
+        !state.active ||
+        state.submitting ||
+        state.tabViolations < TAB_WARNING_THRESHOLD ||
+        state.tabWarningShown
+      ) return;
+      state.tabWarningShown = true;
+      violationWarningCount.textContent = state.tabViolations;
+      saveSession();
+      violationWarningOverlay.hidden = false;
     }
 
     function markExamActivity() {
@@ -2277,8 +2322,20 @@
 
     window.addEventListener("scroll", markExamActivity, { passive: true });
 
+    window.addEventListener("keydown", (event) => {
+      const reloadShortcut = event.key === "F5" || ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "r");
+      if (!reloadShortcut || !state.active || state.submitting) return;
+      event.preventDefault();
+      const accepted = window.confirm(
+        "Nếu tải lại trang, dữ liệu bài làm hiện tại sẽ được nộp và lượt thi này vẫn được tính. Bạn có chắc chắn muốn tải lại không?"
+      );
+      if (!accepted) return;
+      confirmedPageReload = true;
+      window.location.reload();
+    });
+
     window.addEventListener("beforeunload", (event) => {
-      if (!state.active || state.submitting) return;
+      if (!state.active || state.submitting || confirmedPageReload) return;
       event.preventDefault();
       event.returnValue = "";
     });
