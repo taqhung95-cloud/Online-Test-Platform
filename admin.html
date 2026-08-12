@@ -120,16 +120,16 @@
     }
     .filter-actions { display: flex; gap: 8px; }
     .filter-actions .button { white-space: nowrap; }
-    .toolbar-footer { margin-top: 13px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }
+    .toolbar-footer { margin-top: 13px; display: grid; grid-template-columns: minmax(220px, 1fr) auto; align-items: center; gap: 12px; }
     .status { color: var(--muted); font-size: 12px; line-height: 1.5; }
     .export-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
-    .export-actions .button { max-width: 230px; line-height: 1.3; white-space: normal; }
+    .export-actions .button { width: auto; max-width: none; padding-inline: 14px; font-size: 13px; line-height: 1.3; white-space: nowrap; }
 
-    .metrics { min-width: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }
+    .metrics { min-width: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
     .metric { min-width: 0; padding: 17px; border-top: 3px solid var(--orange); }
-    .metric-label { color: var(--muted); font-size: 11px; font-weight: 700; line-height: 1.35; overflow-wrap: anywhere; text-transform: uppercase; }
+    .metric-label { color: var(--muted); font-size: 11px; font-weight: 700; line-height: 1.35; white-space: nowrap; text-transform: uppercase; }
     .metric-value { margin-top: 8px; font-size: 26px; font-weight: 800; font-variant-numeric: tabular-nums; }
-    .metric-note { margin-top: 5px; color: var(--muted); font-size: 11px; line-height: 1.4; }
+    .metric-note { margin-top: 5px; color: var(--muted); font-size: 10.5px; line-height: 1.4; white-space: nowrap; }
 
     .tabs { max-width: 100%; display: inline-flex; gap: 2px; padding: 3px; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
     .tab-button { min-height: 38px; border: 0; border-radius: 6px; padding: 8px 15px; background: transparent; color: var(--muted); cursor: pointer; font-size: 14px; font-weight: 700; }
@@ -248,7 +248,8 @@
 
     @media (max-width: 1120px) {
       .filters { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-      .metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .toolbar-footer { grid-template-columns: 1fr; }
+      .export-actions { justify-content: flex-start; }
     }
     @media (max-width: 760px) {
       .header-inner { align-items: flex-start; padding: 12px 0; }
@@ -261,8 +262,9 @@
       .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .overview-grid { grid-template-columns: 1fr; }
       .category-list { grid-template-columns: 1fr; }
-      .toolbar-footer { align-items: stretch; flex-direction: column; }
-      .export-actions .button { flex: 1; }
+      .toolbar-footer { align-items: stretch; }
+      .export-actions { display: grid; grid-template-columns: 1fr; }
+      .export-actions .button { width: 100%; }
       .company-table-wrap { overflow-x: auto; }
       .company-table { min-width: 560px; }
       .company-member-list { padding-left: 20px; }
