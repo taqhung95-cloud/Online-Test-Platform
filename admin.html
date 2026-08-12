@@ -136,7 +136,14 @@
     .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
     .section h3 { margin: 0; font-size: 18px; }
     .section-note { color: var(--muted); font-size: 12px; }
-    .overview-grid { min-width: 0; display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); gap: 16px; }
+    .overview-grid {
+      min-width: 0;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-items: start;
+      gap: 16px;
+    }
+    .overview-grid > .section { align-self: start; }
 
     .category-list { display: grid; gap: 15px; }
     .category-head { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; }
@@ -172,6 +179,56 @@
       text-align: right;
       white-space: nowrap;
     }
+    .company-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      max-width: 100%;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: var(--ink);
+      cursor: pointer;
+      font: inherit;
+      font-weight: 700;
+      text-align: left;
+    }
+    .company-toggle:hover { color: var(--orange-dark); }
+    .company-toggle-icon {
+      flex: 0 0 auto;
+      width: 18px;
+      height: 18px;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      display: inline-grid;
+      place-items: center;
+      font-size: 11px;
+      line-height: 1;
+      transition: transform 160ms ease;
+    }
+    .company-toggle[aria-expanded="true"] .company-toggle-icon { transform: rotate(90deg); }
+    .company-members-row:hover { background: transparent; }
+    .company-members-row > td {
+      width: auto !important;
+      padding: 0 !important;
+      text-align: left !important;
+      white-space: normal !important;
+      background: #f8fafb;
+    }
+    .company-member-list { padding: 4px 12px 12px 38px; }
+    .company-member {
+      display: grid;
+      grid-template-columns: minmax(150px, 1.1fr) minmax(190px, 1.4fr) 78px 72px 64px;
+      gap: 12px;
+      align-items: center;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 12px;
+    }
+    .company-member:last-child { border-bottom: 0; }
+    .company-member-name { font-weight: 700; }
+    .company-member-email { min-width: 0; overflow-wrap: anywhere; color: var(--muted); }
+    .company-member-value { text-align: right; font-variant-numeric: tabular-nums; }
     .ranking-table { min-width: 1320px; }
     .attempt-table { min-width: 1480px; }
     tbody tr:last-child td { border-bottom: 0; }
@@ -198,6 +255,8 @@
       .export-actions .button { flex: 1; }
       .company-table-wrap { overflow-x: auto; }
       .company-table { min-width: 560px; }
+      .company-member-list { padding-left: 20px; }
+      .company-member { grid-template-columns: minmax(130px, 1fr) minmax(180px, 1.3fr) 70px 64px 56px; }
     }
     @media (max-width: 480px) {
       main, .header-inner { width: min(100% - 20px, 1420px); }
@@ -558,7 +617,7 @@
           `).join("")
         : '<div class="empty">Chưa có dữ liệu theo phần.</div>';
 
-      renderCompanyTable(data.companies || []);
+      renderCompanyTable(data.companies || [], data.rankings || []);
       renderRankingTable(data.rankings || []);
       renderAttemptTable(data.attempts || []);
       dashboardStatus.textContent = `Cập nhật lúc ${new Date(data.generatedAt).toLocaleString("vi-VN")}. Xếp hạng và thống kê đã được tính lại từ dữ liệu hiện tại.`;
@@ -571,16 +630,47 @@
       return `<div class="${wrapClass}"><table class="${className}"><thead><tr>${headers.map((header) => `<th>${escapeHtml(header)}</th>`).join("")}</tr></thead><tbody>${rows.join("")}</tbody></table></div>`;
     }
 
-    function renderCompanyTable(rows) {
+    function renderCompanyTable(rows, rankings) {
+      const membersByCompany = (rankings || []).reduce((groups, row) => {
+        const company = String(row.company || "Chưa xác định");
+        if (!groups[company]) groups[company] = [];
+        groups[company].push(row);
+        return groups;
+      }, {});
+
       document.getElementById("companyTable").innerHTML = tableHtml(
         ["Công ty", "Người", "Đạt", "Tỷ lệ đạt", "Điểm TB"],
-        rows.map((row) => `<tr>
-          <td>${escapeHtml(row.company)}</td>
-          <td class="number">${escapeHtml(row.participants)}</td>
-          <td class="number">${escapeHtml(row.passed)}</td>
-          <td class="number">${escapeHtml(row.passRate)}%</td>
-          <td class="number">${escapeHtml(row.averagePercent)}%</td>
-        </tr>`),
+        rows.flatMap((row, index) => {
+          const company = String(row.company || "Chưa xác định");
+          const members = (membersByCompany[company] || []).sort((left, right) => Number(left.rank || 0) - Number(right.rank || 0));
+          const memberRowId = `company-members-${index}`;
+          const memberHtml = members.length
+            ? members.map((member) => `<div class="company-member">
+                <span class="company-member-name">${escapeHtml(member.name || "Chưa có tên")}</span>
+                <span class="company-member-email">${escapeHtml(member.email)}</span>
+                <span class="company-member-value">${escapeHtml(member.score)}/${escapeHtml(member.total)}</span>
+                <span class="company-member-value ${member.result === "PASS" ? "pass" : "failed"}">${escapeHtml(member.result)}</span>
+                <span class="company-member-value">#${escapeHtml(member.rank)}</span>
+              </div>`).join("")
+            : '<div class="empty">Chưa có người tham gia khóa học theo bộ lọc hiện tại.</div>';
+          return [
+            `<tr>
+              <td>
+                <button class="company-toggle" type="button" aria-expanded="false" aria-controls="${memberRowId}" data-company-toggle="${memberRowId}">
+                  <span class="company-toggle-icon" aria-hidden="true">›</span>
+                  <span>${escapeHtml(company)}</span>
+                </button>
+              </td>
+              <td class="number">${escapeHtml(row.participants)}</td>
+              <td class="number">${escapeHtml(row.passed)}</td>
+              <td class="number">${escapeHtml(row.passRate)}%</td>
+              <td class="number">${escapeHtml(row.averagePercent)}%</td>
+            </tr>`,
+            `<tr id="${memberRowId}" class="company-members-row" hidden>
+              <td colspan="5"><div class="company-member-list">${memberHtml}</div></td>
+            </tr>`
+          ];
+        }),
         "company-table"
       );
     }
@@ -697,6 +787,15 @@
     });
     document.getElementById("exportRankingButton").addEventListener("click", exportRanking);
     document.getElementById("exportAttemptsButton").addEventListener("click", exportAttempts);
+    document.getElementById("companyTable").addEventListener("click", (event) => {
+      const button = event.target.closest("[data-company-toggle]");
+      if (!button) return;
+      const memberRow = document.getElementById(button.dataset.companyToggle);
+      if (!memberRow) return;
+      const expanded = button.getAttribute("aria-expanded") === "true";
+      button.setAttribute("aria-expanded", String(!expanded));
+      memberRow.hidden = expanded;
+    });
     document.querySelectorAll("[data-tab]").forEach((button) => {
       button.addEventListener("click", () => {
         document.querySelectorAll("[data-tab]").forEach((item) => item.classList.toggle("active", item === button));
