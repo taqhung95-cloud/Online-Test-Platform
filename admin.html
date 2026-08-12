@@ -56,8 +56,10 @@
     .brand { display: flex; align-items: center; min-width: 0; gap: 18px; }
     .brand img { width: 142px; height: auto; display: block; }
     .brand-copy { min-width: 0; padding-left: 18px; border-left: 1px solid var(--line); }
-    .brand-copy h1 { margin: 0; font-size: 18px; line-height: 1.35; }
+    .brand-copy h1 { margin: 0; font-size: 18px; line-height: 1.35; overflow-wrap: anywhere; }
     .brand-copy p { margin: 3px 0 0; color: var(--muted); font-size: 12px; }
+    .header-actions { display: flex; align-items: center; gap: 12px; }
+    .language-toggle { min-width: 54px; padding-inline: 12px; }
 
     main {
       width: min(1420px, calc(100% - 32px));
@@ -120,11 +122,12 @@
     .filter-actions .button { white-space: nowrap; }
     .toolbar-footer { margin-top: 13px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }
     .status { color: var(--muted); font-size: 12px; line-height: 1.5; }
-    .export-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .export-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+    .export-actions .button { max-width: 230px; line-height: 1.3; white-space: normal; }
 
     .metrics { min-width: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }
     .metric { min-width: 0; padding: 17px; border-top: 3px solid var(--orange); }
-    .metric-label { color: var(--muted); font-size: 11px; font-weight: 700; text-transform: uppercase; }
+    .metric-label { color: var(--muted); font-size: 11px; font-weight: 700; line-height: 1.35; overflow-wrap: anywhere; text-transform: uppercase; }
     .metric-value { margin-top: 8px; font-size: 26px; font-weight: 800; font-variant-numeric: tabular-nums; }
     .metric-note { margin-top: 5px; color: var(--muted); font-size: 11px; line-height: 1.4; }
 
@@ -252,6 +255,7 @@
       .brand img { width: 112px; }
       .brand-copy h1 { font-size: 13px; }
       .admin-meta { align-items: flex-end; flex-direction: column; }
+      .header-actions { flex-wrap: wrap; justify-content: flex-end; align-items: flex-end; }
       .filters { grid-template-columns: 1fr; }
       .filter-actions, .filter-actions .button { width: 100%; }
       .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -268,6 +272,8 @@
       main, .header-inner { width: min(100% - 20px, 1420px); }
       .brand-copy { padding-left: 10px; }
       .brand img { width: 94px; }
+      .header-actions { gap: 6px; }
+      .language-toggle { min-width: 48px; padding-inline: 9px; }
       .metrics { grid-template-columns: 1fr; }
       .login-panel { padding: 24px; }
     }
@@ -279,32 +285,35 @@
       <div class="brand">
         <img src="https://upload.wikimedia.org/wikipedia/commons/a/a2/Sungrow_Power_Supply.svg" alt="Sungrow">
         <div class="brand-copy">
-          <h1>QUẢN TRỊ KẾT QUẢ ĐÁNH GIÁ</h1>
+          <h1 data-i18n="pageTitle">QUẢN TRỊ KẾT QUẢ ĐÁNH GIÁ</h1>
           <p>Product Training Assessment</p>
         </div>
       </div>
-      <div id="adminMeta" class="admin-meta" hidden>
-        <span id="adminIdentity"></span>
-        <button id="logoutButton" class="button secondary" type="button">Đăng xuất</button>
+      <div class="header-actions">
+        <button id="languageToggle" class="button secondary language-toggle" type="button" aria-label="Switch to English">EN</button>
+        <div id="adminMeta" class="admin-meta" hidden>
+          <span id="adminIdentity"></span>
+          <button id="logoutButton" class="button secondary" type="button" data-i18n="logout">Đăng xuất</button>
+        </div>
       </div>
     </div>
   </header>
 
   <main>
     <section id="loginView" class="panel login-panel">
-      <p class="eyebrow">Tài khoản quản trị</p>
-      <h2>Đăng nhập quản trị</h2>
-      <p class="intro">Sử dụng email đã được kích hoạt và mật khẩu trong sheet Admins.</p>
+      <p class="eyebrow" data-i18n="adminAccount">Tài khoản quản trị</p>
+      <h2 data-i18n="adminLogin">Đăng nhập quản trị</h2>
+      <p class="intro" data-i18n="loginIntro">Sử dụng email đã được kích hoạt và mật khẩu trong sheet Admins.</p>
       <form id="loginForm" class="form-grid" novalidate>
         <div>
-          <label for="adminEmail">Email quản trị</label>
+          <label for="adminEmail" data-i18n="adminEmail">Email quản trị</label>
           <input id="adminEmail" type="email" autocomplete="email" placeholder="admin@congty.com" required>
         </div>
         <div>
-          <label for="adminPassword">Mật khẩu</label>
-          <input id="adminPassword" type="password" autocomplete="current-password" minlength="8" maxlength="128" placeholder="Nhập mật khẩu quản trị" required>
+          <label for="adminPassword" data-i18n="password">Mật khẩu</label>
+          <input id="adminPassword" type="password" autocomplete="current-password" minlength="8" maxlength="128" placeholder="Nhập mật khẩu quản trị" data-i18n-placeholder="passwordPlaceholder" required>
         </div>
-        <button id="loginButton" class="button" type="submit">Đăng nhập quản trị</button>
+        <button id="loginButton" class="button" type="submit" data-i18n="adminLoginButton">Đăng nhập quản trị</button>
       </form>
       <p id="loginMessage" class="login-message" role="alert"></p>
     </section>
@@ -313,36 +322,36 @@
       <section class="panel toolbar">
         <div class="filters">
           <div>
-            <label for="courseFilter">Khóa học</label>
+            <label for="courseFilter" data-i18n="course">Khóa học</label>
             <select id="courseFilter"><option value="">Tất cả khóa học</option></select>
           </div>
           <div>
-            <label for="companyFilter">Công ty</label>
+            <label for="companyFilter" data-i18n="company">Công ty</label>
             <select id="companyFilter"><option value="">Tất cả công ty</option></select>
           </div>
           <div>
             <label for="emailFilter">Email</label>
-            <input id="emailFilter" type="text" placeholder="Tìm theo email">
+            <input id="emailFilter" type="text" placeholder="Tìm theo email" data-i18n-placeholder="searchEmail">
           </div>
           <div>
-            <label for="dateFromFilter">Từ ngày</label>
+            <label for="dateFromFilter" data-i18n="fromDate">Từ ngày</label>
             <input id="dateFromFilter" type="date">
           </div>
           <div>
-            <label for="dateToFilter">Đến ngày</label>
+            <label for="dateToFilter" data-i18n="toDate">Đến ngày</label>
             <input id="dateToFilter" type="date">
           </div>
           <div class="filter-actions">
-            <button id="applyFilterButton" class="button" type="button">Cập nhật</button>
-            <button id="resetFilterButton" class="button secondary" type="button">Xóa lọc</button>
+            <button id="applyFilterButton" class="button" type="button" data-i18n="update">Cập nhật</button>
+            <button id="resetFilterButton" class="button secondary" type="button" data-i18n="clearFilters">Xóa lọc</button>
           </div>
         </div>
         <div class="toolbar-footer">
-          <div id="dashboardStatus" class="status">Chưa tải dữ liệu.</div>
+          <div id="dashboardStatus" class="status" data-i18n="notLoaded">Chưa tải dữ liệu.</div>
           <div class="export-actions">
-            <button id="exportParticipantsButton" class="button secondary" type="button">Xuất danh sách tham gia CSV</button>
-            <button id="exportRankingButton" class="button secondary" type="button">Xuất xếp hạng CSV</button>
-            <button id="exportAttemptsButton" class="button secondary" type="button">Xuất lịch sử CSV</button>
+            <button id="exportParticipantsButton" class="button secondary" type="button" data-i18n="exportParticipants">Xuất danh sách tham gia CSV</button>
+            <button id="exportRankingButton" class="button secondary" type="button" data-i18n="exportRanking">Xuất xếp hạng CSV</button>
+            <button id="exportAttemptsButton" class="button secondary" type="button" data-i18n="exportHistory">Xuất lịch sử CSV</button>
           </div>
         </div>
       </section>
@@ -350,23 +359,23 @@
       <section id="metricsGrid" class="metrics"></section>
 
       <nav class="tabs" aria-label="Nội dung báo cáo">
-        <button class="tab-button active" type="button" data-tab="overview">Tổng quan</button>
-        <button class="tab-button" type="button" data-tab="ranking">Xếp hạng</button>
-        <button class="tab-button" type="button" data-tab="attempts">Lịch sử thi</button>
+        <button class="tab-button active" type="button" data-tab="overview" data-i18n="overview">Tổng quan</button>
+        <button class="tab-button" type="button" data-tab="ranking" data-i18n="ranking">Xếp hạng</button>
+        <button class="tab-button" type="button" data-tab="attempts" data-i18n="examHistory">Lịch sử thi</button>
       </nav>
 
       <div id="overviewTab" class="tab-panel">
         <div class="overview-grid">
           <section class="panel section">
             <div class="section-head">
-              <h3>Tỷ lệ chính xác theo phần</h3>
-              <span class="section-note">Tính theo bài tốt nhất của mỗi email</span>
+              <h3 data-i18n="categoryAccuracy">Tỷ lệ chính xác theo phần</h3>
+              <span class="section-note" data-i18n="bestAttemptNote">Tính theo bài tốt nhất của mỗi email</span>
             </div>
             <div id="categoryList" class="category-list"></div>
           </section>
           <section class="panel section">
             <div class="section-head">
-              <h3>Chất lượng theo công ty</h3>
+              <h3 data-i18n="companyQuality">Chất lượng theo công ty</h3>
             </div>
             <div id="companyTable"></div>
           </section>
@@ -376,8 +385,8 @@
       <div id="rankingTab" class="tab-panel" hidden>
         <section class="panel section">
           <div class="section-head">
-            <h3>Xếp hạng theo email</h3>
-            <span class="section-note">Mỗi email chỉ được tính một người</span>
+            <h3 data-i18n="emailRanking">Xếp hạng theo email</h3>
+            <span class="section-note" data-i18n="uniqueEmailNote">Mỗi email chỉ được tính một người</span>
           </div>
           <div id="rankingTable"></div>
         </section>
@@ -386,8 +395,8 @@
       <div id="attemptsTab" class="tab-panel" hidden>
         <section class="panel section">
           <div class="section-head">
-            <h3>Lịch sử các lượt thi</h3>
-            <span class="section-note">Tối đa 1.000 dòng theo bộ lọc</span>
+            <h3 data-i18n="attemptHistory">Lịch sử các lượt thi</h3>
+            <span class="section-note" data-i18n="rowLimitNote">Tối đa 1.000 dòng theo bộ lọc</span>
           </div>
           <div id="attemptTable"></div>
         </section>
@@ -398,6 +407,64 @@
   <script>
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzh0vDk-fN86u1_g3wm7ti7MpDTQWIGZjqx-XqVLfuRvR_piNAQ1waysZtEW8_AMWyWNQ/exec";
     const ADMIN_SESSION_KEY = "sungrow_admin_session_v1";
+    const ADMIN_LANGUAGE_KEY = "sungrow_admin_language_v1";
+    const TRANSLATIONS = {
+      vi: {
+        browserTitle: "Quản trị kết quả đánh giá Sungrow", pageTitle: "QUẢN TRỊ KẾT QUẢ ĐÁNH GIÁ",
+        logout: "Đăng xuất", adminAccount: "Tài khoản quản trị", adminLogin: "Đăng nhập quản trị",
+        loginIntro: "Sử dụng email đã được kích hoạt và mật khẩu trong sheet Admins.", adminEmail: "Email quản trị",
+        password: "Mật khẩu", passwordPlaceholder: "Nhập mật khẩu quản trị", adminLoginButton: "Đăng nhập quản trị",
+        course: "Khóa học", company: "Công ty", searchEmail: "Tìm theo email", fromDate: "Từ ngày", toDate: "Đến ngày",
+        update: "Cập nhật", clearFilters: "Xóa lọc", notLoaded: "Chưa tải dữ liệu.",
+        exportParticipants: "Xuất danh sách tham gia CSV", exportRanking: "Xuất xếp hạng CSV", exportHistory: "Xuất lịch sử CSV",
+        overview: "Tổng quan", ranking: "Xếp hạng", examHistory: "Lịch sử thi", categoryAccuracy: "Tỷ lệ chính xác theo phần",
+        bestAttemptNote: "Tính theo bài tốt nhất của mỗi email", companyQuality: "Chất lượng theo công ty",
+        emailRanking: "Xếp hạng theo email", uniqueEmailNote: "Mỗi email chỉ được tính một người",
+        attemptHistory: "Lịch sử các lượt thi", rowLimitNote: "Tối đa 1.000 dòng theo bộ lọc",
+        allCourses: "Tất cả khóa học", allCompanies: "Tất cả công ty", closed: "đã đóng", administrator: "Quản trị viên",
+        authenticating: "Đang xác thực...", loading: "Đang tải...", aggregating: "Đang tổng hợp dữ liệu từ Google Sheet...",
+        noResponse: "Không nhận được phản hồi từ Google Apps Script.", requestFailed: "Yêu cầu không được xử lý.",
+        browserBlocked: "Trình duyệt hoặc mạng đang chặn Google Apps Script.", loggedOut: "Đã đăng xuất khỏi trang quản trị.",
+        updatedStatus: "Cập nhật lúc {time}. Xếp hạng và thống kê đã được tính lại từ dữ liệu hiện tại.",
+        registeredEmails: "Email đăng ký", registeredNote: "Theo bộ lọc email/công ty", participants: "Người tham gia",
+        uniquePersonNote: "Mỗi email tính một người", completedAttempts: "Lượt hoàn thành", activeAttempts: "{count} lượt đang làm",
+        participationRate: "Tỷ lệ tham gia", participationNote: "Người tham gia / email đăng ký", passRate: "Tỷ lệ đạt",
+        passedPeople: "{count} người đạt", averageBestScore: "Điểm tốt nhất TB", averageByEmail: "Trung bình theo email",
+        noCategoryData: "Chưa có dữ liệu theo phần.", noMatchingData: "Không có dữ liệu phù hợp.", unknown: "Chưa xác định",
+        noName: "Chưa có tên", noCompanyMembers: "Chưa có người tham gia khóa học theo bộ lọc hiện tại.",
+        person: "Người", passed: "Đạt", averageScore: "Điểm TB", fullName: "Họ tên", score: "Điểm", result: "Kết quả",
+        rank: "Hạng", attempts: "Số lượt", duration: "Thời gian", submittedAt: "Ngày nộp", attempt: "Lượt",
+        termination: "Kết thúc", tabLeaves: "Rời tab", minutesShort: "ph", secondsShort: "giây"
+      },
+      en: {
+        browserTitle: "Sungrow Assessment Results Administration", pageTitle: "ASSESSMENT RESULTS ADMINISTRATION",
+        logout: "Log out", adminAccount: "Administrator account", adminLogin: "Administrator login",
+        loginIntro: "Use an activated email address and the password stored in the Admins sheet.", adminEmail: "Administrator email",
+        password: "Password", passwordPlaceholder: "Enter administrator password", adminLoginButton: "Log in",
+        course: "Course", company: "Company", searchEmail: "Search by email", fromDate: "From", toDate: "To",
+        update: "Refresh", clearFilters: "Clear filters", notLoaded: "Data has not been loaded.",
+        exportParticipants: "Export participant list CSV", exportRanking: "Export ranking CSV", exportHistory: "Export attempt history CSV",
+        overview: "Overview", ranking: "Ranking", examHistory: "Attempt history", categoryAccuracy: "Accuracy by section",
+        bestAttemptNote: "Calculated from each email's best attempt", companyQuality: "Performance by company",
+        emailRanking: "Ranking by email", uniqueEmailNote: "Each email is counted as one participant",
+        attemptHistory: "Attempt history", rowLimitNote: "Up to 1,000 rows for the current filters",
+        allCourses: "All courses", allCompanies: "All companies", closed: "closed", administrator: "Administrator",
+        authenticating: "Authenticating...", loading: "Loading...", aggregating: "Aggregating data from Google Sheets...",
+        noResponse: "No response was received from Google Apps Script.", requestFailed: "The request could not be processed.",
+        browserBlocked: "The browser or network is blocking Google Apps Script.", loggedOut: "You have logged out of the administration page.",
+        updatedStatus: "Updated at {time}. Rankings and statistics were recalculated from the current data.",
+        registeredEmails: "Registered emails", registeredNote: "Based on the email/company filters", participants: "Participants",
+        uniquePersonNote: "Each email counts as one person", completedAttempts: "Completed attempts", activeAttempts: "{count} in progress",
+        participationRate: "Participation rate", participationNote: "Participants / registered emails", passRate: "Pass rate",
+        passedPeople: "{count} participants passed", averageBestScore: "Average best score", averageByEmail: "Average by email",
+        noCategoryData: "No section data is available.", noMatchingData: "No matching data.", unknown: "Unspecified",
+        noName: "Name unavailable", noCompanyMembers: "No course participants match the current filters.",
+        person: "Participants", passed: "Passed", averageScore: "Avg. score", fullName: "Full name", score: "Score", result: "Result",
+        rank: "Rank", attempts: "Attempts", duration: "Duration", submittedAt: "Submitted at", attempt: "Attempt",
+        termination: "Termination", tabLeaves: "Tab leaves", minutesShort: "min", secondsShort: "sec"
+      }
+    };
+    let currentLanguage = localStorage.getItem(ADMIN_LANGUAGE_KEY) === "en" ? "en" : "vi";
     let adminToken = sessionStorage.getItem(ADMIN_SESSION_KEY) || "";
     let dashboardData = null;
     let refreshTimer = null;
@@ -420,6 +487,52 @@
     const applyFilterButton = document.getElementById("applyFilterButton");
     const resetFilterButton = document.getElementById("resetFilterButton");
     const dashboardStatus = document.getElementById("dashboardStatus");
+    const languageToggle = document.getElementById("languageToggle");
+
+    function t(key, variables = {}) {
+      const template = TRANSLATIONS[currentLanguage][key] || TRANSLATIONS.vi[key] || key;
+      return Object.keys(variables).reduce(
+        (text, name) => text.replace(new RegExp(`\\{${name}\\}`, "g"), String(variables[name])),
+        template
+      );
+    }
+
+    function applyLanguage() {
+      document.documentElement.lang = currentLanguage;
+      document.title = t("browserTitle");
+      document.querySelectorAll("[data-i18n]").forEach((element) => {
+        element.textContent = t(element.dataset.i18n);
+      });
+      document.querySelectorAll("[data-i18n-placeholder]").forEach((element) => {
+        element.placeholder = t(element.dataset.i18nPlaceholder);
+      });
+      languageToggle.textContent = currentLanguage === "vi" ? "EN" : "VI";
+      languageToggle.setAttribute("aria-label", currentLanguage === "vi" ? "Switch to English" : "Chuyển sang tiếng Việt");
+      if (dashboardData) {
+        renderFilterOptions(dashboardData.options || {});
+        renderDashboard(dashboardData);
+      }
+    }
+
+    function localizeServerMessage(message) {
+      const source = String(message || "");
+      if (currentLanguage !== "en") return source;
+      const exactMessages = {
+        "Email quản trị không hợp lệ.": "The administrator email address is invalid.",
+        "Email này không có quyền quản trị hoặc đã bị khóa.": "This email does not have administrator access or has been disabled.",
+        "Mật khẩu phải có từ 8 đến 128 ký tự.": "The password must contain 8 to 128 characters.",
+        "Tài khoản quản trị chưa được đặt mật khẩu trong sheet Admins.": "No password has been configured for this administrator in the Admins sheet.",
+        "Mật khẩu không chính xác. Tài khoản đã bị khóa tạm thời 15 phút.": "The password is incorrect. The account has been temporarily locked for 15 minutes.",
+        "Phiên quản trị không hợp lệ.": "The administrator session is invalid.",
+        "Phiên quản trị đã hết hạn. Vui lòng đăng nhập lại.": "The administrator session has expired. Please log in again."
+      };
+      if (exactMessages[source]) return exactMessages[source];
+      let match = source.match(/^Tài khoản tạm khóa do nhập sai nhiều lần\. Vui lòng thử lại sau (\d+) phút\.$/);
+      if (match) return `The account is temporarily locked after multiple failed attempts. Please try again in ${match[1]} minutes.`;
+      match = source.match(/^Mật khẩu không chính xác\. Bạn còn (\d+) lần thử\.$/);
+      if (match) return `The password is incorrect. You have ${match[1]} attempts remaining.`;
+      return source;
+    }
 
     function escapeHtml(value) {
       return String(value ?? "")
@@ -457,7 +570,7 @@
 
         const timeoutId = setTimeout(() => {
           cleanup();
-          reject(new Error("Không nhận được phản hồi từ Google Apps Script."));
+          reject(new Error(t("noResponse")));
         }, 30000);
 
         function cleanup() {
@@ -477,7 +590,7 @@
           cleanup();
           const data = message.data;
           if (!data || !data.ok) {
-            reject(new Error(data && data.message ? data.message : "Yêu cầu không được xử lý."));
+            reject(new Error(data && data.message ? data.message : t("requestFailed")));
             return;
           }
           resolve(data);
@@ -485,7 +598,7 @@
 
         iframe.addEventListener("error", () => {
           cleanup();
-          reject(new Error("Trình duyệt hoặc mạng đang chặn Google Apps Script."));
+          reject(new Error(t("browserBlocked")));
         });
         window.addEventListener("message", handleMessage);
         document.body.appendChild(iframe);
@@ -512,7 +625,7 @@
         return;
       }
       loginButton.disabled = true;
-      loginButton.textContent = "Đang xác thực...";
+      loginButton.textContent = t("authenticating");
       try {
         const data = await callApi("loginAdmin", {
           email: adminEmail.value.trim(),
@@ -524,10 +637,10 @@
         showDashboard(data.admin);
         await loadDashboard();
       } catch (error) {
-        loginMessage.textContent = error.message;
+        loginMessage.textContent = localizeServerMessage(error.message);
       } finally {
         loginButton.disabled = false;
-        loginButton.textContent = "Đăng nhập quản trị";
+        loginButton.textContent = t("adminLoginButton");
       }
     }
 
@@ -535,7 +648,7 @@
       loginView.hidden = true;
       dashboardView.hidden = false;
       adminMeta.hidden = false;
-      adminIdentity.textContent = admin ? `${admin.name} · ${admin.email}` : "Quản trị viên";
+      adminIdentity.textContent = admin ? `${admin.name} · ${admin.email}` : t("administrator");
       clearInterval(refreshTimer);
       refreshTimer = setInterval(() => loadDashboard(true), 5 * 60 * 1000);
     }
@@ -554,9 +667,9 @@
       if (!adminToken) return;
       if (!silent) {
         applyFilterButton.disabled = true;
-        applyFilterButton.textContent = "Đang tải...";
+        applyFilterButton.textContent = t("loading");
       }
-      dashboardStatus.textContent = "Đang tổng hợp dữ liệu từ Google Sheet...";
+      dashboardStatus.textContent = t("aggregating");
       try {
         const data = await callApi("getAdminDashboard", {
           adminToken,
@@ -568,24 +681,24 @@
         renderDashboard(data);
       } catch (error) {
         if (/Phiên quản trị/.test(error.message)) {
-          showLogin(error.message);
+          showLogin(localizeServerMessage(error.message));
           return;
         }
-        dashboardStatus.textContent = error.message;
+        dashboardStatus.textContent = localizeServerMessage(error.message);
       } finally {
         applyFilterButton.disabled = false;
-        applyFilterButton.textContent = "Cập nhật";
+        applyFilterButton.textContent = t("update");
       }
     }
 
     function renderFilterOptions(options) {
       const selectedCourse = courseFilter.value;
       const selectedCompany = companyFilter.value;
-      courseFilter.innerHTML = '<option value="">Tất cả khóa học</option>' +
+      courseFilter.innerHTML = `<option value="">${escapeHtml(t("allCourses"))}</option>` +
         (options.courses || []).map((course) =>
-          `<option value="${escapeHtml(course.id)}">${escapeHtml(course.title)}${course.active ? "" : " (đã đóng)"}</option>`
+          `<option value="${escapeHtml(course.id)}">${escapeHtml(course.title)}${course.active ? "" : ` (${escapeHtml(t("closed"))})`}</option>`
         ).join("");
-      companyFilter.innerHTML = '<option value="">Tất cả công ty</option>' +
+      companyFilter.innerHTML = `<option value="">${escapeHtml(t("allCompanies"))}</option>` +
         (options.companies || []).map((company) =>
           `<option value="${escapeHtml(company)}">${escapeHtml(company)}</option>`
         ).join("");
@@ -596,12 +709,12 @@
     function renderDashboard(data) {
       const metrics = data.metrics || {};
       const metricItems = [
-        ["Email đăng ký", metrics.registeredParticipants, "Theo bộ lọc email/công ty"],
-        ["Người tham gia", metrics.participatingEmails, "Mỗi email tính một người"],
-        ["Lượt hoàn thành", metrics.completedAttempts, `${metrics.activeAttempts || 0} lượt đang làm`],
-        ["Tỷ lệ tham gia", `${metrics.completionRate || 0}%`, "Người tham gia / email đăng ký"],
-        ["Tỷ lệ đạt", `${metrics.passRate || 0}%`, `${metrics.passedParticipants || 0} người đạt`],
-        ["Điểm tốt nhất TB", `${metrics.averageBestPercent || 0}%`, "Trung bình theo email"]
+        [t("registeredEmails"), metrics.registeredParticipants, t("registeredNote")],
+        [t("participants"), metrics.participatingEmails, t("uniquePersonNote")],
+        [t("completedAttempts"), metrics.completedAttempts, t("activeAttempts", { count: metrics.activeAttempts || 0 })],
+        [t("participationRate"), `${metrics.completionRate || 0}%`, t("participationNote")],
+        [t("passRate"), `${metrics.passRate || 0}%`, t("passedPeople", { count: metrics.passedParticipants || 0 })],
+        [t("averageBestScore"), `${metrics.averageBestPercent || 0}%`, t("averageByEmail")]
       ];
       document.getElementById("metricsGrid").innerHTML = metricItems.map((item) => `
         <article class="panel metric">
@@ -622,16 +735,17 @@
               <div class="bar"><span style="width:${Math.max(0, Math.min(100, Number(item.percent) || 0))}%"></span></div>
             </div>
           `).join("")
-        : '<div class="empty">Chưa có dữ liệu theo phần.</div>';
+        : `<div class="empty">${escapeHtml(t("noCategoryData"))}</div>`;
 
       renderCompanyTable(data.companies || [], data.rankings || []);
       renderRankingTable(data.rankings || []);
       renderAttemptTable(data.attempts || []);
-      dashboardStatus.textContent = `Cập nhật lúc ${new Date(data.generatedAt).toLocaleString("vi-VN")}. Xếp hạng và thống kê đã được tính lại từ dữ liệu hiện tại.`;
+      const locale = currentLanguage === "en" ? "en-US" : "vi-VN";
+      dashboardStatus.textContent = t("updatedStatus", { time: new Date(data.generatedAt).toLocaleString(locale) });
     }
 
     function tableHtml(headers, rows, tableClass = "") {
-      if (!rows.length) return '<div class="empty">Không có dữ liệu phù hợp.</div>';
+      if (!rows.length) return `<div class="empty">${escapeHtml(t("noMatchingData"))}</div>`;
       const className = String(tableClass || "").replace(/[^a-z0-9_-]/gi, "");
       const wrapClass = className ? `table-wrap ${className}-wrap` : "table-wrap";
       return `<div class="${wrapClass}"><table class="${className}"><thead><tr>${headers.map((header) => `<th>${escapeHtml(header)}</th>`).join("")}</tr></thead><tbody>${rows.join("")}</tbody></table></div>`;
@@ -639,33 +753,33 @@
 
     function renderCompanyTable(rows, rankings) {
       const membersByCompany = (rankings || []).reduce((groups, row) => {
-        const company = String(row.company || "Chưa xác định");
+        const company = String(row.company || t("unknown"));
         if (!groups[company]) groups[company] = [];
         groups[company].push(row);
         return groups;
       }, {});
 
       document.getElementById("companyTable").innerHTML = tableHtml(
-        ["Công ty", "Người", "Đạt", "Tỷ lệ đạt", "Điểm TB"],
+        [t("company"), t("person"), t("passed"), t("passRate"), t("averageScore")],
         rows.flatMap((row, index) => {
-          const company = String(row.company || "Chưa xác định");
+          const company = String(row.company || t("unknown"));
           const members = (membersByCompany[company] || []).sort((left, right) => Number(left.rank || 0) - Number(right.rank || 0));
           const memberRowId = `company-members-${index}`;
           const memberHtml = members.length
             ? `<div class="company-member company-member-header" aria-hidden="true">
-                <span>Họ tên</span>
+                <span>${escapeHtml(t("fullName"))}</span>
                 <span>Email</span>
-                <span class="company-member-value">Điểm</span>
-                <span class="company-member-value">Kết quả</span>
-                <span class="company-member-value">Hạng</span>
+                <span class="company-member-value">${escapeHtml(t("score"))}</span>
+                <span class="company-member-value">${escapeHtml(t("result"))}</span>
+                <span class="company-member-value">${escapeHtml(t("rank"))}</span>
               </div>${members.map((member) => `<div class="company-member">
-                <span class="company-member-name">${escapeHtml(member.name || "Chưa có tên")}</span>
+                <span class="company-member-name">${escapeHtml(member.name || t("noName"))}</span>
                 <span class="company-member-email">${escapeHtml(member.email)}</span>
                 <span class="company-member-value">${escapeHtml(member.score)}/${escapeHtml(member.total)}</span>
                 <span class="company-member-value ${member.result === "PASS" ? "pass" : "failed"}">${escapeHtml(member.result)}</span>
                 <span class="company-member-value">#${escapeHtml(member.rank)}</span>
               </div>`).join("")}`
-            : '<div class="empty">Chưa có người tham gia khóa học theo bộ lọc hiện tại.</div>';
+            : `<div class="empty">${escapeHtml(t("noCompanyMembers"))}</div>`;
           return [
             `<tr>
               <td>
@@ -690,7 +804,7 @@
 
     function renderRankingTable(rows) {
       document.getElementById("rankingTable").innerHTML = tableHtml(
-        ["Hạng", "Họ tên", "Email", "Công ty", "Khóa học", "Điểm", "%", "Kết quả", "Số lượt", "Thời gian", "Ngày nộp"],
+        [t("rank"), t("fullName"), "Email", t("company"), t("course"), t("score"), "%", t("result"), t("attempts"), t("duration"), t("submittedAt")],
         rows.map((row) => `<tr>
           <td class="number"><strong>${escapeHtml(row.rank)}</strong></td>
           <td>${escapeHtml(row.name)}</td>
@@ -710,7 +824,7 @@
 
     function renderAttemptTable(rows) {
       document.getElementById("attemptTable").innerHTML = tableHtml(
-        ["Ngày nộp", "Họ tên", "Email", "Công ty", "Khóa học", "Lượt", "Điểm", "%", "Kết quả", "Thời gian", "Kết thúc", "Rời tab"],
+        [t("submittedAt"), t("fullName"), "Email", t("company"), t("course"), t("attempt"), t("score"), "%", t("result"), t("duration"), t("termination"), t("tabLeaves")],
         rows.map((row) => `<tr>
           <td>${escapeHtml(row.submittedAt)}</td>
           <td>${escapeHtml(row.name)}</td>
@@ -731,7 +845,7 @@
 
     function formatDuration(seconds) {
       const safe = Math.max(0, Number(seconds) || 0);
-      return `${Math.floor(safe / 60)}m ${Math.floor(safe % 60)}s`;
+      return `${Math.floor(safe / 60)} ${t("minutesShort")} ${Math.floor(safe % 60)} ${t("secondsShort")}`;
     }
 
     function csvCell(value) {
@@ -755,6 +869,9 @@
 
     function exportRanking() {
       if (!dashboardData) return;
+      const headers = currentLanguage === "en"
+        ? ["Rank", "Full name", "Email", "Company", "Course ID", "Course title", "Score", "Total", "Percent", "Result", "Attempts", "Duration (seconds)", "Submitted at"]
+        : ["Hạng", "Họ và tên", "Email", "Công ty", "Mã khóa học", "Tên khóa học", "Điểm", "Tổng điểm", "Tỷ lệ (%)", "Kết quả", "Số lượt", "Thời gian (giây)", "Ngày nộp"];
       const rows = (dashboardData.rankings || []).map((row) => [
         row.rank, row.name, row.email, row.company, row.courseId, row.courseTitle,
         row.score, row.total, row.percent, row.result, row.attempts,
@@ -762,13 +879,16 @@
       ]);
       downloadCsv(
         `sungrow-ranking-${new Date().toISOString().slice(0, 10)}.csv`,
-        ["Rank", "FullName", "Email", "Company", "CourseID", "CourseTitle", "Score", "Total", "Percent", "Result", "Attempts", "DurationSeconds", "SubmittedAt"],
+        headers,
         rows
       );
     }
 
     function exportParticipants() {
       if (!dashboardData) return;
+      const headers = currentLanguage === "en"
+        ? ["No.", "Full name", "Email", "Company", "Course", "Attempts", "Best score", "Percent", "Result", "Rank", "Best attempt submitted at"]
+        : ["STT", "Họ và tên", "Email", "Công ty", "Khóa học", "Số lượt đã làm", "Điểm tốt nhất", "Tỷ lệ (%)", "Kết quả", "Xếp hạng", "Ngày nộp bài tốt nhất"];
       const rows = (dashboardData.rankings || [])
         .slice()
         .sort((left, right) => {
@@ -790,13 +910,16 @@
         ]);
       downloadCsv(
         `sungrow-danh-sach-tham-gia-${new Date().toISOString().slice(0, 10)}.csv`,
-        ["STT", "Họ và tên", "Email", "Công ty", "Khóa học", "Số lượt đã làm", "Điểm tốt nhất", "Tỷ lệ (%)", "Kết quả", "Xếp hạng", "Ngày nộp bài tốt nhất"],
+        headers,
         rows
       );
     }
 
     function exportAttempts() {
       if (!dashboardData) return;
+      const headers = currentLanguage === "en"
+        ? ["Submitted at", "Full name", "Email", "Company", "Course ID", "Course title", "Attempt", "Score", "Total", "Percent", "Result", "Duration (seconds)", "Termination", "Tab leaves"]
+        : ["Ngày nộp", "Họ và tên", "Email", "Công ty", "Mã khóa học", "Tên khóa học", "Lượt", "Điểm", "Tổng điểm", "Tỷ lệ (%)", "Kết quả", "Thời gian (giây)", "Kết thúc", "Rời tab"];
       const rows = (dashboardData.attempts || []).map((row) => [
         row.submittedAt, row.name, row.email, row.company, row.courseId,
         row.courseTitle, row.attemptNumber, row.score, row.total, row.percent,
@@ -804,7 +927,7 @@
       ]);
       downloadCsv(
         `sungrow-attempts-${new Date().toISOString().slice(0, 10)}.csv`,
-        ["SubmittedAt", "FullName", "Email", "Company", "CourseID", "CourseTitle", "AttemptNumber", "Score", "Total", "Percent", "Result", "DurationSeconds", "TerminationReason", "TabViolations"],
+        headers,
         rows
       );
     }
@@ -815,7 +938,12 @@
     });
     logoutButton.addEventListener("click", async () => {
       try { await callApi("logoutAdmin", { adminToken }); } catch (error) {}
-      showLogin("Đã đăng xuất khỏi trang quản trị.");
+      showLogin(t("loggedOut"));
+    });
+    languageToggle.addEventListener("click", () => {
+      currentLanguage = currentLanguage === "vi" ? "en" : "vi";
+      localStorage.setItem(ADMIN_LANGUAGE_KEY, currentLanguage);
+      applyLanguage();
     });
     applyFilterButton.addEventListener("click", () => loadDashboard());
     resetFilterButton.addEventListener("click", () => {
@@ -849,6 +977,8 @@
     document.addEventListener("visibilitychange", () => {
       if (!document.hidden && adminToken) loadDashboard(true);
     });
+
+    applyLanguage();
 
     if (adminToken) {
       showDashboard();
