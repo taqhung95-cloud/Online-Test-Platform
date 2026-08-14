@@ -285,6 +285,14 @@
       background: #f3f6f8;
     }
 
+    .button.result-unavailable:disabled {
+      cursor: not-allowed;
+      border-color: #dbe3ea;
+      background: #f3f6f8;
+      color: var(--muted);
+      opacity: 1;
+    }
+
     .registration-message.success {
       color: var(--green);
     }
@@ -1430,7 +1438,14 @@
                       type="button"
                       data-result-course-id="${escapeHtml(course.id)}"
                     >Xem kết quả mới nhất</button>
-                  ` : ""}
+                  ` : `
+                    <button
+                      class="button secondary-button result-unavailable"
+                      type="button"
+                      disabled
+                      aria-disabled="true"
+                    >Chưa có kết quả</button>
+                  `}
                 </div>
               </article>
             `;
