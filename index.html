@@ -1177,7 +1177,13 @@
       inactivityTimerId: null,
       progressSaveTimerId: null,
       progressSyncTimerId: null,
-      lastProgressSnapshot: ""
+      progressSaveInFlight: false,
+      progressSavePending: false,
+      lastProgressSnapshot: "",
+      submitRetryTimerId: null,
+      submitRetryCount: 0,
+      pendingSubmission: null,
+      submitFailureNotified: false
     };
 
     const loginView = document.getElementById("loginView");
@@ -1264,21 +1270,54 @@
       return `${minutes} phút ${seconds} giây`;
     }
 
+    function wait(milliseconds) {
+      return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
+    }
+
     async function callApi(action, payload = {}) {
       if (!APPS_SCRIPT_URL) {
         throw new Error("Hệ thống chưa được cấu hình Google Apps Script.");
       }
+      const retryableActions = ["loginParticipant", "startAttempt", "submitAttempt"];
+      const maxTries = retryableActions.includes(action)
+        ? 3
+        : action === "saveAttemptProgress" ? 2 : 1;
+      const preferIframe = action === "submitAttempt";
+      let lastError;
+      for (let tryNumber = 1; tryNumber <= maxTries; tryNumber += 1) {
+        try {
+          const useIframe = preferIframe
+            ? tryNumber % 2 === 1
+            : tryNumber % 2 === 0;
+          return await (useIframe
+            ? callApiIframeOnce(action, payload)
+            : callApiJsonpOnce(action, payload));
+        } catch (error) {
+          lastError = error;
+          if (!error.isTransportError || tryNumber >= maxTries) throw error;
+          await wait(1200 + Math.floor(Math.random() * 1200));
+        }
+      }
+      throw lastError;
+    }
+
+    function callApiJsonpOnce(action, payload) {
       return new Promise((resolve, reject) => {
         const callbackName = `mgrl_callback_${Date.now()}_${Math.random().toString(16).slice(2)}`;
         const script = document.createElement("script");
         script.async = true;
+        const timeoutMilliseconds = action === "submitAttempt" ? 45000 : 30000;
 
         const timeoutId = window.setTimeout(() => {
           cleanup();
-          reject(new Error(
-            "Không thể kết nối đến Google Apps Script. Hãy kiểm tra mạng, tiện ích chặn nội dung hoặc chính sách truy cập script.google.com rồi thử lại."
-          ));
-        }, 20000);
+          const error = new Error(
+            action === "submitAttempt"
+              ? "Hệ thống đang có nhiều người nộp bài cùng lúc. Yêu cầu chưa nhận được phản hồi và sẽ được thử lại tự động."
+              : "Không thể kết nối đến Google Apps Script. Hãy kiểm tra mạng, tiện ích chặn nội dung hoặc chính sách truy cập script.google.com rồi thử lại."
+          );
+          error.isTransportError = true;
+          reject(error);
+        }, timeoutMilliseconds);
 
         function cleanup() {
           window.clearTimeout(timeoutId);
@@ -1293,7 +1332,9 @@
         window[callbackName] = (data) => {
           cleanup();
           if (!data || !data.ok) {
-            reject(new Error(data && data.message ? data.message : "Yêu cầu không được xử lý."));
+            const error = new Error(data && data.message ? data.message : "Yêu cầu không được xử lý.");
+            error.isTransportError = Boolean(data && data.retryable);
+            reject(error);
             return;
           }
           resolve(data);
@@ -1308,12 +1349,85 @@
         script.onerror = (event) => {
           console.error("Không tải được Google Apps Script Web App:", APPS_SCRIPT_URL, event);
           cleanup();
-          reject(new Error(
+          const error = new Error(
             "Trình duyệt hoặc mạng đang chặn Google Apps Script. Hãy tắt tiện ích chặn nội dung hoặc cho phép script.google.com."
-          ));
+          );
+          error.isTransportError = true;
+          reject(error);
         };
         script.src = `${APPS_SCRIPT_URL}?${query.toString()}`;
         document.head.appendChild(script);
+      });
+    }
+
+    function callApiIframeOnce(action, payload) {
+      return new Promise((resolve, reject) => {
+        const requestId = `mgrl_iframe_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+        const iframe = document.createElement("iframe");
+        const form = document.createElement("form");
+        iframe.name = requestId;
+        iframe.hidden = true;
+        form.hidden = true;
+        form.method = "POST";
+        form.action = APPS_SCRIPT_URL;
+        form.target = requestId;
+
+        [
+          ["action", action],
+          ["payload", JSON.stringify(payload)],
+          ["transport", "iframe"],
+          ["requestId", requestId]
+        ].forEach(([name, value]) => {
+          const input = document.createElement("input");
+          input.type = "hidden";
+          input.name = name;
+          input.value = value;
+          form.appendChild(input);
+        });
+
+        const timeoutMilliseconds = action === "submitAttempt" ? 45000 : 30000;
+        const timeoutId = window.setTimeout(() => {
+          cleanup();
+          const error = new Error("Kết nối Google Apps Script tạm thời bị gián đoạn.");
+          error.isTransportError = true;
+          reject(error);
+        }, timeoutMilliseconds);
+
+        function cleanup() {
+          window.clearTimeout(timeoutId);
+          window.removeEventListener("message", handleMessage);
+          form.remove();
+          iframe.remove();
+        }
+
+        function handleMessage(event) {
+          const message = event.data;
+          if (
+            !message ||
+            message.source !== "MGRL_APPS_SCRIPT" ||
+            message.requestId !== requestId
+          ) return;
+          cleanup();
+          const data = message.data;
+          if (!data || !data.ok) {
+            const error = new Error(data && data.message ? data.message : "Yêu cầu không được xử lý.");
+            error.isTransportError = Boolean(data && data.retryable);
+            reject(error);
+            return;
+          }
+          resolve(data);
+        }
+
+        iframe.addEventListener("error", () => {
+          cleanup();
+          const error = new Error("Trình duyệt đang chặn kết nối Google Apps Script.");
+          error.isTransportError = true;
+          reject(error);
+        });
+        window.addEventListener("message", handleMessage);
+        document.body.appendChild(iframe);
+        document.body.appendChild(form);
+        form.submit();
       });
     }
 
@@ -1339,7 +1453,9 @@
         startedAt: state.startedAt,
         hiddenAt: state.hiddenAt,
         tabViolations: state.tabViolations,
-        tabWarningShown: state.tabWarningShown
+        tabWarningShown: state.tabWarningShown,
+        pendingSubmission: state.pendingSubmission,
+        submitRetryCount: state.submitRetryCount
       }));
     }
 
@@ -1373,6 +1489,11 @@
       );
       state.tabWarningShown = Boolean(localMeta.tabWarningShown);
       state.lastProgressSnapshot = "";
+      clearTimeout(state.submitRetryTimerId);
+      state.submitRetryTimerId = null;
+      state.submitRetryCount = 0;
+      state.pendingSubmission = null;
+      state.submitFailureNotified = false;
       saveSession();
       renderExam();
     }
@@ -1585,8 +1706,13 @@
 
     async function saveAttemptProgress(force = false) {
       if (!state.active || state.submitting) return;
+      if (state.progressSaveInFlight) {
+        state.progressSavePending = true;
+        return;
+      }
       const snapshot = JSON.stringify(state.answers);
       if (!force && snapshot === state.lastProgressSnapshot) return;
+      state.progressSaveInFlight = true;
       try {
         const data = await callApi("saveAttemptProgress", {
           attemptToken: state.token,
@@ -1606,6 +1732,12 @@
         }
       } catch (error) {
         console.warn("Không thể lưu tiến độ bài thi:", error.message);
+      } finally {
+        state.progressSaveInFlight = false;
+        if (state.progressSavePending && state.active && !state.submitting) {
+          state.progressSavePending = false;
+          window.setTimeout(() => saveAttemptProgress(), 800);
+        }
       }
     }
 
@@ -1613,14 +1745,14 @@
       clearTimeout(state.progressSaveTimerId);
       state.progressSaveTimerId = setTimeout(() => {
         saveAttemptProgress();
-      }, 700);
+      }, 5000);
     }
 
     function startProgressSync() {
       clearInterval(state.progressSyncTimerId);
       state.progressSyncTimerId = setInterval(() => {
         saveAttemptProgress();
-      }, 15000);
+      }, 60000);
     }
 
     function showRegistrationForm() {
@@ -1766,12 +1898,22 @@
       }, 1000);
     }
 
-    async function submitExam(autoSubmitted, terminationReason) {
+    async function submitExam(autoSubmitted, terminationReason, skipConfirmation = false) {
       if (!state.active || state.submitting) return;
-      if (!autoSubmitted && !window.confirm("Bạn xác nhận nộp bài? Sau khi nộp, bạn không thể sửa câu trả lời.")) {
+      if (
+        !autoSubmitted &&
+        !skipConfirmation &&
+        !window.confirm("Bạn xác nhận nộp bài? Sau khi nộp, bạn không thể sửa câu trả lời.")
+      ) {
         return;
       }
 
+      clearTimeout(state.submitRetryTimerId);
+      state.submitRetryTimerId = null;
+      state.pendingSubmission = {
+        autoSubmitted: Boolean(autoSubmitted),
+        terminationReason
+      };
       state.submitting = true;
       submitButton.disabled = true;
       submitButton.textContent = "Đang nộp bài...";
@@ -1781,6 +1923,7 @@
       clearTimeout(state.progressSaveTimerId);
       clearInterval(state.progressSyncTimerId);
       tabOverlay.hidden = true;
+      saveSession();
 
       try {
         const data = await callApi("submitAttempt", {
@@ -1793,10 +1936,46 @@
           tabViolations: state.tabViolations
         });
         state.active = false;
+        state.pendingSubmission = null;
+        state.submitRetryCount = 0;
+        state.submitFailureNotified = false;
         clearSession();
         renderResult(data);
       } catch (error) {
         state.submitting = false;
+        if (error.isTransportError) {
+          state.submitRetryCount += 1;
+          const retryDelay = Math.min(
+            30000,
+            3000 * Math.pow(2, Math.min(state.submitRetryCount - 1, 3))
+          ) + Math.floor(Math.random() * 1500);
+          submitButton.disabled = true;
+          submitButton.textContent = navigator.onLine
+            ? "Mất kết nối - đang gửi lại..."
+            : "Đang chờ có mạng để nộp bài...";
+          saveSession();
+          state.submitRetryTimerId = window.setTimeout(() => {
+            if (!state.pendingSubmission || !state.active) return;
+            state.submitting = false;
+            submitExam(
+              state.pendingSubmission.autoSubmitted,
+              state.pendingSubmission.terminationReason,
+              true
+            );
+          }, retryDelay);
+          if (!state.submitFailureNotified) {
+            state.submitFailureNotified = true;
+            window.alert(
+              "Kết nối với hệ thống đang bị gián đoạn. Bài làm đã được giữ trên thiết bị và sẽ tự động gửi lại; vui lòng không đóng trang này."
+            );
+          }
+          state.submitting = true;
+          return;
+        }
+
+        state.pendingSubmission = null;
+        state.submitRetryCount = 0;
+        state.submitFailureNotified = false;
         state.hiddenAt = 0;
         state.attentionReason = "";
         state.lastInteractionAt = Date.now();
@@ -2350,9 +2529,21 @@
     });
 
     window.addEventListener("beforeunload", (event) => {
-      if (!state.active || state.submitting || confirmedPageReload) return;
+      if (!state.active || confirmedPageReload) return;
       event.preventDefault();
       event.returnValue = "";
+    });
+
+    window.addEventListener("online", () => {
+      if (!state.active || !state.pendingSubmission) return;
+      clearTimeout(state.submitRetryTimerId);
+      state.submitRetryTimerId = null;
+      state.submitting = false;
+      submitExam(
+        state.pendingSubmission.autoSubmitted,
+        state.pendingSubmission.terminationReason,
+        true
+      );
     });
 
     (async function initialize() {
@@ -2361,20 +2552,31 @@
       let reloadTerminationSucceeded = false;
       try {
         const saved = JSON.parse(raw);
+        const pendingSubmission = saved.pendingSubmission && typeof saved.pendingSubmission === "object"
+          ? saved.pendingSubmission
+          : null;
         setLoginLoading(true);
-        loginMessage.textContent = "Đang kết thúc phiên thi trước do trang đã được tải lại...";
+        loginMessage.textContent = pendingSubmission
+          ? "Đang gửi lại bài thi chưa nhận được xác nhận từ hệ thống..."
+          : "Đang kết thúc phiên thi trước do trang đã được tải lại...";
         await callApi("submitAttempt", {
           attemptToken: saved.token,
           email: saved.email,
           deviceId: saved.deviceId || state.deviceId,
           answers: saved.answers || {},
-          autoSubmitted: true,
-          terminationReason: "PAGE_RELOAD",
+          autoSubmitted: pendingSubmission
+            ? Boolean(pendingSubmission.autoSubmitted)
+            : true,
+          terminationReason: pendingSubmission
+            ? String(pendingSubmission.terminationReason || "MANUAL")
+            : "PAGE_RELOAD",
           tabViolations: Number(saved.tabViolations || 0)
         });
         clearSession();
         emailInput.value = saved.email || "";
-        loginMessage.textContent = "Phiên thi trước đã kết thúc do tải lại trang và được tính là một lượt tham gia.";
+        loginMessage.textContent = pendingSubmission
+          ? "Bài thi trước đã được hệ thống xác nhận thành công."
+          : "Phiên thi trước đã kết thúc do tải lại trang và được tính là một lượt tham gia.";
         reloadTerminationSucceeded = true;
       } catch (error) {
         loginMessage.textContent =
