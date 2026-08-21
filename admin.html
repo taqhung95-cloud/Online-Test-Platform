@@ -470,6 +470,8 @@
     let adminToken = sessionStorage.getItem(ADMIN_SESSION_KEY) || "";
     let dashboardData = null;
     let refreshTimer = null;
+    let dashboardLoading = false;
+    let lastDashboardLoadAt = 0;
 
     const loginView = document.getElementById("loginView");
     const dashboardView = document.getElementById("dashboardView");
@@ -573,7 +575,7 @@
         const timeoutId = setTimeout(() => {
           cleanup();
           reject(new Error(t("noResponse")));
-        }, 30000);
+        }, 60000);
 
         function cleanup() {
           clearTimeout(timeoutId);
@@ -667,6 +669,9 @@
 
     async function loadDashboard(silent = false) {
       if (!adminToken) return;
+      if (dashboardLoading) return;
+      if (silent && Date.now() - lastDashboardLoadAt < 30000) return;
+      dashboardLoading = true;
       if (!silent) {
         applyFilterButton.disabled = true;
         applyFilterButton.textContent = t("loading");
@@ -678,6 +683,7 @@
           filters: currentFilters()
         });
         dashboardData = data;
+        lastDashboardLoadAt = Date.now();
         showDashboard(data.admin);
         renderFilterOptions(data.options || {});
         renderDashboard(data);
@@ -688,6 +694,7 @@
         }
         dashboardStatus.textContent = localizeServerMessage(error.message);
       } finally {
+        dashboardLoading = false;
         applyFilterButton.disabled = false;
         applyFilterButton.textContent = t("update");
       }
