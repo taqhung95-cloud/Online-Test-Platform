@@ -7,7 +7,6 @@
   <title>Quản trị kết quả đánh giá Sungrow</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #f4f6f8;
@@ -280,7 +279,7 @@
       .login-panel { padding: 24px; }
     }
   </style>
-  <link rel="stylesheet" href="platform.css?v=2">
+  <link rel="stylesheet" href="platform.css?v=20261022-typography2">
   <script src="platform.js?v=2"></script>
 </head>
 <body>
@@ -319,7 +318,7 @@
           <input id="adminPassword" type="password" autocomplete="current-password" minlength="8" maxlength="128" placeholder="Nhập mật khẩu quản trị" data-i18n-placeholder="passwordPlaceholder" required>
         </div>
         <label for="adminOtp">Mã OTP email quản trị</label>
-        <input id="adminOtp" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6 chữ số">
+        <input id="adminOtp" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6 chữ số">
         <button id="adminOtpSend" class="button secondary-button" type="button">Gửi OTP quản trị</button>
         <button id="loginButton" class="button" type="submit" data-i18n="adminLoginButton">Đăng nhập quản trị</button>
       </form>

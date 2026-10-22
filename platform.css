@@ -1,9 +1,33 @@
 /* Layout retained: header, course cards, exam/navigation, admin filters and tabs. */
 :root{--orange:#f57920;--orange-dark:#bb4c05;--line:#dce3ec;--muted:#66768b;--surface:#fff;--portal-ink:#172b46;--portal-canvas:#f2f5f9}
-body{background:var(--portal-canvas);color:var(--portal-ink);font-family:Inter,"Segoe UI",Arial,sans-serif}
+body{background:var(--portal-canvas);color:var(--portal-ink);font-family:"Segoe UI",Arial,Helvetica,sans-serif;font-size:14px;font-weight:400;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font-family:inherit;font-size:14px}
+h1{font-size:16px;font-weight:600;line-height:1.4;letter-spacing:0}
+h2{font-size:23px;font-weight:600;line-height:1.35;letter-spacing:-.25px}
+h3,.question-text,.question-nav-panel h2{font-weight:600}
+label{font-weight:500}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.7px}
 .header{background:#fff;border-bottom:1px solid var(--line);box-shadow:0 2px 12px #172b4605}
-.panel,.course-card{border:1px solid var(--line);border-radius:16px;box-shadow:0 4px 20px #172b4605}
-.button{border-radius:9px;min-height:42px;font-weight:650;transition:background .15s,box-shadow .15s}
+.panel,.course-card{border:1px solid var(--line);border-radius:12px;box-shadow:0 2px 12px #172b4604}
+.button{border-radius:8px;min-height:44px;font-size:14px;font-weight:600;transition:background .15s,box-shadow .15s}
+.brand-logo{width:132px}
+.header-inner{min-height:74px}
+.login-panel{width:min(480px,100%);max-width:480px;margin:40px auto 0;padding:30px 32px}
+.login-panel h2{margin-bottom:24px}
+.login-panel label{margin:0 0 7px;font-size:13px;font-weight:500}
+.login-panel input:not([type=checkbox]){display:block;width:100%;min-width:0;height:44px;min-height:44px;border:1px solid #ccd5df;border-radius:8px;background:#fff;color:#24364a;padding:10px 12px;font-size:14px;font-weight:400;line-height:22px;box-sizing:border-box}
+.login-panel input::placeholder{color:#8a96a4;opacity:1}
+#loginForm>input{margin-bottom:18px}
+.login-panel .otp-field{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;margin:0 0 6px}
+.login-panel .otp-field .button{width:auto;height:44px;min-height:44px;margin:0;padding:10px 14px;font-size:13px;font-weight:600;white-space:nowrap}
+.login-panel .button{font-weight:600}
+.login-panel .registration-link{display:block;width:auto;min-height:0;margin:18px auto 0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;color:#476381;font-size:13px;font-weight:400;line-height:1.5;text-align:center;text-decoration:none}
+.login-panel .registration-link:hover{background:transparent;color:#a3460c;text-decoration:underline}
+.login-panel .admin-link-button{display:none}
+.login-panel .security-note{margin-top:20px;padding-top:18px;font-size:12px;font-weight:400;line-height:1.7;color:#748090}
+.login-message{font-size:12px;font-weight:400}
+.metric-value,.timer,.course-user-name,.question-number,.option-letter,.question-nav-button,.history-score{font-weight:600}
+.metric-label,.candidate-label,.category-name,.tab-button{font-weight:500}
 .button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #f5792060;outline-offset:3px}
 .button:disabled{cursor:not-allowed;opacity:.62}
 .portal-nav{display:flex;flex-wrap:wrap;align-items:center;gap:8px;justify-content:flex-end;font-size:12px}
@@ -26,3 +50,4 @@ body{background:var(--portal-canvas);color:var(--portal-ink);font-family:Inter,"
 @media(min-width:960px){body:has(#examView) .header-inner{grid-template-columns:1fr auto auto}}
 @media(max-width:800px){.schedule-grid{grid-template-columns:1fr 1fr}.portal-nav{justify-content:flex-start}.header-inner{flex-wrap:wrap}}
 @media(max-width:540px){.schedule-grid{grid-template-columns:1fr}.portal-nav a{padding:8px;font-size:11px}.connection-status{white-space:normal}}
+@media(max-width:620px){.login-panel{margin-top:16px;padding:24px 20px}.login-panel h2{font-size:21px}.brand-logo{width:108px}.header-inner{min-height:0}.login-panel .otp-field{grid-template-columns:minmax(0,1fr) auto}.login-panel .otp-field .button{width:auto;padding:10px;font-size:12px}}
