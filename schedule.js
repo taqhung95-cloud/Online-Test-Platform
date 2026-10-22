@@ -8,7 +8,8 @@
   window.refreshCourseWindows=async(force=false)=>{
     if(!adminToken||loading||(!force&&Date.now()-loadedAt<60000))return;
     loading=true;
-    try{const previous=select.value;const data=await callApi('listCourseWindows',{adminToken});courses=data.courses||[];
+    const requestedToken=adminToken;
+    try{const previous=select.value;const data=await callApi('listCourseWindows',{adminToken:requestedToken});if(adminToken!==requestedToken)return;courses=data.courses||[];
       select.replaceChildren(...courses.map(c=>{const option=document.createElement('option');option.value=c.id;option.textContent=c.title;return option;}));
       if(courses.some(c=>c.id===previous))select.value=previous;loadedAt=Date.now();fill();
     }catch(e){message.textContent=e.message;}finally{loading=false;}

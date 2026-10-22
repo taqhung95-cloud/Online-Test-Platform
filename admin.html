@@ -281,7 +281,7 @@
   </style>
   <link rel="preload" href="fonts/Montserrat-wght.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="stylesheet" href="platform.css?v=20261022-account3">
-  <script src="platform.js?v=20261022-start4"></script>
+  <script src="platform.js?v=20261022-lifecycle5"></script>
 </head>
 <body>
   <header class="header">
@@ -305,7 +305,8 @@
   </header>
 
   <main>
-    <section id="loginView" class="panel login-panel">
+    <section id="bootView" class="panel login-panel" aria-live="polite" aria-busy="true"><p class="eyebrow">Sungrow · Quản trị</p><h2>Đang mở trang quản trị</h2><p id="bootMessage" class="intro">Đang kiểm tra phiên đăng nhập…</p><button id="bootRetry" class="button" type="button" hidden>Thử lại kết nối</button></section>
+    <section id="loginView" class="panel login-panel" hidden>
       <p class="eyebrow" data-i18n="adminAccount">Tài khoản quản trị</p>
       <h2 data-i18n="adminLogin">Đăng nhập quản trị</h2>
       <p class="intro" data-i18n="loginIntro">Sử dụng email đã được kích hoạt và mật khẩu trong sheet Admins.</p>
@@ -487,6 +488,7 @@
     let refreshTimer = null;
     let dashboardLoading = false;
     let lastDashboardLoadAt = 0;
+    let adminEpoch=0,dashboardRequestEpoch=0;
 
     const loginView = document.getElementById("loginView");
     const dashboardView = document.getElementById("dashboardView");
@@ -562,7 +564,7 @@
         .replace(/'/g, "&#039;");
     }
 
-    function callApi(action,payload={}) { return Portal.request(APPS_SCRIPT_URL,action,payload); }
+    function callApi(action,payload={}) { return requestAdmin(action,payload); }
 
     function currentFilters() {
       return {
@@ -574,7 +576,17 @@
       };
     }
 
+    async function requestAdmin(action,payload){
+      const epoch=adminEpoch;
+      try{return await Portal.request(APPS_SCRIPT_URL,action,payload);}catch(error){
+        if(epoch===adminEpoch&&['getAdminDashboard','listCourseWindows','updateCourseWindow','unlinkParticipantDevice'].includes(action)&&Portal.isAuthError(error))showLogin(localizeServerMessage(error.message));
+        throw error;
+      }
+    }
+
     async function loginAdmin() {
+      if(loginButton.disabled)return;
+      const epoch=++adminEpoch;
       loginMessage.classList.remove("success");
       loginMessage.textContent = "";
       if (!adminEmail.checkValidity() || !adminPassword.checkValidity()) {
@@ -585,25 +597,29 @@
       loginButton.textContent = t("authenticating");
       try {
         const config=await callApi('getPublicConfig',{});
+        if(epoch!==adminEpoch)return;
         if(config.adminAuth!=='password')throw new Error('Cần cập nhật Code.gs và Deploy New version để bật đăng nhập quản trị không OTP.');
         const data = await callApi("loginAdmin", {
           email: adminEmail.value.trim(),
           password: adminPassword.value
         });
+        if(epoch!==adminEpoch)return;
         adminPassword.value = "";
         adminToken = data.adminToken;
         sessionStorage.setItem(ADMIN_SESSION_KEY, adminToken);
-        showDashboard(data.admin);
-        await loadDashboard();
+        Portal.loading('Đang tải dữ liệu quản trị…');
+        await loadDashboard(false,true);
       } catch (error) {
+        if(epoch!==adminEpoch)return;
+        Portal.showView('loginView');
         loginMessage.textContent = localizeServerMessage(error.message);
       } finally {
-        loginButton.disabled = false;
-        loginButton.textContent = t("adminLoginButton");
+        if(epoch===adminEpoch){loginButton.disabled = false;loginButton.textContent = t("adminLoginButton");}
       }
     }
 
     function showDashboard(admin) {
+      Portal.showView('dashboardView');
       loginView.hidden = true;
       dashboardView.hidden = false;
       adminMeta.hidden = false;
@@ -614,6 +630,9 @@
     }
 
     function showLogin(message = "") {
+      adminEpoch++;dashboardData=null;dashboardLoading=false;lastDashboardLoadAt=0;
+      loginButton.disabled=false;loginButton.textContent=t('adminLoginButton');adminPassword.value='';
+      Portal.showView('loginView');
       adminToken = "";
       sessionStorage.removeItem(ADMIN_SESSION_KEY);
       clearInterval(refreshTimer);
@@ -623,11 +642,13 @@
       loginMessage.textContent = message;
     }
 
-    async function loadDashboard(silent = false) {
+    async function loadDashboard(silent = false,restoring=false) {
       if (!adminToken) return;
-      if (dashboardLoading) return;
+      if (dashboardLoading&&dashboardRequestEpoch===adminEpoch) return;
       if (silent && Date.now() - lastDashboardLoadAt < 30000) return;
       dashboardLoading = true;
+      const epoch=adminEpoch;dashboardRequestEpoch=epoch;
+      if(restoring)Portal.loading('Đang xác thực phiên và tải dữ liệu quản trị…');
       if (!silent) {
         applyFilterButton.disabled = true;
         applyFilterButton.textContent = t("loading");
@@ -638,21 +659,21 @@
           adminToken,
           filters: currentFilters()
         });
-        dashboardData = data;
-        lastDashboardLoadAt = Date.now();
-        showDashboard(data.admin);
+        if(epoch!==adminEpoch)return;
+        if(!data.metrics||!Array.isArray(data.rankings)||!Array.isArray(data.attempts))throw new Error('Dữ liệu quản trị chưa hợp lệ. Hãy thử tải lại dữ liệu.');
         renderFilterOptions(data.options || {});
         renderDashboard(data);
+        dashboardData = data;lastDashboardLoadAt = Date.now();showDashboard(data.admin);
       } catch (error) {
-        if (/Phiên quản trị/.test(error.message)) {
+        if(epoch!==adminEpoch)return;
+        if (Portal.isAuthError(error)) {
           showLogin(localizeServerMessage(error.message));
           return;
         }
-        dashboardStatus.textContent = localizeServerMessage(error.message);
+        if(!dashboardData)Portal.recovery(localizeServerMessage(error.message),()=>loadDashboard(false,true));
+        else dashboardStatus.textContent = localizeServerMessage(error.message);
       } finally {
-        dashboardLoading = false;
-        applyFilterButton.disabled = false;
-        applyFilterButton.textContent = t("update");
+        if(dashboardRequestEpoch===epoch){dashboardLoading = false;applyFilterButton.disabled = false;applyFilterButton.textContent = t("update");}
       }
     }
 
@@ -904,8 +925,9 @@
       loginAdmin();
     });
     logoutButton.addEventListener("click", async () => {
-      try { await callApi("logoutAdmin", { adminToken }); } catch (error) {}
+      const previousToken=adminToken;
       showLogin(t("loggedOut"));
+      try { await callApi("logoutAdmin", { adminToken:previousToken }); } catch (error) {loginMessage.textContent=t("loggedOut")+' Chưa xác nhận được đăng xuất phía máy chủ.';}
     });
     languageToggle.addEventListener("click", () => {
       currentLanguage = currentLanguage === "vi" ? "en" : "vi";
@@ -948,10 +970,10 @@
     applyLanguage();
 
     if (adminToken) {
-      showDashboard();
-      loadDashboard();
-    }
+      loadDashboard(false,true);
+    }else showLogin();
+    window.addEventListener('pageshow',event=>{if(event.persisted&&adminToken){adminEpoch++;dashboardLoading=false;loadDashboard(false,true);}});
   </script>
-  <script src="schedule.js?v=20261022-start4"></script>
+  <script src="schedule.js?v=20261022-lifecycle5"></script>
 </body>
 </html>

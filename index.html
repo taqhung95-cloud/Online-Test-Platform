@@ -1006,7 +1006,7 @@
   </style>
   <link rel="preload" href="fonts/Montserrat-wght.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="stylesheet" href="platform.css?v=20261022-account3">
-  <script src="platform.js?v=20261022-start4"></script>
+  <script src="platform.js?v=20261022-lifecycle5"></script>
 </head>
 <body>
   <header class="header">
@@ -1034,7 +1034,12 @@
   </header>
 
   <main>
-    <section id="loginView" class="panel login-panel">
+    <section id="bootView" class="panel login-panel" aria-live="polite" aria-busy="true">
+      <p class="eyebrow">Sungrow · Kết nối hệ thống</p><h2>Đang mở cổng đánh giá</h2>
+      <p id="bootMessage" class="intro">Đang kiểm tra phiên đăng nhập…</p>
+      <button id="bootRetry" class="button" type="button" hidden>Thử lại kết nối</button>
+    </section>
+    <section id="loginView" class="panel login-panel" hidden>
       <div id="loginContent">
         <p class="eyebrow">Xác thực người tham gia</p>
         <h2>Đăng nhập tài khoản</h2>
@@ -1184,6 +1189,7 @@
     let otpCooldownRemaining = 0;
 
     const state = {
+      authEpoch:0,
       active: false,
       submitting: false,
       token: "",
@@ -1291,11 +1297,19 @@
       return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
     }
 
-    async function callApi(action,payload={}) { return Portal.request(APPS_SCRIPT_URL,action,payload); }
+    async function callApi(action,payload={}) { return requestParticipant(action,payload); }
 
     function setLoginLoading(isLoading) {
       loginButton.disabled = isLoading;
       loginButton.textContent = isLoading ? "Đang xác thực..." : "Đăng nhập";
+    }
+
+    async function requestParticipant(action,payload){
+      const epoch=state.authEpoch;
+      try{return await Portal.request(APPS_SCRIPT_URL,action,payload);}catch(error){
+        if(epoch===state.authEpoch&&['listCourses','startAttempt','resumeAttempt','saveAttemptProgress','submitAttempt','getLatestResult','getAttemptResult','reportAttention'].includes(action)&&Portal.isAuthError(error))handleParticipantAuthLoss(error);
+        throw error;
+      }
     }
 
     function saveSession() {
@@ -1323,6 +1337,9 @@
     }
 
     function clearSession() {
+      const raw=localStorage.getItem(ACTIVE_SESSION_KEY);
+      if(!raw)return;
+      try{const saved=JSON.parse(raw);if(state.email&&saved.email!==state.email)return;}catch{return;}
       localStorage.removeItem(ACTIVE_SESSION_KEY);
     }
 
@@ -1363,8 +1380,9 @@
       renderExam();
     }
 
-    async function authenticateParticipant(email) {
-      const data = await callApi("loginParticipant", {
+    async function authenticateParticipant(email,restore=false) {
+      const epoch=++state.authEpoch;
+      const data = await callApi(restore?"listCourses":"loginParticipant", restore?{deviceId:state.deviceId}:{
         email,
         password: document.getElementById("learnerPassword").value,
         remember: document.getElementById("rememberLogin").checked,
@@ -1372,26 +1390,32 @@
         otp: document.getElementById("learnerOtp").value.trim(),
         deviceId: state.deviceId
       });
-      if(data.requiresDeviceOtp){document.getElementById('deviceVerification').hidden=false;loginMessage.textContent=data.message;return;}
+      if(epoch!==state.authEpoch)return false;
+      if(data.requiresDeviceOtp){Portal.showView('loginView');document.getElementById('deviceVerification').hidden=false;loginMessage.textContent=data.message;return false;}
       document.getElementById('learnerPassword').value='';document.getElementById('learnerOtp').value='';
       state.email = data.participant.email;
       state.participant = data.participant;
       state.courses = Array.isArray(data.courses) ? data.courses : [];
       const pendingRaw=localStorage.getItem(ACTIVE_SESSION_KEY);
       if(pendingRaw){
-        const saved=JSON.parse(pendingRaw);
+        let saved;try{saved=JSON.parse(pendingRaw);}catch{throw new Error('Bài làm lưu trên trình duyệt không đọc được. Dữ liệu chưa bị xóa; vui lòng liên hệ quản trị.');}
         if(saved.email===state.email){
+          if(!saved.token)throw new Error('Bản lưu bài thi thiếu mã lượt. Dữ liệu chưa bị xóa; vui lòng liên hệ quản trị.');
+          Portal.loading(saved.pendingSubmission?'Đang xác nhận lại bài đã gửi…':'Đang xác nhận kết thúc bài thi trước do tải lại trang…');
           const result=await callApi("submitAttempt",{email:state.email,deviceId:state.deviceId,attemptToken:saved.token,
             answers:saved.answers||{},answerVersion:Number(saved.answerVersion||0)+1,
             autoSubmitted:saved.pendingSubmission?!!saved.pendingSubmission.autoSubmitted:true,
             terminationReason:saved.pendingSubmission?.terminationReason||"PAGE_RELOAD",tabViolations:Number(saved.tabViolations||0)});
-          clearSession();state.course=result.course;renderResult(result);return;
+          if(epoch!==state.authEpoch)return false;
+          clearSession();state.course=result.course;renderResult(result);return true;
         }
       }
       renderCourseSelection();
+      return true;
     }
 
     function renderCourseSelection() {
+      Portal.showView('courseView');
       loginView.hidden = true;
       examView.hidden = true;
       resultView.hidden = true;
@@ -1480,6 +1504,7 @@
     }
 
     function renderExam() {
+      Portal.showView('examView');
       loginView.hidden = true;
       courseView.hidden = true;
       resultView.hidden = true;
@@ -1560,6 +1585,7 @@
     }
 
     async function startAttempt(email, courseId) {
+      const epoch=state.authEpoch;
       const pendingKey='sungrow_pending_start_v4:'+email.toLowerCase()+':'+courseId;
       let startRequestId=localStorage.getItem(pendingKey);
       if(!startRequestId){startRequestId=crypto.randomUUID();localStorage.setItem(pendingKey,startRequestId);}
@@ -1570,29 +1596,34 @@
         deviceId: state.deviceId,
         clientTimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Ho_Chi_Minh"
       });
+      if(epoch!==state.authEpoch)return;
       // A transport timeout must retain this key: the server may have committed already.
       if(data.finished){state.course=data.course;renderResult(data);}else applyAttempt(data);
       localStorage.removeItem(pendingKey);
     }
 
     async function viewLatestResult(courseId) {
+      const epoch=state.authEpoch;
       const data = await callApi("getLatestResult", {
         email: state.email,
         courseId,
         deviceId: state.deviceId
       });
+      if(epoch!==state.authEpoch)return;
       state.course = data.course;
       state.history = data.history || [];
       renderResult(data);
     }
 
     async function viewAttemptResult(attemptToken) {
+      const epoch=state.authEpoch;
       const data = await callApi("getAttemptResult", {
         email: state.email,
         courseId: state.course ? state.course.id : "",
         attemptToken,
         deviceId: state.deviceId
       });
+      if(epoch!==state.authEpoch)return;
       state.course = data.course;
       state.history = data.history || [];
       renderResult(data);
@@ -1600,6 +1631,7 @@
 
     async function saveAttemptProgress(force = false) {
       if (!state.active || state.submitting) return;
+      const epoch=state.authEpoch;
       if (state.progressSaveInFlight) {
         state.progressSavePending = true;
         return;
@@ -1616,6 +1648,7 @@
           answerVersion: ++state.answerVersion,
           tabViolations: state.tabViolations
         });
+        if(epoch!==state.authEpoch)return;
         state.lastProgressSnapshot = snapshot;
         if (data.expiresAt) state.expiresAt = data.expiresAt;
         if (data.expired) { await submitExam(true, "TIME_LIMIT"); return; }
@@ -1630,6 +1663,7 @@
       } catch (error) {
         console.warn("Không thể lưu tiến độ bài thi:", error.message);
       } finally {
+        if(epoch!==state.authEpoch)return;
         state.progressSaveInFlight = false;
         if (state.progressSavePending && state.active && !state.submitting) {
           state.progressSavePending = false;
@@ -1664,6 +1698,8 @@
     }
 
     function showLoginForm() {
+      Portal.showView('loginView');
+      document.getElementById('passwordSetupForm').hidden=true;
       clearInterval(registrationRedirectTimer);
       registrationRedirectTimer = null;
       resetRegistrationOtp();
@@ -1799,6 +1835,7 @@
 
     async function submitExam(autoSubmitted, terminationReason, skipConfirmation = false) {
       if (!state.active || state.submitting) return;
+      const epoch=state.authEpoch;
       if (
         !autoSubmitted &&
         !skipConfirmation &&
@@ -1835,6 +1872,7 @@
           terminationReason,
           tabViolations: state.tabViolations
         });
+        if(epoch!==state.authEpoch)return;
         state.active = false;
         state.pendingSubmission = null;
         state.submitRetryCount = 0;
@@ -1842,6 +1880,7 @@
         clearSession();
         renderResult(data);
       } catch (error) {
+        if(epoch!==state.authEpoch)return;
         state.submitting = false;
         if (error.isTransportError) {
           state.submitRetryCount += 1;
@@ -1952,6 +1991,7 @@
     }
 
     function renderResult(data) {
+      Portal.showView('resultView');
       examView.hidden = true;
       timer.hidden = true;
       resultView.hidden = false;
@@ -2076,9 +2116,10 @@
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
-    function resetExamState() {
+    function resetExamState(clearSaved=true) {
       state.active = false;
       state.submitting = false;
+      state.progressSaveInFlight=false;state.progressSavePending=false;state.startingAttempt=false;
       state.token = "";
       state.course = null;
       state.questions = [];
@@ -2095,10 +2136,11 @@
       clearInterval(state.inactivityTimerId);
       clearTimeout(state.progressSaveTimerId);
       clearInterval(state.progressSyncTimerId);
+      clearTimeout(state.submitRetryTimerId);state.submitRetryTimerId=null;state.pendingSubmission=null;
       state.lastProgressSnapshot = "";
       tabOverlay.hidden = true;
       violationWarningOverlay.hidden = true;
-      clearSession();
+      if(clearSaved)clearSession();
       resultView.hidden = true;
       resultView.innerHTML = "";
       examView.hidden = true;
@@ -2109,30 +2151,40 @@
       const previousEmail = state.email;
       resetExamState();
       courseMessage.textContent = "";
+      Portal.loading('Đang cập nhật khóa học và lượt thi…');
       try {
-        await authenticateParticipant(previousEmail);
+        await authenticateParticipant(previousEmail,true);
       } catch (error) {
-        loginView.hidden = false;
-        emailInput.value = previousEmail;
-        showLoginForm();
-        loginMessage.textContent = error.message;
+        if(Portal.isAuthError(error)){handleParticipantAuthLoss(error);return;}
+        Portal.recovery(error.message,returnToCourseSelection);
       }
     }
 
     function logoutParticipant() {
+      if(state.active){window.alert('Hãy nộp bài trước khi đăng xuất.');return;}
       const previousEmail = state.email;
       callApi("logoutParticipant",{deviceId:state.deviceId}).catch(()=>{});
       Portal.session("");
-      resetExamState();
+      state.authEpoch++;resetExamState(false);
       state.email = "";
       state.participant = null;
       state.courses = [];
       courseView.hidden = true;
       loginView.hidden = false;
       emailInput.value = previousEmail;
+      loginForm.reset();emailInput.value=previousEmail;document.getElementById('deviceVerification').hidden=true;
+      setLoginLoading(false);
       showLoginForm();
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
+
+    function handleParticipantAuthLoss(error,clearToken=true){
+      if(state.active)saveSession();
+      state.authEpoch++;resetExamState(false);state.participant=null;state.courses=[];
+      if(clearToken)Portal.session('');loginForm.reset();document.getElementById('deviceVerification').hidden=true;
+      document.getElementById('passwordSetupForm').reset();showLoginForm();setLoginLoading(false);loginMessage.textContent=error.message;
+    }
+    document.addEventListener('portal:logout',event=>handleParticipantAuthLoss(new Error(event.detail.message),false));
 
     function startTabCountdown() {
       clearInterval(state.tabTimerId);
@@ -2155,19 +2207,25 @@
 
     loginForm.addEventListener("submit", async (event) => {
       event.preventDefault();
+      if(loginButton.disabled)return;
       loginMessage.textContent = "";
       if (!emailInput.checkValidity()) {
         emailInput.reportValidity();
         return;
       }
+      if(!document.getElementById('learnerPassword').reportValidity())return;
 
       setLoginLoading(true);
+      let epoch;
       try {
-        await authenticateParticipant(emailInput.value.trim());
+        const login=authenticateParticipant(emailInput.value.trim());epoch=state.authEpoch;await login;
       } catch (error) {
-        loginMessage.textContent = error.message;
+        if(epoch!==state.authEpoch)return;
+        if(Portal.isAuthError(error))handleParticipantAuthLoss(error);
+        else if(!document.getElementById('bootView').hidden)Portal.recovery(error.message,initialize);
+        else loginMessage.textContent = error.message;
       } finally {
-        setLoginLoading(false);
+        if(epoch===state.authEpoch)setLoginLoading(false);
       }
     });
 
@@ -2248,6 +2306,7 @@
       const button = event.target.closest("[data-start-course-id]");
       if (!button || button.disabled) return;
       if(state.startingAttempt)return;
+      const epoch=state.authEpoch;
       state.startingAttempt=true;
       const controls=Array.from(courseGrid.querySelectorAll('button')).map(control=>({control,disabled:control.disabled}));
       controls.forEach(({control})=>control.disabled=true);
@@ -2259,10 +2318,11 @@
       try {
         await startAttempt(state.email, button.dataset.startCourseId);
       } catch (error) {
+        if(epoch!==state.authEpoch)return;
         courseMessage.textContent = error.message;
         button.textContent = error.uncertain?"Kiểm tra lại yêu cầu":previousText;
       } finally {
-        clearInterval(loadingTimer);state.startingAttempt=false;
+        clearInterval(loadingTimer);if(epoch!==state.authEpoch)return;state.startingAttempt=false;
         controls.forEach(({control,disabled})=>control.disabled=disabled);
         if(!button.textContent.includes('Kiểm tra lại'))button.textContent=previousText;
       }
@@ -2506,68 +2566,28 @@
       );
     });
 
-    (async function initialize() {
-      setLoginLoading(true);
+    let initializing=false;
+    async function initialize(){
+      if(initializing)return;initializing=true;Portal.loading();
+      let epoch=state.authEpoch;
       try{
-        const config=await callApi('getPublicConfig',{});
-        if(config.authSchema!==3||!config.ready)throw new Error('Backend chưa sẵn sàng.');
-      }catch(error){
-        loginMessage.textContent='Hệ thống đang chờ cập nhật Apps Script và chạy setupPlatformV2. Vui lòng quay lại sau khi quản trị hoàn tất.';
-        document.getElementById('loginButton').textContent='Đang bảo trì';
-        document.getElementById('passwordSetupToggle').disabled=true;registrationToggleButton.disabled=true;return;
-      }
-      setLoginLoading(false);
-      const raw = localStorage.getItem(ACTIVE_SESSION_KEY);
-      if (!raw) {
-        if(Portal.session())try{setLoginLoading(true);await authenticateParticipant('');}catch(error){if(!error.isTransportError)Portal.session('');loginMessage.textContent=error.message;}finally{setLoginLoading(false);}
-        return;
-      }
-      if(!Portal.session()) {
-        loginMessage.textContent="Có bài làm chưa được xác nhận. Đăng nhập lại bằng mật khẩu để gửi và nhận kết quả.";
-        return;
-      }
-      let reloadTerminationSucceeded = false;
-      try {
-        const saved = JSON.parse(raw);
-        const pendingSubmission = saved.pendingSubmission && typeof saved.pendingSubmission === "object"
-          ? saved.pendingSubmission
-          : null;
-        setLoginLoading(true);
-        loginMessage.textContent = pendingSubmission
-          ? "Đang gửi lại bài thi chưa nhận được xác nhận từ hệ thống..."
-          : "Đang kết thúc phiên thi trước do trang đã được tải lại...";
-        await callApi("submitAttempt", {
-          attemptToken: saved.token,
-          email: saved.email,
-          deviceId: saved.deviceId || state.deviceId,
-          answers: saved.answers || {},
-          autoSubmitted: pendingSubmission
-            ? Boolean(pendingSubmission.autoSubmitted)
-            : true,
-          terminationReason: pendingSubmission
-            ? String(pendingSubmission.terminationReason || "MANUAL")
-            : "PAGE_RELOAD",
-          tabViolations: Number(saved.tabViolations || 0),
-          answerVersion: Number(saved.answerVersion || 0) + 1
-        });
-        clearSession();
-        emailInput.value = saved.email || "";
-        loginMessage.textContent = pendingSubmission
-          ? "Bài thi trước đã được hệ thống xác nhận thành công."
-          : "Phiên thi trước đã kết thúc do tải lại trang và được tính là một lượt tham gia.";
-        reloadTerminationSucceeded = true;
-      } catch (error) {
-        loginMessage.textContent =
-          `Chưa thể kết thúc phiên thi trước: ${error.message} Vui lòng tải lại trang để thử lại.`;
-      } finally {
-        if (reloadTerminationSucceeded) {
-          setLoginLoading(false);
-        } else {
-          setLoginLoading(false);
-          loginMessage.textContent += " Bạn có thể xác thực lại email để tiếp tục gửi bài.";
+        if(Portal.session()){
+          const restore=authenticateParticipant('',true);epoch=state.authEpoch;await restore;
+        }else{
+          const config=await callApi('getPublicConfig',{});
+          if(epoch!==state.authEpoch)return;
+          if(config.authSchema!==3||!config.ready){Portal.recovery('Hệ thống cần quản trị cập nhật Apps Script và chạy setupPlatformV2.',initialize);return;}
+          showLoginForm();setLoginLoading(false);
+          if(localStorage.getItem(ACTIVE_SESSION_KEY))loginMessage.textContent='Có bài làm chưa được xác nhận. Đăng nhập lại để xác nhận kết quả; dữ liệu vẫn được giữ trên trình duyệt.';
         }
-      }
-    })();
+      }catch(error){
+        if(epoch!==state.authEpoch)return;
+        if(Portal.isAuthError(error))handleParticipantAuthLoss(error);
+        else Portal.recovery(error.message||'Chưa thể kết nối máy chủ. Phiên và bài làm vẫn được giữ.',initialize);
+      }finally{initializing=false;setLoginLoading(false);}
+    }
+    window.addEventListener('pageshow',event=>{if(event.persisted){if(state.active)saveSession();resetExamState(false);initialize();}});
+    initialize();
   </script>
 </body>
 </html>
