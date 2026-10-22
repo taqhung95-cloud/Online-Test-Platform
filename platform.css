@@ -1,0 +1,28 @@
+/* Layout retained: header, course cards, exam/navigation, admin filters and tabs. */
+:root{--orange:#f57920;--orange-dark:#bb4c05;--line:#dce3ec;--muted:#66768b;--surface:#fff;--portal-ink:#172b46;--portal-canvas:#f2f5f9}
+body{background:var(--portal-canvas);color:var(--portal-ink);font-family:Inter,"Segoe UI",Arial,sans-serif}
+.header{background:#fff;border-bottom:1px solid var(--line);box-shadow:0 2px 12px #172b4605}
+.panel,.course-card{border:1px solid var(--line);border-radius:16px;box-shadow:0 4px 20px #172b4605}
+.button{border-radius:9px;min-height:42px;font-weight:650;transition:background .15s,box-shadow .15s}
+.button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #f5792060;outline-offset:3px}
+.button:disabled{cursor:not-allowed;opacity:.62}
+.portal-nav{display:flex;flex-wrap:wrap;align-items:center;gap:8px;justify-content:flex-end;font-size:12px}
+.portal-nav a{color:#35516f;text-decoration:none;border:1px solid var(--line);padding:9px 12px;border-radius:8px;background:#fff;font-weight:600}
+.portal-nav a[aria-current=page]{background:#fff3e8;border-color:#ffc99f;color:#a3440b}
+.connection-status{font-size:11px;color:#39775d;white-space:nowrap}
+.connection-status[data-status=retry]{color:#9e6400}
+.course-window{margin:12px 0;padding:10px 12px;border-radius:8px;background:#edf3f9;color:#37516b;font-size:12px;line-height:1.65}
+.course-window[data-state=OPEN]{background:#eaf6ef;color:#17603b}
+.course-window[data-state=CLOSED],.course-window[data-state=INVALID]{background:#f5e9e9;color:#9a3535}
+.course-card.unavailable{opacity:1;background:#fbfcfe}
+.schedule-panel{margin:20px 0;padding:20px}
+.schedule-panel summary{cursor:pointer;font-size:16px;font-weight:700}
+.schedule-grid{display:grid;grid-template-columns:minmax(170px,1.4fr) 1fr 1fr auto;gap:12px;align-items:end;margin-top:18px}
+.schedule-grid label{display:flex;flex-direction:column;gap:7px;font-size:12px;font-weight:600}
+.schedule-grid input,.schedule-grid select{width:100%;min-height:42px;box-sizing:border-box}
+.schedule-message{font-size:13px;min-height:22px;margin-bottom:0}
+.sync-state{display:block;font-size:12px;line-height:1.5;color:#51677f;margin:8px 0}
+.header-inner{gap:16px}
+@media(min-width:960px){body:has(#examView) .header-inner{grid-template-columns:1fr auto auto}}
+@media(max-width:800px){.schedule-grid{grid-template-columns:1fr 1fr}.portal-nav{justify-content:flex-start}.header-inner{flex-wrap:wrap}}
+@media(max-width:540px){.schedule-grid{grid-template-columns:1fr}.portal-nav a{padding:8px;font-size:11px}.connection-status{white-space:normal}}

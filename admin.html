@@ -280,6 +280,8 @@
       .login-panel { padding: 24px; }
     }
   </style>
+  <link rel="stylesheet" href="platform.css?v=2">
+  <script src="platform.js?v=2"></script>
 </head>
 <body>
   <header class="header">
@@ -292,6 +294,7 @@
         </div>
       </div>
       <div class="header-actions">
+        <nav class="portal-nav" aria-label="Chuyển trang"><a href="index.html">Làm bài</a><a href="admin.html" aria-current="page">Quản trị</a><span id="connectionStatus" class="connection-status" role="status">Sẵn sàng kết nối</span></nav>
         <button id="languageToggle" class="button secondary language-toggle" type="button" aria-label="Switch to English">EN</button>
         <div id="adminMeta" class="admin-meta" hidden>
           <span id="adminIdentity"></span>
@@ -315,6 +318,9 @@
           <label for="adminPassword" data-i18n="password">Mật khẩu</label>
           <input id="adminPassword" type="password" autocomplete="current-password" minlength="8" maxlength="128" placeholder="Nhập mật khẩu quản trị" data-i18n-placeholder="passwordPlaceholder" required>
         </div>
+        <label for="adminOtp">Mã OTP email quản trị</label>
+        <input id="adminOtp" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6 chữ số">
+        <button id="adminOtpSend" class="button secondary-button" type="button">Gửi OTP quản trị</button>
         <button id="loginButton" class="button" type="submit" data-i18n="adminLoginButton">Đăng nhập quản trị</button>
       </form>
       <p id="loginMessage" class="login-message" role="alert"></p>
@@ -360,6 +366,17 @@
 
       <section id="metricsGrid" class="metrics"></section>
 
+      <details class="panel schedule-panel" id="schedulePanel">
+        <summary>Lịch mở và đóng khóa học</summary>
+        <p class="intro">Giờ Việt Nam (UTC+7). Khóa học vẫn hiển thị khi chưa mở hoặc đã đóng. Để trống nếu không đặt mốc thời gian.</p>
+        <form id="scheduleForm" class="schedule-grid">
+          <label>Khóa học<select id="scheduleCourse" required></select></label>
+          <label>Mở từ<input id="scheduleOpen" type="datetime-local"></label>
+          <label>Đóng lúc<input id="scheduleClose" type="datetime-local"></label>
+          <button class="button" id="scheduleSave" type="submit">Lưu lịch</button>
+        </form>
+        <p id="scheduleMessage" class="schedule-message" role="status"></p>
+      </details>
       <nav class="tabs" aria-label="Nội dung báo cáo">
         <button class="tab-button active" type="button" data-tab="overview" data-i18n="overview">Tổng quan</button>
         <button class="tab-button" type="button" data-tab="ranking" data-i18n="ranking">Xếp hạng</button>
@@ -547,69 +564,7 @@
         .replace(/'/g, "&#039;");
     }
 
-    function callApi(action, payload = {}) {
-      return new Promise((resolve, reject) => {
-        const requestId = `admin_request_${Date.now()}_${Math.random().toString(16).slice(2)}`;
-        const iframe = document.createElement("iframe");
-        const form = document.createElement("form");
-        iframe.name = requestId;
-        iframe.hidden = true;
-        form.hidden = true;
-        form.method = "POST";
-        form.action = APPS_SCRIPT_URL;
-        form.target = requestId;
-
-        [
-          ["action", action],
-          ["payload", JSON.stringify(payload)],
-          ["transport", "iframe"],
-          ["requestId", requestId]
-        ].forEach(([name, value]) => {
-          const input = document.createElement("input");
-          input.type = "hidden";
-          input.name = name;
-          input.value = value;
-          form.appendChild(input);
-        });
-
-        const timeoutId = setTimeout(() => {
-          cleanup();
-          reject(new Error(t("noResponse")));
-        }, 60000);
-
-        function cleanup() {
-          clearTimeout(timeoutId);
-          window.removeEventListener("message", handleMessage);
-          form.remove();
-          iframe.remove();
-        }
-
-        function handleMessage(event) {
-          const message = event.data;
-          if (
-            !message ||
-            message.source !== "MGRL_APPS_SCRIPT" ||
-            message.requestId !== requestId
-          ) return;
-          cleanup();
-          const data = message.data;
-          if (!data || !data.ok) {
-            reject(new Error(data && data.message ? data.message : t("requestFailed")));
-            return;
-          }
-          resolve(data);
-        }
-
-        iframe.addEventListener("error", () => {
-          cleanup();
-          reject(new Error(t("browserBlocked")));
-        });
-        window.addEventListener("message", handleMessage);
-        document.body.appendChild(iframe);
-        document.body.appendChild(form);
-        form.submit();
-      });
-    }
+    function callApi(action,payload={}) { return Portal.request(APPS_SCRIPT_URL,action,payload); }
 
     function currentFilters() {
       return {
@@ -633,7 +588,8 @@
       try {
         const data = await callApi("loginAdmin", {
           email: adminEmail.value.trim(),
-          password: adminPassword.value
+          password: adminPassword.value,
+          otp: document.getElementById("adminOtp").value.trim()
         });
         adminPassword.value = "";
         adminToken = data.adminToken;
@@ -652,6 +608,7 @@
       loginView.hidden = true;
       dashboardView.hidden = false;
       adminMeta.hidden = false;
+      window.refreshCourseWindows?.();
       adminIdentity.textContent = admin ? `${admin.name} · ${admin.email}` : t("administrator");
       clearInterval(refreshTimer);
       refreshTimer = setInterval(() => loadDashboard(true), 5 * 60 * 1000);
@@ -858,7 +815,9 @@
     }
 
     function csvCell(value) {
-      return `"${String(value ?? "").replace(/"/g, '""')}"`;
+      const raw=String(value ?? "");
+      const safe=/^[\s]*[=+@-]/.test(raw) ? "'"+raw : raw;
+      return `"${safe.replace(/"/g, '""')}"`;
     }
 
     function downloadCsv(filename, headers, rows) {
@@ -994,5 +953,6 @@
       loadDashboard();
     }
   </script>
+  <script src="schedule.js?v=2"></script>
 </body>
 </html>

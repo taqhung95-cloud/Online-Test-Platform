@@ -1005,6 +1005,8 @@
       .otp-field .button { width: 100%; }
     }
   </style>
+  <link rel="stylesheet" href="platform.css?v=2">
+  <script src="platform.js?v=2"></script>
 </head>
 <body>
   <header class="header">
@@ -1019,6 +1021,11 @@
           <h1>CỔNG ĐÁNH GIÁ KIẾN THỨC SẢN PHẨM SUNGROW</h1>
         </div>
       </div>
+      <nav class="portal-nav" aria-label="Chuyển trang">
+        <a href="index.html" aria-current="page">Làm bài</a>
+        <a id="adminNavLink" href="admin.html">Quản trị</a>
+        <span id="connectionStatus" class="connection-status" role="status">Sẵn sàng kết nối</span>
+      </nav>
       <div id="timer" class="timer" hidden>
         <span class="timer-dot" aria-hidden="true"></span>
         <span id="timerText">60:00</span>
@@ -1034,6 +1041,11 @@
         <form id="loginForm" novalidate>
           <label for="emailInput">Email</label>
           <input id="emailInput" type="email" autocomplete="email" placeholder="ten@congty.com" required>
+          <label for="learnerOtp">Mã đăng nhập gửi qua email</label>
+          <div class="otp-field">
+            <input id="learnerOtp" inputmode="numeric" autocomplete="one-time-code" maxlength="8" pattern="[0-9]{8}" placeholder="8 chữ số">
+            <button id="learnerOtpButton" class="button secondary-button" type="button">Gửi mã đăng nhập</button>
+          </div>
           <button id="loginButton" class="button" type="submit">Đăng nhập</button>
           <button id="registrationToggleButton" class="registration-link" type="button">Chưa đăng ký? Đăng ký tham gia</button>
           <a class="registration-link admin-link-button" href="admin.html">Đăng nhập quản trị</a>
@@ -1072,7 +1084,7 @@
         </div>
         <p id="registrationMessage" class="login-message registration-message" role="alert"></p>
       </form>
-      <div class="security-note">Mỗi email và mỗi thiết bị được tham gia tối đa 3 lần cho từng bài kiểm tra. Khi rời tab hoặc chuyển sang ứng dụng khác quá 60 giây, bài thi sẽ tự động kết thúc. Hệ thống cảnh báo khi rời bài thi từ 10 lần. Tải lại trang trong khi làm bài sẽ kết thúc và tính lượt thi sau khi người làm bài xác nhận.</div>
+      <div class="security-note">Mỗi tài khoản được thi tối đa 2 lần cho từng khóa học. Bài phải được nộp trước giờ đóng khóa học. Khi rời tab hoặc chuyển ứng dụng quá 60 giây, bài thi sẽ tự kết thúc; hệ thống ghi nhận số lần rời bài. Tải lại trang khi đang thi sẽ kết thúc và tính lượt thi sau khi xác nhận.</div>
     </section>
 
     <section id="courseView" class="course-view" hidden>
@@ -1164,7 +1176,7 @@
       answers: {},
       history: [],
       attemptNumber: 0,
-      maxAttempts: 3,
+      maxAttempts: 2,
       expiresAt: "",
       startedAt: "",
       hiddenAt: 0,
@@ -1274,162 +1286,7 @@
       return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
     }
 
-    async function callApi(action, payload = {}) {
-      if (!APPS_SCRIPT_URL) {
-        throw new Error("Hệ thống chưa được cấu hình Google Apps Script.");
-      }
-      const retryableActions = ["loginParticipant", "startAttempt", "submitAttempt"];
-      const maxTries = retryableActions.includes(action)
-        ? 3
-        : action === "saveAttemptProgress" ? 2 : 1;
-      const preferIframe = action === "submitAttempt";
-      let lastError;
-      for (let tryNumber = 1; tryNumber <= maxTries; tryNumber += 1) {
-        try {
-          const useIframe = preferIframe
-            ? tryNumber % 2 === 1
-            : tryNumber % 2 === 0;
-          return await (useIframe
-            ? callApiIframeOnce(action, payload)
-            : callApiJsonpOnce(action, payload));
-        } catch (error) {
-          lastError = error;
-          if (!error.isTransportError || tryNumber >= maxTries) throw error;
-          await wait(1200 + Math.floor(Math.random() * 1200));
-        }
-      }
-      throw lastError;
-    }
-
-    function callApiJsonpOnce(action, payload) {
-      return new Promise((resolve, reject) => {
-        const callbackName = `mgrl_callback_${Date.now()}_${Math.random().toString(16).slice(2)}`;
-        const script = document.createElement("script");
-        script.async = true;
-        const timeoutMilliseconds = action === "submitAttempt" ? 45000 : 30000;
-
-        const timeoutId = window.setTimeout(() => {
-          cleanup();
-          const error = new Error(
-            action === "submitAttempt"
-              ? "Hệ thống đang có nhiều người nộp bài cùng lúc. Yêu cầu chưa nhận được phản hồi và sẽ được thử lại tự động."
-              : "Không thể kết nối đến Google Apps Script. Hãy kiểm tra mạng, tiện ích chặn nội dung hoặc chính sách truy cập script.google.com rồi thử lại."
-          );
-          error.isTransportError = true;
-          reject(error);
-        }, timeoutMilliseconds);
-
-        function cleanup() {
-          window.clearTimeout(timeoutId);
-          script.remove();
-          try {
-            delete window[callbackName];
-          } catch (error) {
-            window[callbackName] = undefined;
-          }
-        }
-
-        window[callbackName] = (data) => {
-          cleanup();
-          if (!data || !data.ok) {
-            const error = new Error(data && data.message ? data.message : "Yêu cầu không được xử lý.");
-            error.isTransportError = Boolean(data && data.retryable);
-            reject(error);
-            return;
-          }
-          resolve(data);
-        };
-
-        const query = new URLSearchParams({
-          action,
-          payload: JSON.stringify(payload),
-          callback: callbackName,
-          _: Date.now().toString()
-        });
-        script.onerror = (event) => {
-          console.error("Không tải được Google Apps Script Web App:", APPS_SCRIPT_URL, event);
-          cleanup();
-          const error = new Error(
-            "Trình duyệt hoặc mạng đang chặn Google Apps Script. Hãy tắt tiện ích chặn nội dung hoặc cho phép script.google.com."
-          );
-          error.isTransportError = true;
-          reject(error);
-        };
-        script.src = `${APPS_SCRIPT_URL}?${query.toString()}`;
-        document.head.appendChild(script);
-      });
-    }
-
-    function callApiIframeOnce(action, payload) {
-      return new Promise((resolve, reject) => {
-        const requestId = `mgrl_iframe_${Date.now()}_${Math.random().toString(16).slice(2)}`;
-        const iframe = document.createElement("iframe");
-        const form = document.createElement("form");
-        iframe.name = requestId;
-        iframe.hidden = true;
-        form.hidden = true;
-        form.method = "POST";
-        form.action = APPS_SCRIPT_URL;
-        form.target = requestId;
-
-        [
-          ["action", action],
-          ["payload", JSON.stringify(payload)],
-          ["transport", "iframe"],
-          ["requestId", requestId]
-        ].forEach(([name, value]) => {
-          const input = document.createElement("input");
-          input.type = "hidden";
-          input.name = name;
-          input.value = value;
-          form.appendChild(input);
-        });
-
-        const timeoutMilliseconds = action === "submitAttempt" ? 45000 : 30000;
-        const timeoutId = window.setTimeout(() => {
-          cleanup();
-          const error = new Error("Kết nối Google Apps Script tạm thời bị gián đoạn.");
-          error.isTransportError = true;
-          reject(error);
-        }, timeoutMilliseconds);
-
-        function cleanup() {
-          window.clearTimeout(timeoutId);
-          window.removeEventListener("message", handleMessage);
-          form.remove();
-          iframe.remove();
-        }
-
-        function handleMessage(event) {
-          const message = event.data;
-          if (
-            !message ||
-            message.source !== "MGRL_APPS_SCRIPT" ||
-            message.requestId !== requestId
-          ) return;
-          cleanup();
-          const data = message.data;
-          if (!data || !data.ok) {
-            const error = new Error(data && data.message ? data.message : "Yêu cầu không được xử lý.");
-            error.isTransportError = Boolean(data && data.retryable);
-            reject(error);
-            return;
-          }
-          resolve(data);
-        }
-
-        iframe.addEventListener("error", () => {
-          cleanup();
-          const error = new Error("Trình duyệt đang chặn kết nối Google Apps Script.");
-          error.isTransportError = true;
-          reject(error);
-        });
-        window.addEventListener("message", handleMessage);
-        document.body.appendChild(iframe);
-        document.body.appendChild(form);
-        form.submit();
-      });
-    }
+    async function callApi(action,payload={}) { return Portal.request(APPS_SCRIPT_URL,action,payload); }
 
     function setLoginLoading(isLoading) {
       loginButton.disabled = isLoading;
@@ -1455,7 +1312,8 @@
         tabViolations: state.tabViolations,
         tabWarningShown: state.tabWarningShown,
         pendingSubmission: state.pendingSubmission,
-        submitRetryCount: state.submitRetryCount
+        submitRetryCount: state.submitRetryCount,
+        answerVersion: state.answerVersion
       }));
     }
 
@@ -1480,6 +1338,8 @@
       state.maxAttempts = data.maxAttempts;
       state.expiresAt = data.expiresAt;
       state.startedAt = data.startedAt;
+      state.answerVersion = Math.max(Number(data.answerVersion || 0), Number(localMeta.answerVersion || 0));
+      state.serverOffset = Date.parse(data.serverNow || new Date().toISOString()) - Date.now();
       state.hiddenAt = 0;
       state.attentionReason = "";
       state.lastInteractionAt = Date.now();
@@ -1501,11 +1361,23 @@
     async function authenticateParticipant(email) {
       const data = await callApi("loginParticipant", {
         email,
+        otp: document.getElementById("learnerOtp").value.trim(),
         deviceId: state.deviceId
       });
       state.email = data.participant.email;
       state.participant = data.participant;
       state.courses = Array.isArray(data.courses) ? data.courses : [];
+      const pendingRaw=localStorage.getItem(ACTIVE_SESSION_KEY);
+      if(pendingRaw){
+        const saved=JSON.parse(pendingRaw);
+        if(saved.email===state.email){
+          const result=await callApi("submitAttempt",{email:state.email,deviceId:state.deviceId,attemptToken:saved.token,
+            answers:saved.answers||{},answerVersion:Number(saved.answerVersion||0)+1,
+            autoSubmitted:saved.pendingSubmission?!!saved.pendingSubmission.autoSubmitted:true,
+            terminationReason:saved.pendingSubmission?.terminationReason||"PAGE_RELOAD",tabViolations:Number(saved.tabViolations||0)});
+          clearSession();state.course=result.course;renderResult(result);return;
+        }
+      }
       renderCourseSelection();
     }
 
@@ -1530,6 +1402,8 @@
           ? state.courses.map((course) => {
               const remaining = Math.max(0, Number(course.remainingAttempts || 0));
               const canStart = Boolean(course.canStart);
+              const labels = {OPEN:"Đang mở",UPCOMING:"Chưa đến giờ",CLOSED:"Đã đóng",INVALID:"Lịch chưa hợp lệ",DISABLED:"Tạm khóa"};
+              const dateLabel = value => value ? new Date(value).toLocaleString("vi-VN",{timeZone:"Asia/Ho_Chi_Minh"}) : "Không giới hạn";
               const hasResult = Boolean(
                 course.hasResult ||
                 course.latestResult ||
@@ -1546,13 +1420,17 @@
                   <div class="course-fact"><span>Ngưỡng đạt</span><strong>${escapeHtml(course.passPercent)}%</strong></div>
                   <div class="course-fact"><span>Lượt còn lại</span><strong>${escapeHtml(remaining)}/${escapeHtml(course.maxAttempts)}</strong></div>
                 </div>
+                <div class="course-window" data-state="${escapeHtml(course.windowStatus)}">
+                  <strong>${escapeHtml(labels[course.windowStatus] || "Chưa mở")}</strong><br>
+                  Từ ${escapeHtml(dateLabel(course.opensAt))}<br>Đến ${escapeHtml(dateLabel(course.closesAt))} · Giờ Việt Nam
+                </div>
                 <div class="course-actions">
                   <button
                     class="button"
                     type="button"
                     data-start-course-id="${escapeHtml(course.id)}"
                     ${canStart ? "" : "disabled"}
-                  >${canStart ? "Bắt đầu kiểm tra" : "Đã hết lượt"}</button>
+                  >${canStart ? "Bắt đầu kiểm tra" : course.windowStatus !== "OPEN" ? escapeHtml(labels[course.windowStatus] || "Chưa mở") : "Đã hết 2 lượt"}</button>
                   ${hasResult ? `
                     <button
                       class="button secondary-button"
@@ -1653,7 +1531,7 @@
     }
 
     function remainingSeconds() {
-      return Math.ceil((Date.parse(state.expiresAt) - Date.now()) / 1000);
+      return Math.ceil((Date.parse(state.expiresAt) - Date.now() - (state.serverOffset || 0)) / 1000);
     }
 
     function startTimer() {
@@ -1719,9 +1597,12 @@
           email: state.email,
           deviceId: state.deviceId,
           answers: state.answers,
+          answerVersion: ++state.answerVersion,
           tabViolations: state.tabViolations
         });
         state.lastProgressSnapshot = snapshot;
+        if (data.expiresAt) state.expiresAt = data.expiresAt;
+        if (data.expired) { await submitExam(true, "TIME_LIMIT"); return; }
         if (data.finished) {
           state.active = false;
           clearSession();
@@ -1745,14 +1626,14 @@
       clearTimeout(state.progressSaveTimerId);
       state.progressSaveTimerId = setTimeout(() => {
         saveAttemptProgress();
-      }, 5000);
+      }, 12000 + Math.random() * 6000);
     }
 
     function startProgressSync() {
       clearInterval(state.progressSyncTimerId);
       state.progressSyncTimerId = setInterval(() => {
         saveAttemptProgress();
-      }, 60000);
+      }, 45000 + Math.random() * 15000);
     }
 
     function showRegistrationForm() {
@@ -1932,6 +1813,7 @@
           deviceId: state.deviceId,
           answers: state.answers,
           autoSubmitted: Boolean(autoSubmitted),
+          answerVersion: ++state.answerVersion,
           terminationReason,
           tabViolations: state.tabViolations
         });
@@ -2108,7 +1990,7 @@
               </div>
             `;
           }).join("")
-        : '<p class="intro">Bạn không có câu trả lời sai.</p>';
+        : `<p class="intro">${data.reviewWithheld ? "Chi tiết từng câu được giữ kín để bảo vệ ngân hàng đề. Kết quả theo phần được hiển thị ở trên." : "Bạn không có câu trả lời sai."}</p>`;
 
       resultView.innerHTML = `
         <div class="result-layout">
@@ -2163,8 +2045,8 @@
               </div>
             </section>
             <section class="panel wrong-review-panel">
-              <h3>Các câu trả lời chưa đúng (${wrongQuestions.length})</h3>
-              <p class="wrong-review-intro">Xem lại nội dung câu hỏi và phương án bạn đã chọn.</p>
+              <h3>${data.reviewWithheld ? "Thông tin phúc khảo" : `Các câu trả lời chưa đúng (${wrongQuestions.length})`}</h3>
+              <p class="wrong-review-intro">Liên hệ ban tổ chức nếu cần kiểm tra kết quả.</p>
               <div class="wrong-review-list">${wrongReviewHtml}</div>
             </section>
             <div class="result-actions">
@@ -2221,6 +2103,8 @@
 
     function logoutParticipant() {
       const previousEmail = state.email;
+      callApi("logoutParticipant",{deviceId:state.deviceId}).catch(()=>{});
+      Portal.session("");
       resetExamState();
       state.email = "";
       state.participant = null;
@@ -2269,6 +2153,33 @@
       }
     });
 
+    state.answerVersion = 0;
+    state.serverOffset = 0;
+    document.getElementById("learnerOtpButton").addEventListener("click", async () => {
+      if (!emailInput.checkValidity()) { emailInput.reportValidity(); return; }
+      const button=document.getElementById("learnerOtpButton");button.disabled=true;
+      try {
+        const result=await callApi("sendParticipantOtp",{email:emailInput.value.trim(),deviceId:state.deviceId});
+        loginMessage.textContent=result.message;
+        let left=60;button.textContent=`Gửi lại sau ${left}s`;
+        const timer=setInterval(()=>{left--;button.textContent=left?`Gửi lại sau ${left}s`:"Gửi mã đăng nhập";if(!left){clearInterval(timer);button.disabled=false;}},1000);
+      } catch(error) {loginMessage.textContent=error.message;button.disabled=false;}
+    });
+    document.getElementById("adminNavLink").addEventListener("click",event=>{
+      if(state.active){event.preventDefault();window.alert("Hãy nộp bài trước khi chuyển sang quản trị.");}
+    });
+    // Send minimal attention events; the server measures the elapsed interval.
+    let attentionChain=Promise.resolve();
+    function reportAttention(attention) {
+      if(!state.active || state.submitting)return;
+      const payload={attemptToken:state.token,email:state.email,deviceId:state.deviceId,attention};
+      attentionChain=attentionChain.catch(()=>{}).then(()=>callApi("reportAttention",payload)).then(data=>{
+        if(data.finished && state.active && !state.submitting)submitExam(true,"TAB_TIMEOUT");
+      }).catch(()=>{});
+    }
+    document.addEventListener("visibilitychange",()=>reportAttention(document.hidden?"away":"present"));
+    window.addEventListener("blur",()=>reportAttention("away"));
+    window.addEventListener("focus",()=>{if(!document.hidden)reportAttention("present");});
     registrationToggleButton.addEventListener("click", showRegistrationForm);
     registrationBackButton.addEventListener("click", showLoginForm);
     registrationOtpButton.addEventListener("click", sendRegistrationOtp);
@@ -2549,6 +2460,10 @@
     (async function initialize() {
       const raw = localStorage.getItem(ACTIVE_SESSION_KEY);
       if (!raw) return;
+      if(!Portal.session()) {
+        loginMessage.textContent="Có bài làm chưa được xác nhận. Đăng nhập lại bằng mã email để gửi và nhận kết quả.";
+        return;
+      }
       let reloadTerminationSucceeded = false;
       try {
         const saved = JSON.parse(raw);
@@ -2570,7 +2485,8 @@
           terminationReason: pendingSubmission
             ? String(pendingSubmission.terminationReason || "MANUAL")
             : "PAGE_RELOAD",
-          tabViolations: Number(saved.tabViolations || 0)
+          tabViolations: Number(saved.tabViolations || 0),
+          answerVersion: Number(saved.answerVersion || 0) + 1
         });
         clearSession();
         emailInput.value = saved.email || "";
@@ -2585,8 +2501,8 @@
         if (reloadTerminationSucceeded) {
           setLoginLoading(false);
         } else {
-          loginButton.disabled = true;
-          loginButton.textContent = "Tải lại trang để thử lại";
+          setLoginLoading(false);
+          loginMessage.textContent += " Bạn có thể xác thực lại email để tiếp tục gửi bài.";
         }
       }
     })();
