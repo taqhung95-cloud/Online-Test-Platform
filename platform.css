@@ -53,3 +53,7 @@ label{font-weight:500}
 @media(max-width:800px){.schedule-grid{grid-template-columns:1fr 1fr}.portal-nav{justify-content:flex-start}.header-inner{flex-wrap:wrap}}
 @media(max-width:540px){.schedule-grid{grid-template-columns:1fr}.portal-nav a{padding:8px;font-size:11px}.connection-status{white-space:normal}}
 @media(max-width:620px){.login-panel{margin-top:16px;padding:24px 20px}.login-panel h2{font-size:20px}.brand-logo{width:108px}.brand-copy h1{font-size:12px}.header-inner{min-height:0}.login-panel .otp-field{grid-template-columns:minmax(0,1fr) auto}.login-panel .otp-field .button{width:auto;padding:10px;font-size:12px}}
+/* Native controls share Montserrat; small checkboxes must not inherit text-input sizing. */
+.remember-option{display:flex!important;align-items:center;gap:9px;font-size:12px!important;font-weight:400!important;line-height:1.6;margin:14px 0!important;}
+.remember-option input[type=checkbox]{width:16px!important;height:16px!important;min-height:0!important;margin:0;flex:0 0 16px;accent-color:#ff7900;}
+#passwordSetupForm input,#learnerPassword{font:inherit;}

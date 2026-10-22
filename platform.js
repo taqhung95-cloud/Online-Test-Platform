@@ -1,9 +1,9 @@
 /* Shared POST transport. The server origin is public; sessions and answers are not URL parameters. */
 window.Portal = (() => {
   const sessionKey='sungrow_learner_session_v2';
-  let token=sessionStorage.getItem(sessionKey)||'';
+  let token=sessionStorage.getItem(sessionKey)||localStorage.getItem(sessionKey)||'';
   const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
-  function session(value){if(value!==undefined){token=value||'';if(token)sessionStorage.setItem(sessionKey,token);else sessionStorage.removeItem(sessionKey);}return token;}
+  function session(value,remember=false){if(value!==undefined){token=value||'';localStorage.removeItem(sessionKey);if(token){sessionStorage.setItem(sessionKey,token);if(remember)localStorage.setItem(sessionKey,token);}else sessionStorage.removeItem(sessionKey);}return token;}
   function once(endpoint,action,payload){
     return new Promise((resolve,reject)=>{
       const requestId=crypto.randomUUID(),frame=document.createElement('iframe'),form=document.createElement('form');
@@ -24,7 +24,7 @@ window.Portal = (() => {
         const m=event.data;if(!m||m.source!=='MGRL_APPS_SCRIPT'||m.requestId!==requestId)return;
         cleanup();const data=m.data;
         if(!data?.ok){reject(Object.assign(new Error(data?.message||'Yêu cầu chưa hoàn tất.'),{isTransportError:!!data?.retryable}));return;}
-        if(data.sessionToken)session(data.sessionToken);
+        if(data.sessionToken)session(data.sessionToken,data.remember===true);
         document.dispatchEvent(new CustomEvent('portal:connection',{detail:'online'}));resolve(data);
       }
       window.addEventListener('message',receive);document.body.append(frame,form);form.submit();

@@ -1005,8 +1005,8 @@
     }
   </style>
   <link rel="preload" href="fonts/Montserrat-wght.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="platform.css?v=20261022-montserrat3">
-  <script src="platform.js?v=2"></script>
+  <link rel="stylesheet" href="platform.css?v=20261022-account3">
+  <script src="platform.js?v=20261022-account3"></script>
 </head>
 <body>
   <header class="header">
@@ -1037,21 +1037,39 @@
     <section id="loginView" class="panel login-panel">
       <div id="loginContent">
         <p class="eyebrow">Xác thực người tham gia</p>
-        <h2>Đăng nhập bằng email đã đăng ký</h2>
+        <h2>Đăng nhập tài khoản</h2>
         <form id="loginForm" novalidate>
           <label for="emailInput">Email</label>
           <input id="emailInput" type="email" autocomplete="email" placeholder="ten@congty.com" required>
-          <label for="learnerOtp">Mã đăng nhập gửi qua email</label>
+          <label for="learnerPassword">Mật khẩu</label>
+          <input id="learnerPassword" type="password" autocomplete="current-password" placeholder="Nhập mật khẩu" required>
+          <label class="remember-option"><input id="rememberLogin" type="checkbox"> Ghi nhớ 30 ngày · Chỉ dùng trên máy cá nhân</label>
+          <div id="deviceVerification" hidden>
+          <label for="learnerOtp">Xác thực chuyển trình duyệt / thiết bị</label>
           <div class="otp-field">
             <input id="learnerOtp" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="8" pattern="[0-9]{8}" placeholder="Nhập mã 8 chữ số">
-            <button id="learnerOtpButton" class="button secondary-button" type="button">Gửi mã đăng nhập</button>
+            <button id="learnerOtpButton" class="button secondary-button" type="button">Gửi mã xác thực</button>
+          </div>
+          <label class="remember-option"><input id="confirmTransfer" type="checkbox"> Chuyển sang thiết bị này và thu hồi phiên cũ</label>
           </div>
           <button id="loginButton" class="button" type="submit">Đăng nhập</button>
+          <button id="passwordSetupToggle" class="registration-link" type="button">Thiết lập / quên mật khẩu</button>
           <button id="registrationToggleButton" class="registration-link" type="button">Chưa đăng ký? Đăng ký tham gia</button>
           <a class="registration-link admin-link-button" href="admin.html">Đăng nhập quản trị</a>
           <p id="loginMessage" class="login-message" role="alert"></p>
         </form>
       </div>
+
+      <form id="passwordSetupForm" class="registration-form" hidden>
+        <p class="eyebrow">Bảo mật tài khoản</p><h2>Thiết lập mật khẩu</h2>
+        <p class="intro">Tài khoản đã đăng ký nhưng chưa có mật khẩu cũng sử dụng chức năng này. Lượt thi đã dùng được giữ nguyên.</p>
+        <label for="setupEmail">Email đã đăng ký</label><input id="setupEmail" type="email" autocomplete="email" required>
+        <label for="setupPassword">Mật khẩu mới · Ít nhất 12 ký tự</label><input id="setupPassword" type="password" autocomplete="new-password" minlength="12" required>
+        <label for="setupConfirm">Nhập lại mật khẩu</label><input id="setupConfirm" type="password" autocomplete="new-password" required>
+        <label for="setupOtp">Mã xác thực qua email</label><div class="otp-field"><input id="setupOtp" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="8" pattern="[0-9]{8}" required><button id="setupSendOtp" type="button" class="button secondary-button">Gửi mã xác thực</button></div>
+        <div class="registration-actions"><button id="setupBack" type="button" class="button secondary-button">Quay lại</button><button type="submit" class="button">Lưu mật khẩu</button></div>
+        <p id="setupMessage" class="login-message" role="alert"></p>
+      </form>
 
       <form id="registrationForm" class="registration-form" novalidate hidden>
         <p class="eyebrow">Đăng ký người tham gia</p>
@@ -1070,10 +1088,12 @@
             <label for="registrationEmail">Email đăng ký</label>
             <input id="registrationEmail" type="email" autocomplete="email" placeholder="ten@congty.com" required>
           </div>
+          <div><label for="registrationPassword">Mật khẩu · Ít nhất 12 ký tự</label><input id="registrationPassword" type="password" autocomplete="new-password" minlength="12" required></div>
+          <div><label for="registrationConfirm">Nhập lại mật khẩu</label><input id="registrationConfirm" type="password" autocomplete="new-password" required></div>
           <div class="otp-field">
             <div>
               <label for="registrationOtp">Mã OTP</label>
-              <input id="registrationOtp" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" placeholder="000000" required>
+              <input id="registrationOtp" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="8" pattern="[0-9]{8}" placeholder="8 chữ số" required>
             </div>
             <button id="registrationOtpButton" class="button secondary-button" type="button">Gửi mã OTP</button>
           </div>
@@ -1240,23 +1260,8 @@
     const violationWarningCount = document.getElementById("violationWarningCount");
     const violationAcknowledgeButton = document.getElementById("violationAcknowledgeButton");
     function getDeviceId() {
-      const signature = [
-        navigator.userAgent,
-        navigator.platform,
-        navigator.language,
-        Intl.DateTimeFormat().resolvedOptions().timeZone || "",
-        screen.width,
-        screen.height,
-        screen.colorDepth,
-        navigator.hardwareConcurrency || "",
-        navigator.deviceMemory || ""
-      ].join("|");
-      let hash = 2166136261;
-      for (let index = 0; index < signature.length; index += 1) {
-        hash ^= signature.charCodeAt(index);
-        hash = Math.imul(hash, 16777619);
-      }
-      return `device-${(hash >>> 0).toString(16).padStart(8, "0")}`;
+      const key='sungrow_browser_id_v3';
+      let id=localStorage.getItem(key);if(!id){id=crypto.randomUUID();localStorage.setItem(key,id);}return id;
     }
 
     function escapeHtml(value) {
@@ -1361,9 +1366,14 @@
     async function authenticateParticipant(email) {
       const data = await callApi("loginParticipant", {
         email,
+        password: document.getElementById("learnerPassword").value,
+        remember: document.getElementById("rememberLogin").checked,
+        confirmTransfer: document.getElementById("confirmTransfer").checked,
         otp: document.getElementById("learnerOtp").value.trim(),
         deviceId: state.deviceId
       });
+      if(data.requiresDeviceOtp){document.getElementById('deviceVerification').hidden=false;loginMessage.textContent=data.message;return;}
+      document.getElementById('learnerPassword').value='';document.getElementById('learnerOtp').value='';
       state.email = data.participant.email;
       state.participant = data.participant;
       state.courses = Array.isArray(data.courses) ? data.courses : [];
@@ -1723,6 +1733,7 @@
           name: registrationName.value.trim(),
           company: registrationCompany.value.trim(),
           email: registrationEmail.value.trim()
+          ,deviceId: state.deviceId
         });
         if (data.alreadyRegistered) {
           const registeredEmail = registrationEmail.value.trim();
@@ -1752,7 +1763,8 @@
         name: registrationName.value.trim(),
         company: registrationCompany.value.trim(),
         email: registeredEmail,
-        otp: registrationOtp.value.trim()
+        otp: registrationOtp.value.trim(),deviceId:state.deviceId,
+        password:document.getElementById('registrationPassword').value,passwordSalt:passwordSalt()
       });
       registrationMessage.classList.add("success");
       registrationForm.reset();
@@ -2155,11 +2167,32 @@
 
     state.answerVersion = 0;
     state.serverOffset = 0;
+    function passwordSalt(){return Array.from(crypto.getRandomValues(new Uint8Array(16)));}
+    const setupForm=document.getElementById('passwordSetupForm'),setupMessage=document.getElementById('setupMessage');
+    document.getElementById('passwordSetupToggle').addEventListener('click',()=>{loginContent.hidden=true;registrationForm.hidden=true;setupForm.hidden=false;document.getElementById('setupEmail').value=emailInput.value;});
+    document.getElementById('setupBack').addEventListener('click',()=>{setupForm.hidden=true;showLoginForm();});
+    document.getElementById('setupSendOtp').addEventListener('click',async()=>{
+      const field=document.getElementById('setupEmail'),button=document.getElementById('setupSendOtp');
+      if(!field.reportValidity())return;button.disabled=true;
+      try{const result=await callApi('sendParticipantOtp',{email:field.value.trim(),deviceId:state.deviceId,purpose:'password'});setupMessage.textContent=result.message;
+        let left=60;const tick=()=>{button.textContent=left?`Gửi lại sau ${left}s`:'Gửi mã xác thực';};tick();const timer=setInterval(()=>{left--;tick();if(!left){clearInterval(timer);button.disabled=false;}},1000);
+      }catch(error){setupMessage.textContent=error.message;button.disabled=false;}
+    });
+    setupForm.addEventListener('submit',async event=>{
+      event.preventDefault();if(!setupForm.reportValidity())return;
+      const password=document.getElementById('setupPassword').value;
+      if(password!==document.getElementById('setupConfirm').value){setupMessage.textContent='Mật khẩu nhập lại không khớp.';return;}
+      const button=setupForm.querySelector('[type=submit]');button.disabled=true;
+      try{const result=await callApi('setParticipantPassword',{email:document.getElementById('setupEmail').value.trim(),deviceId:state.deviceId,password,passwordSalt:passwordSalt(),otp:document.getElementById('setupOtp').value.trim()});
+        Portal.session('');emailInput.value=document.getElementById('setupEmail').value;setupForm.reset();setupForm.hidden=true;showLoginForm();loginMessage.textContent=result.message;
+      }catch(error){setupMessage.textContent=error.message;}finally{button.disabled=false;}
+    });
+    emailInput.addEventListener('input',()=>{document.getElementById('deviceVerification').hidden=true;document.getElementById('learnerOtp').value='';document.getElementById('confirmTransfer').checked=false;});
     document.getElementById("learnerOtpButton").addEventListener("click", async () => {
       if (!emailInput.checkValidity()) { emailInput.reportValidity(); return; }
       const button=document.getElementById("learnerOtpButton");button.disabled=true;
       try {
-        const result=await callApi("sendParticipantOtp",{email:emailInput.value.trim(),deviceId:state.deviceId});
+        const result=await callApi("sendParticipantOtp",{email:emailInput.value.trim(),deviceId:state.deviceId,purpose:'device',password:document.getElementById('learnerPassword').value});
         loginMessage.textContent=result.message;
         let left=60;button.textContent=`Gửi lại sau ${left}s`;
         const timer=setInterval(()=>{left--;button.textContent=left?`Gửi lại sau ${left}s`:"Gửi mã đăng nhập";if(!left){clearInterval(timer);button.disabled=false;}},1000);
@@ -2229,7 +2262,7 @@
     });
 
     registrationOtp.addEventListener("input", () => {
-      registrationOtp.value = registrationOtp.value.replace(/\D/g, "").slice(0, 6);
+      registrationOtp.value = registrationOtp.value.replace(/\D/g, "").slice(0, 8);
     });
 
     registrationForm.addEventListener("submit", async (event) => {
@@ -2240,7 +2273,7 @@
         registrationName,
         registrationCompany,
         registrationEmail,
-        registrationOtp
+        registrationOtp,document.getElementById('registrationPassword'),document.getElementById('registrationConfirm')
       ];
       const invalidField = fields.find((field) => !field.checkValidity());
       if (invalidField) {
@@ -2253,6 +2286,8 @@
         registrationOtpButton.focus();
         return;
       }
+
+      if(document.getElementById('registrationPassword').value!==document.getElementById('registrationConfirm').value){registrationMessage.textContent='Mật khẩu nhập lại không khớp.';return;}
 
       setRegistrationLoading(true);
       try {
@@ -2458,10 +2493,23 @@
     });
 
     (async function initialize() {
+      setLoginLoading(true);
+      try{
+        const config=await callApi('getPublicConfig',{});
+        if(config.authSchema!==3||!config.ready)throw new Error('Backend chưa sẵn sàng.');
+      }catch(error){
+        loginMessage.textContent='Hệ thống đang chờ cập nhật Apps Script và chạy setupPlatformV2. Vui lòng quay lại sau khi quản trị hoàn tất.';
+        document.getElementById('loginButton').textContent='Đang bảo trì';
+        document.getElementById('passwordSetupToggle').disabled=true;registrationToggleButton.disabled=true;return;
+      }
+      setLoginLoading(false);
       const raw = localStorage.getItem(ACTIVE_SESSION_KEY);
-      if (!raw) return;
+      if (!raw) {
+        if(Portal.session())try{setLoginLoading(true);await authenticateParticipant('');}catch(error){if(!error.isTransportError)Portal.session('');loginMessage.textContent=error.message;}finally{setLoginLoading(false);}
+        return;
+      }
       if(!Portal.session()) {
-        loginMessage.textContent="Có bài làm chưa được xác nhận. Đăng nhập lại bằng mã email để gửi và nhận kết quả.";
+        loginMessage.textContent="Có bài làm chưa được xác nhận. Đăng nhập lại bằng mật khẩu để gửi và nhận kết quả.";
         return;
       }
       let reloadTerminationSucceeded = false;
