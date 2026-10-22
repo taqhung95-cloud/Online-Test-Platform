@@ -281,7 +281,7 @@
   </style>
   <link rel="preload" href="fonts/Montserrat-wght.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="stylesheet" href="platform.css?v=20261022-account3">
-  <script src="platform.js?v=20261022-account3"></script>
+  <script src="platform.js?v=20261022-start4"></script>
 </head>
 <body>
   <header class="header">
@@ -318,9 +318,6 @@
           <label for="adminPassword" data-i18n="password">Mật khẩu</label>
           <input id="adminPassword" type="password" autocomplete="current-password" minlength="8" maxlength="128" placeholder="Nhập mật khẩu quản trị" data-i18n-placeholder="passwordPlaceholder" required>
         </div>
-        <label for="adminOtp">Mã OTP email quản trị</label>
-        <input id="adminOtp" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6 chữ số">
-        <button id="adminOtpSend" class="button secondary-button" type="button">Gửi OTP quản trị</button>
         <button id="loginButton" class="button" type="submit" data-i18n="adminLoginButton">Đăng nhập quản trị</button>
       </form>
       <p id="loginMessage" class="login-message" role="alert"></p>
@@ -587,10 +584,11 @@
       loginButton.disabled = true;
       loginButton.textContent = t("authenticating");
       try {
+        const config=await callApi('getPublicConfig',{});
+        if(config.adminAuth!=='password')throw new Error('Cần cập nhật Code.gs và Deploy New version để bật đăng nhập quản trị không OTP.');
         const data = await callApi("loginAdmin", {
           email: adminEmail.value.trim(),
-          password: adminPassword.value,
-          otp: document.getElementById("adminOtp").value.trim()
+          password: adminPassword.value
         });
         adminPassword.value = "";
         adminToken = data.adminToken;
@@ -954,6 +952,6 @@
       loadDashboard();
     }
   </script>
-  <script src="schedule.js?v=20261022-account3"></script>
+  <script src="schedule.js?v=20261022-start4"></script>
 </body>
 </html>

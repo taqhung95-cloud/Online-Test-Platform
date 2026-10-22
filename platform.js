@@ -4,7 +4,7 @@ window.Portal = (() => {
   let token=sessionStorage.getItem(sessionKey)||localStorage.getItem(sessionKey)||'';
   const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
   function session(value,remember=false){if(value!==undefined){token=value||'';localStorage.removeItem(sessionKey);if(token){sessionStorage.setItem(sessionKey,token);if(remember)localStorage.setItem(sessionKey,token);}else sessionStorage.removeItem(sessionKey);}return token;}
-  function once(endpoint,action,payload){
+  function once(endpoint,action,payload,timeoutMs=35000){
     return new Promise((resolve,reject)=>{
       const requestId=crypto.randomUUID(),frame=document.createElement('iframe'),form=document.createElement('form');
       frame.name='portal_'+requestId;frame.hidden=true;frame.title='Kết nối bảo mật';
@@ -13,7 +13,7 @@ window.Portal = (() => {
       for(const [name,value] of Object.entries({action,payload:JSON.stringify(body),transport:'iframe',requestId})){
         const input=document.createElement('input');input.type='hidden';input.name=name;input.value=value;form.append(input);
       }
-      const timer=setTimeout(()=>fail(Object.assign(new Error('Máy chủ chưa xác nhận. Bài làm vẫn được giữ trên thiết bị.'),{isTransportError:true})),35000);
+      const timer=setTimeout(()=>fail(Object.assign(new Error(action==='startAttempt'?'Chưa nhận được xác nhận tạo đề. Yêu cầu có thể vẫn đang xử lý; bấm Kiểm tra lại yêu cầu để nhận đúng lượt cũ.':'Máy chủ chưa xác nhận. Bài làm vẫn được giữ trên thiết bị.'),{isTransportError:true,uncertain:true})),timeoutMs);
       function cleanup(){clearTimeout(timer);window.removeEventListener('message',receive);form.remove();frame.remove();}
       function fail(error){cleanup();reject(error);}
       function receive(event){
@@ -33,12 +33,13 @@ window.Portal = (() => {
   async function request(endpoint,action,payload={}){
     // Preserve the answer snapshot across every retry of a single request.
     const stable=JSON.parse(JSON.stringify(payload));
-    const retry=['submitAttempt','startAttempt','saveAttemptProgress','resumeAttempt','listCourses','getAdminDashboard'].includes(action)?6:1;
+    const retry=action==='startAttempt'?2:['submitAttempt','saveAttemptProgress','resumeAttempt','listCourses','getAdminDashboard'].includes(action)?6:1;
+    const deadline=action==='startAttempt'?Date.now()+45000:Infinity;
     if(action==='submitAttempt')await pause(Math.random()*1800);
     for(let attempt=0;attempt<retry;attempt++){
-      try{return await once(endpoint,action,stable);}catch(e){
+      try{return await once(endpoint,action,stable,Math.min(35000,Math.max(1,deadline-Date.now())));}catch(e){
         document.dispatchEvent(new CustomEvent('portal:connection',{detail:'retry'}));
-        if(!e.isTransportError||attempt===retry-1)throw e;
+        if(!e.isTransportError||attempt===retry-1||action==='startAttempt'&&(e.uncertain||Date.now()+2000>=deadline))throw e;
         await pause(Math.min(16000,800*2**attempt)+Math.random()*1800);
       }
     }

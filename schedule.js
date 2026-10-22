@@ -25,16 +25,9 @@
       await window.refreshCourseWindows(true);message.textContent='Đã lưu lịch. Thời gian được kiểm tra tại máy chủ.';
     }catch(e){message.textContent=e.message;}finally{button.disabled=false;}
   });
-  const otpButton=document.getElementById('adminOtpSend');
   document.getElementById('unlinkDeviceButton').addEventListener('click',async()=>{
     const email=window.prompt('Email tài khoản cần gỡ thiết bị (giữ nguyên lượt thi):');if(!email)return;
     if(!window.confirm('Thu hồi các phiên đăng nhập và gỡ liên kết thiết bị của '+email+'?'))return;
     try{const result=await callApi('unlinkParticipantDevice',{adminToken,email:email.trim()});message.textContent=result.message;}catch(error){message.textContent=error.message;}
-  });
-  otpButton.addEventListener('click',async()=>{
-    if(!adminEmail.checkValidity()){adminEmail.reportValidity();return;}otpButton.disabled=true;
-    try{const d=await callApi('sendAdminOtp',{email:adminEmail.value.trim()});loginMessage.textContent=d.message;
-      let left=60;otpButton.textContent=`Gửi lại sau ${left}s`;const timer=setInterval(()=>{left--;otpButton.textContent=left?`Gửi lại sau ${left}s`:'Gửi OTP quản trị';if(!left){clearInterval(timer);otpButton.disabled=false;}},1000);
-    }catch(e){loginMessage.textContent=e.message;otpButton.disabled=false;}
   });
 })();

@@ -1006,7 +1006,7 @@
   </style>
   <link rel="preload" href="fonts/Montserrat-wght.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="stylesheet" href="platform.css?v=20261022-account3">
-  <script src="platform.js?v=20261022-account3"></script>
+  <script src="platform.js?v=20261022-start4"></script>
 </head>
 <body>
   <header class="header">
@@ -1560,13 +1560,19 @@
     }
 
     async function startAttempt(email, courseId) {
+      const pendingKey='sungrow_pending_start_v4:'+email.toLowerCase()+':'+courseId;
+      let startRequestId=localStorage.getItem(pendingKey);
+      if(!startRequestId){startRequestId=crypto.randomUUID();localStorage.setItem(pendingKey,startRequestId);}
       const data = await callApi("startAttempt", {
         email,
         courseId,
+        startRequestId,
         deviceId: state.deviceId,
         clientTimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Ho_Chi_Minh"
       });
-      applyAttempt(data);
+      // A transport timeout must retain this key: the server may have committed already.
+      if(data.finished){state.course=data.course;renderResult(data);}else applyAttempt(data);
+      localStorage.removeItem(pendingKey);
     }
 
     async function viewLatestResult(courseId) {
@@ -2241,16 +2247,24 @@
 
       const button = event.target.closest("[data-start-course-id]");
       if (!button || button.disabled) return;
-      courseMessage.textContent = "";
-      button.disabled = true;
+      if(state.startingAttempt)return;
+      state.startingAttempt=true;
+      const controls=Array.from(courseGrid.querySelectorAll('button')).map(control=>({control,disabled:control.disabled}));
+      controls.forEach(({control})=>control.disabled=true);
+      courseMessage.textContent = "Đang yêu cầu máy chủ tạo đề. Nếu chưa có xác nhận, hệ thống sẽ dừng chờ và cho phép kiểm tra lại cùng mã yêu cầu.";
       const previousText = button.textContent;
       button.textContent = "Đang tạo đề...";
+      const started=Date.now();
+      const loadingTimer=setInterval(()=>{button.textContent=`Đang chờ máy chủ · ${Math.floor((Date.now()-started)/1000)}s`;},1000);
       try {
         await startAttempt(state.email, button.dataset.startCourseId);
       } catch (error) {
         courseMessage.textContent = error.message;
-        button.disabled = false;
-        button.textContent = previousText;
+        button.textContent = error.uncertain?"Kiểm tra lại yêu cầu":previousText;
+      } finally {
+        clearInterval(loadingTimer);state.startingAttempt=false;
+        controls.forEach(({control,disabled})=>control.disabled=disabled);
+        if(!button.textContent.includes('Kiểm tra lại'))button.textContent=previousText;
       }
     });
 
