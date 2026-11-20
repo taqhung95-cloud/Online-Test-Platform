@@ -3352,31 +3352,57 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
 .v5-lesson-status:empty{display:none}
 </style>
 <style>
-.portal-spinner {
-  width: 34px;
-  height: 34px;
-  margin: 0;
-  appearance: none;
-  background: transparent;
-  border: 3px solid transparent;
-  border-inline-start-color: var(--sg-action, #9c420d);
-  border-block-start-color: var(--sg-action, #9c420d);
-  border-radius: 50%;
-  animation: portal-spin .9s linear infinite;
+.portal-load-track {
+  position: relative;
+  inline-size: min(420px, calc(100vw - 48px));
+  block-size: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #b7c9d7;
 }
-.portal-spinner::-webkit-progress-bar { display: none; }
-.portal-spinner::-moz-progress-bar { display: none; }
+.portal-load-track progress {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  opacity: 0;
+}
+.portal-load-track::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  inline-size: 35%;
+  border-radius: 999px;
+  background: #c65300;
+  transform: translateX(-100%);
+  animation: portal-load-across 1.45s ease-in-out infinite;
+}
+@keyframes portal-load-across { to { transform: translateX(286%); } }
 @keyframes portal-spin { to { transform: rotate(1turn); } }
 @media (prefers-reduced-motion: reduce) {
-  .portal-spinner { animation-duration: 6s; }
+  .portal-load-track::after { animation: none; transform: translateX(92%); }
 }
 @media (forced-colors: active) {
-  .portal-spinner { forced-color-adjust: none; border-inline-start-color: CanvasText; border-block-start-color: CanvasText; }
+  .portal-load-track { forced-color-adjust: none; background: Canvas; outline: 1px solid CanvasText; }
+  .portal-load-track::after { background: Highlight; }
 }
-#bootView { display: grid; justify-items: center; gap: 14px; text-align: center; }
+#bootView {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  text-align: center;
+  gap: 14px;
+  margin: 0;
+  padding: 24px;
+  pointer-events: none;
+}
+#bootRetry { pointer-events: auto; }
 #bootView[hidden],
 #bootView[aria-busy="true"] #bootMessage,
-#bootView[aria-busy="false"] .portal-spinner { display: none; }
+#bootView[aria-busy="false"] .portal-load-track { display: none; }
 #bootMessage { max-width: 32rem; margin: 0; }
 :is(#loginButton, #registrationSubmitButton)[aria-busy="true"]::before {
   content: "";
@@ -3430,7 +3456,7 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
 
   <main id="main-content"><img class="v5-login-logo" src="v5-assets/694c3e44a198.svg" alt="Sungrow"><img class="v5-login-art" src="v5-assets/a4488460d7e3.png" alt="" aria-hidden="true">
     <section id="bootView" aria-busy="true">
-      <progress class="portal-spinner" aria-label="Đang tải"></progress>
+      <div class="portal-load-track"><progress aria-label="Đang tải"></progress></div>
       <p id="bootMessage" role="status"></p>
       <button id="bootRetry" class="button" type="button" hidden>Thử lại kết nối</button>
     </section>
@@ -8698,31 +8724,57 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
 .v5-lesson-status:empty{display:none}
 </style>
 <style>
-.portal-spinner {
-  width: 34px;
-  height: 34px;
-  margin: 0;
-  appearance: none;
-  background: transparent;
-  border: 3px solid transparent;
-  border-inline-start-color: var(--sg-action, #9c420d);
-  border-block-start-color: var(--sg-action, #9c420d);
-  border-radius: 50%;
-  animation: portal-spin .9s linear infinite;
+.portal-load-track {
+  position: relative;
+  inline-size: min(420px, calc(100vw - 48px));
+  block-size: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #b7c9d7;
 }
-.portal-spinner::-webkit-progress-bar { display: none; }
-.portal-spinner::-moz-progress-bar { display: none; }
+.portal-load-track progress {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  opacity: 0;
+}
+.portal-load-track::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  inline-size: 35%;
+  border-radius: 999px;
+  background: #c65300;
+  transform: translateX(-100%);
+  animation: portal-load-across 1.45s ease-in-out infinite;
+}
+@keyframes portal-load-across { to { transform: translateX(286%); } }
 @keyframes portal-spin { to { transform: rotate(1turn); } }
 @media (prefers-reduced-motion: reduce) {
-  .portal-spinner { animation-duration: 6s; }
+  .portal-load-track::after { animation: none; transform: translateX(92%); }
 }
 @media (forced-colors: active) {
-  .portal-spinner { forced-color-adjust: none; border-inline-start-color: CanvasText; border-block-start-color: CanvasText; }
+  .portal-load-track { forced-color-adjust: none; background: Canvas; outline: 1px solid CanvasText; }
+  .portal-load-track::after { background: Highlight; }
 }
-#bootView { display: grid; justify-items: center; gap: 14px; text-align: center; }
+#bootView {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  text-align: center;
+  gap: 14px;
+  margin: 0;
+  padding: 24px;
+  pointer-events: none;
+}
+#bootRetry { pointer-events: auto; }
 #bootView[hidden],
 #bootView[aria-busy="true"] #bootMessage,
-#bootView[aria-busy="false"] .portal-spinner { display: none; }
+#bootView[aria-busy="false"] .portal-load-track { display: none; }
 #bootMessage { max-width: 32rem; margin: 0; }
 </style><a class="v3-skip" href="#main-content">Bỏ qua tới nội dung chính</a>
   <header class="header">
@@ -8747,7 +8799,7 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
 
   <main id="main-content">
     <section id="bootView" aria-busy="true">
-      <progress class="portal-spinner" aria-label="Đang tải"></progress>
+      <div class="portal-load-track"><progress aria-label="Đang tải"></progress></div>
       <p id="bootMessage" role="status"></p>
       <button id="bootRetry" class="button" type="button" hidden>Thử lại kết nối</button>
     </section>
