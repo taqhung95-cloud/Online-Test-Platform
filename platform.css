@@ -57,3 +57,38 @@ label{font-weight:500}
 .remember-option{display:flex!important;align-items:center;gap:9px;font-size:12px!important;font-weight:400!important;line-height:1.6;margin:14px 0!important;}
 .remember-option input[type=checkbox]{width:16px!important;height:16px!important;min-height:0!important;margin:0;flex:0 0 16px;accent-color:#ff7900;}
 #passwordSetupForm input,#learnerPassword{font:inherit;}
+
+/* Sungrow learning workspace */
+.learning-workspace,.learning-admin{margin-block:18px}
+.learning-admin{padding:20px}
+.learning-admin summary{font-weight:750;cursor:pointer;padding-block:10px}
+.learning-nav{display:flex;flex-wrap:wrap;gap:8px;padding:8px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.learning-nav button{min-height:44px;padding:8px 16px;border:1px solid transparent;border-radius:8px;color:var(--portal-ink);background:transparent;font-weight:650;cursor:pointer}
+.learning-nav button[aria-pressed=true]{color:#843500;background:#fff1e5;border-color:#ffd3ad}
+.learning-workspace :focus-visible,.learning-admin :focus-visible{outline:3px solid var(--orange-dark);outline-offset:3px}
+.learning-status:empty{display:none}
+.learning-status{margin:12px 0;color:var(--portal-ink)}
+.learning-content{padding-block:12px}
+.learning-hero{padding:clamp(22px,5vw,55px);border-radius:14px;background:#172b46;color:white;border-inline-start:6px solid var(--orange)}
+.learning-hero h2{font-size:clamp(24px,4vw,44px);margin:0}
+.learning-hero p{margin:8px 0 0;color:#edf2f8}
+.learning-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,175px),1fr));gap:14px;margin-block:16px 24px}
+.learning-metrics div,.learning-card,.learning-row{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px}
+.learning-metrics strong{display:block;font-size:29px}
+.learning-card{margin-block:12px;overflow-wrap:anywhere}
+.learning-card h3{margin-top:0}
+.learning-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;width:100%;margin-block:8px;text-align:left;color:var(--portal-ink)}
+button.learning-row{cursor:pointer}
+.learning-row small,.learning-row a{display:block;margin-top:4px}
+.learning-content a{color:#843500;text-decoration:underline}
+.learning-badge{display:inline-block;padding:5px 9px;background:#fff1e5;border-radius:7px;color:#843500;margin-bottom:8px;font-weight:650}
+.learning-form{display:grid;gap:14px;max-width:640px;padding-block:12px}
+.learning-form label{display:grid;gap:5px}
+.learning-form .learning-check{display:flex;align-items:center;gap:8px}
+.learning-form input:not([type=checkbox]),.learning-form select,.learning-form textarea{width:100%;min-height:44px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:white;color:var(--portal-ink);font:inherit}
+.learning-form button,.learning-row button{min-height:44px;justify-self:start}
+#learningCertificate{display:none}
+@media print{
+  body.printing-certificate > :not(#learningCertificate){display:none!important}
+  body.printing-certificate #learningCertificate{display:block;text-align:center;border:4px double #843500;padding:70px 24px}
+}

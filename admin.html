@@ -280,10 +280,12 @@
     }
   </style>
   <link rel="preload" href="fonts/Montserrat-wght.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="platform.css?v=20261022-account3">
+  <link rel="stylesheet" href="platform.css?v=20261113">
+  <link rel="stylesheet" href="portal-v2.css?v=20261113">
+  <script src="portal-icons.js?v=20261113"></script>
   <script src="platform.js?v=20261022-lifecycle5"></script>
 </head>
-<body>
+<body class="admin-v2">
   <header class="header">
     <div class="header-inner">
       <div class="brand">
@@ -294,7 +296,7 @@
         </div>
       </div>
       <div class="header-actions">
-        <nav class="portal-nav" aria-label="Chuyển trang"><a href="index.html">Làm bài</a><a href="admin.html" aria-current="page">Quản trị</a><span id="connectionStatus" class="connection-status" role="status">Sẵn sàng kết nối</span></nav>
+        <nav class="portal-nav" aria-label="Chuyển trang"><a href="index.html">Cổng học viên</a><a href="admin.html" aria-current="page">Quản trị</a><span id="connectionStatus" class="connection-status" role="status">Sẵn sàng kết nối</span></nav>
         <button id="languageToggle" class="button secondary language-toggle" type="button" aria-label="Switch to English">EN</button>
         <div id="adminMeta" class="admin-meta" hidden>
           <span id="adminIdentity"></span>
@@ -325,6 +327,20 @@
     </section>
 
     <section id="dashboardView" class="dashboard" hidden>
+      <div class="v2-admin-shell">
+      <nav id="v2AdminNav" class="v2-admin-nav" aria-label="Quản trị đào tạo">
+        <button type="button" data-admin-page="reports" aria-pressed="true">Báo cáo đào tạo</button>
+        <button type="button" data-admin-page="learning" hidden>Khóa học và video</button>
+        <button type="button" data-admin-page="exams">Lịch kiểm tra</button>
+      </nav>
+      <div class="v2-admin-main">
+      <h2 id="v2AdminTitle">Báo cáo đào tạo</h2>
+      <details id="learningAdmin" class="panel learning-admin" data-admin-section="learning" hidden>
+        <summary>Quản lý khóa học, video và chứng nhận</summary>
+        <p class="learning-status" role="status"></p>
+        <div class="learning-content"></div>
+      </details>
+      <div data-admin-section="reports">
       <section class="panel toolbar">
         <div class="filters">
           <div>
@@ -363,8 +379,9 @@
       </section>
 
       <section id="metricsGrid" class="metrics"></section>
+      </div>
 
-      <details class="panel schedule-panel" id="schedulePanel">
+      <details class="panel schedule-panel" id="schedulePanel" data-admin-section="exams">
         <summary>Lịch mở và đóng khóa học</summary>
         <p class="intro">Giờ Việt Nam (UTC+7). Khóa học vẫn hiển thị khi chưa mở hoặc đã đóng. Để trống nếu không đặt mốc thời gian.</p>
         <form id="scheduleForm" class="schedule-grid">
@@ -376,6 +393,7 @@
         <p id="scheduleMessage" class="schedule-message" role="status"></p>
         <button id="unlinkDeviceButton" type="button" class="button secondary-button">Gỡ liên kết thiết bị tài khoản</button>
       </details>
+      <div data-admin-section="reports">
       <nav class="tabs" aria-label="Nội dung báo cáo">
         <button class="tab-button active" type="button" data-tab="overview" data-i18n="overview">Tổng quan</button>
         <button class="tab-button" type="button" data-tab="ranking" data-i18n="ranking">Xếp hạng</button>
@@ -418,6 +436,9 @@
           </div>
           <div id="attemptTable"></div>
         </section>
+      </div>
+      </div>
+      </div>
       </div>
     </section>
   </main>
@@ -579,7 +600,7 @@
     async function requestAdmin(action,payload){
       const epoch=adminEpoch;
       try{return await Portal.request(APPS_SCRIPT_URL,action,payload);}catch(error){
-        if(epoch===adminEpoch&&['getAdminDashboard','listCourseWindows','updateCourseWindow','unlinkParticipantDevice'].includes(action)&&Portal.isAuthError(error))showLogin(localizeServerMessage(error.message));
+        if(epoch===adminEpoch&&['getAdminDashboard','listCourseWindows','updateCourseWindow','unlinkParticipantDevice','adminLearningCatalog','saveLearningContent'].includes(action)&&Portal.isAuthError(error))showLogin(localizeServerMessage(error.message));
         throw error;
       }
     }
@@ -597,6 +618,7 @@
       loginButton.textContent = t("authenticating");
       try {
         const config=await callApi('getPublicConfig',{});
+        window.updateAdminWorkspace?.(config.learningReady===true);
         if(epoch!==adminEpoch)return;
         if(config.adminAuth!=='password')throw new Error('Cần cập nhật Code.gs và Deploy New version để bật đăng nhập quản trị không OTP.');
         const data = await callApi("loginAdmin", {
@@ -620,6 +642,12 @@
 
     function showDashboard(admin) {
       Portal.showView('dashboardView');
+      if (document.getElementById('learningAdmin').dataset.available === undefined) {
+        const epoch=adminEpoch;
+        callApi('getPublicConfig',{}).then(config=>{
+          if(epoch===adminEpoch)window.updateAdminWorkspace?.(config.learningReady===true);
+        }).catch(()=>{});
+      }
       loginView.hidden = true;
       dashboardView.hidden = false;
       adminMeta.hidden = false;
@@ -630,6 +658,8 @@
     }
 
     function showLogin(message = "") {
+      document.getElementById('learningAdmin').open = false;
+      document.querySelector('#learningAdmin .learning-content').replaceChildren();
       adminEpoch++;dashboardData=null;dashboardLoading=false;lastDashboardLoadAt=0;
       loginButton.disabled=false;loginButton.textContent=t('adminLoginButton');adminPassword.value='';
       Portal.showView('loginView');
@@ -975,5 +1005,7 @@
     window.addEventListener('pageshow',event=>{if(event.persisted&&adminToken){adminEpoch++;dashboardLoading=false;loadDashboard(false,true);}});
   </script>
   <script src="schedule.js?v=20261022-lifecycle5"></script>
+  <script src="learning.js?v=20261113"></script>
+  <script src="portal-workspace.js?v=20261113"></script>
 </body>
 </html>

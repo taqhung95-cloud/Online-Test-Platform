@@ -1005,10 +1005,12 @@
     }
   </style>
   <link rel="preload" href="fonts/Montserrat-wght.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="platform.css?v=20261022-account3">
+  <link rel="stylesheet" href="platform.css?v=20261113">
+  <link rel="stylesheet" href="portal-v2.css?v=20261113">
+  <script src="portal-icons.js?v=20261113"></script>
   <script src="platform.js?v=20261022-lifecycle5"></script>
 </head>
-<body>
+<body class="learner-v2">
   <header class="header">
     <div class="header-inner">
       <div class="brand">
@@ -1017,13 +1019,20 @@
           src="https://upload.wikimedia.org/wikipedia/commons/a/a2/Sungrow_Power_Supply.svg"
           alt="Sungrow"
         >
-        <div class="brand-copy">
-          <h1>CỔNG ĐÁNH GIÁ KIẾN THỨC SẢN PHẨM SUNGROW</h1>
-        </div>
+
       </div>
-      <nav class="portal-nav" aria-label="Chuyển trang">
-        <a href="index.html" aria-current="page">Làm bài</a>
+        <nav id="academyNavigation" class="learning-nav" aria-label="Cổng học viên" hidden>
+          <button type="button" data-learning-tab="overview">Tổng quan</button>
+          <button type="button" data-learning-tab="courses">Khóa học</button>
+          <button type="button" data-learning-tab="exams" aria-pressed="true">Bài kiểm tra</button>
+          <button type="button" data-learning-tab="results">Kết quả</button>
+          <button type="button" data-learning-tab="awards">Thành tích</button>
+          <button type="button" data-learning-tab="profile">Hồ sơ</button>
+        </nav>
+      <nav class="portal-nav" aria-label="Tài khoản">
+
         <a id="adminNavLink" href="admin.html">Quản trị</a>
+        <button id="logoutButton" type="button">Đăng xuất</button>
         <span id="connectionStatus" class="connection-status" role="status">Sẵn sàng kết nối</span>
       </nav>
       <div id="timer" class="timer" hidden>
@@ -1041,7 +1050,7 @@
     </section>
     <section id="loginView" class="panel login-panel" hidden>
       <div id="loginContent">
-        <p class="eyebrow">Xác thực người tham gia</p>
+        <p class="eyebrow">Sungrow E-learning</p>
         <h2>Đăng nhập tài khoản</h2>
         <form id="loginForm" novalidate>
           <label for="emailInput">Email</label>
@@ -1112,18 +1121,27 @@
       <div class="security-note">Mỗi tài khoản được thi tối đa 2 lần cho từng khóa học. Bài phải được nộp trước giờ đóng khóa học. Khi rời tab hoặc chuyển ứng dụng quá 60 giây, bài thi sẽ tự kết thúc; hệ thống ghi nhận số lần rời bài. Tải lại trang khi đang thi sẽ kết thúc và tính lượt thi sau khi xác nhận.</div>
     </section>
 
-    <section id="courseView" class="course-view" hidden>
-      <div class="panel course-header">
-        <div id="courseUser" class="course-user"></div>
-        <button id="logoutButton" class="button secondary-button" type="button">Đăng xuất</button>
+    <section id="courseView" class="course-view academy-shell" hidden>
+      <div id="courseUser" class="course-user" hidden></div>
+      <div class="academy-main">
+      <div id="learningPortal" class="learning-workspace" hidden>
+        <p class="learning-status" role="status"></p>
+        <div class="learning-content" hidden></div>
       </div>
+      <div id="learningExams">
       <div class="course-heading">
-        <p class="eyebrow">Chương trình đào tạo</p>
-        <h2>Chọn nội dung kiểm tra</h2>
-        <p class="intro">Mỗi bài kiểm tra sử dụng ngân hàng câu hỏi và lịch sử kết quả riêng.</p>
+        <h2>Trung tâm bài kiểm tra</h2>
       </div>
+      <div class="v2-exam-tools">
+        <label>Tìm bài kiểm tra<input id="examSearch" type="search" placeholder="Nhập tên bài kiểm tra"></label>
+        <label>Trạng thái<select id="examWindowFilter"><option value="">Tất cả</option><option value="OPEN">Đang mở</option><option value="UPCOMING">Sắp mở</option><option value="CLOSED">Đã đóng</option></select></label>
+        <label>Sắp xếp<select id="examSort"><option value="">Mặc định</option><option value="start">Ngày mở</option><option value="end">Hạn nộp</option></select></label>
+      </div>
+      <p id="examNoMatches" role="status" hidden>Không có bài kiểm tra phù hợp.</p>
       <div id="courseGrid" class="course-grid" aria-live="polite"></div>
       <p id="courseMessage" class="login-message" role="alert"></p>
+      </div>
+      </div>
     </section>
 
     <section id="examView" hidden>
@@ -1144,9 +1162,12 @@
         </aside>
         <div class="exam-question-column">
           <form id="quizForm" class="questions"></form>
-          <div class="submit-bar">
+          <nav class="exam-stepper" aria-label="Điều khiển bài thi">
+            <button id="previousQuestion" class="button secondary-button" type="button">Câu trước</button>
+            <span id="examPosition" aria-live="polite"></span>
+            <button id="nextQuestion" class="button secondary-button" type="button">Câu tiếp</button>
             <button id="submitButton" class="button" type="button">Nộp bài</button>
-          </div>
+          </nav>
         </div>
       </div>
     </section>
@@ -1307,7 +1328,7 @@
     async function requestParticipant(action,payload){
       const epoch=state.authEpoch;
       try{return await Portal.request(APPS_SCRIPT_URL,action,payload);}catch(error){
-        if(epoch===state.authEpoch&&['listCourses','startAttempt','resumeAttempt','saveAttemptProgress','submitAttempt','getLatestResult','getAttemptResult','reportAttention'].includes(action)&&Portal.isAuthError(error))handleParticipantAuthLoss(error);
+        if(epoch===state.authEpoch&&['listCourses','startAttempt','resumeAttempt','saveAttemptProgress','submitAttempt','getLatestResult','getAttemptResult','reportAttention','learningHome','updateLearningProfile','completeLearningLesson'].includes(action)&&Portal.isAuthError(error))handleParticipantAuthLoss(error);
         throw error;
       }
     }
@@ -1391,11 +1412,24 @@
         deviceId: state.deviceId
       });
       if(epoch!==state.authEpoch)return false;
+      if(data.requiresPasswordChange){
+        showLoginForm();
+        document.getElementById('learnerPassword').value='';
+        document.getElementById('passwordSetupToggle').click();
+        document.getElementById('setupMessage').textContent=data.message;
+        document.getElementById('setupSendOtp').focus();
+        return false;
+      }
       if(data.requiresDeviceOtp){Portal.showView('loginView');document.getElementById('deviceVerification').hidden=false;loginMessage.textContent=data.message;return false;}
       document.getElementById('learnerPassword').value='';document.getElementById('learnerOtp').value='';
       state.email = data.participant.email;
       state.participant = data.participant;
       state.courses = Array.isArray(data.courses) ? data.courses : [];
+      if (typeof data.learningReady === 'boolean') {
+        state.learningReady=data.learningReady;
+        document.getElementById('learningPortal').hidden=!state.learningReady;
+        document.getElementById('academyNavigation').hidden=!state.learningReady;
+      }
       const pendingRaw=localStorage.getItem(ACTIVE_SESSION_KEY);
       if(pendingRaw){
         let saved;try{saved=JSON.parse(pendingRaw);}catch{throw new Error('Bài làm lưu trên trình duyệt không đọc được. Dữ liệu chưa bị xóa; vui lòng liên hệ quản trị.');}
@@ -1411,6 +1445,7 @@
         }
       }
       renderCourseSelection();
+      if (state.learningReady) window.LearningPortal?.open();
       return true;
     }
 
@@ -1433,30 +1468,25 @@
       `;
 
       courseGrid.innerHTML = state.courses.length
-          ? state.courses.map((course) => {
+          ? state.courses.map((course, position) => {
               const remaining = Math.max(0, Number(course.remainingAttempts || 0));
               const canStart = Boolean(course.canStart);
               const labels = {OPEN:"Đang mở",UPCOMING:"Chưa đến giờ",CLOSED:"Đã đóng",INVALID:"Lịch chưa hợp lệ",DISABLED:"Tạm khóa"};
-              const dateLabel = value => value ? new Date(value).toLocaleString("vi-VN",{timeZone:"Asia/Ho_Chi_Minh"}) : "Không giới hạn";
+              const dateLabel = value => value ? new Date(value).toLocaleString("vi-VN",{timeZone:"Asia/Ho_Chi_Minh",dateStyle:"short",timeStyle:"short"}) : "Không giới hạn";
               const hasResult = Boolean(
                 course.hasResult ||
                 course.latestResult ||
                 Number(course.attemptsUsed || 0) > 0
               );
             return `
-              <article class="course-card${canStart ? "" : " unavailable"}">
-                <div class="course-code">${escapeHtml(course.id)}</div>
-                <h3>${escapeHtml(course.title)}</h3>
-                <p class="course-description">${escapeHtml(course.description || "Bài đánh giá kiến thức sản phẩm.")}</p>
-                <div class="course-facts">
-                  <div class="course-fact"><span>Số câu</span><strong>${escapeHtml(course.questionCount)}</strong></div>
-                  <div class="course-fact"><span>Thời gian</span><strong>${escapeHtml(course.durationMinutes)} phút</strong></div>
-                  <div class="course-fact"><span>Ngưỡng đạt</span><strong>${escapeHtml(course.passPercent)}%</strong></div>
-                  <div class="course-fact"><span>Lượt còn lại</span><strong>${escapeHtml(remaining)}/${escapeHtml(course.maxAttempts)}</strong></div>
+              <article class="course-card${canStart ? "" : " unavailable"}" data-window="${escapeHtml(course.windowStatus)}" data-opens="${escapeHtml(course.opensAt || '')}" data-closes="${escapeHtml(course.closesAt || '')}" data-position="${position}">
+                <div class="exam-card-heading"><h3>${escapeHtml(course.title)}</h3>
+                  <span class="exam-state" data-state="${escapeHtml(course.windowStatus)}">${escapeHtml(labels[course.windowStatus] || "Chưa mở")}</span>
                 </div>
+                <p class="v2-exam-meta">${escapeHtml(course.questionCount)} câu · ${escapeHtml(course.durationMinutes)} phút · Đạt từ ${escapeHtml(course.passPercent)}% · Còn ${escapeHtml(remaining)}/${escapeHtml(course.maxAttempts)} lượt</p>
                 <div class="course-window" data-state="${escapeHtml(course.windowStatus)}">
-                  <strong>${escapeHtml(labels[course.windowStatus] || "Chưa mở")}</strong><br>
-                  Từ ${escapeHtml(dateLabel(course.opensAt))}<br>Đến ${escapeHtml(dateLabel(course.closesAt))} · Giờ Việt Nam
+                  <span><b>Mở</b> ${escapeHtml(dateLabel(course.opensAt))}</span>
+                  <span><b>Hạn nộp</b> ${escapeHtml(dateLabel(course.closesAt))}</span>
                 </div>
                 <div class="course-actions">
                   <button
@@ -1484,6 +1514,7 @@
             `;
           }).join("")
         : '<div class="panel course-empty">Hiện chưa có bài kiểm tra nào được mở.</div>';
+      window.updateExamFilters?.();
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
@@ -1514,7 +1545,7 @@
       submitButton.textContent = "Nộp bài";
       renderCandidate();
       quizForm.innerHTML = state.questions.map((question, questionIndex) => `
-        <section id="question-${questionIndex + 1}" class="panel question-card">
+        <section id="question-${questionIndex + 1}" class="panel question-card" ${questionIndex ? 'hidden' : ''}>
           <div class="question-head">
             <div class="question-number">${questionIndex + 1}</div>
             <div class="question-text">${escapeHtml(question.question)}</div>
@@ -1535,7 +1566,9 @@
           </div>
         </section>
       `).join("");
+      state.currentQuestion=1;
       updateProgress();
+      openExamQuestion(1);
       startTimer();
       startInactivityWatcher();
       startProgressSync();
@@ -1550,10 +1583,29 @@
             class="question-nav-button${answered ? " answered-question" : ""}"
             type="button"
             data-question-number="${questionIndex + 1}"
+            ${state.currentQuestion === questionIndex + 1 ? 'aria-current="step"' : ''}
             aria-label="Đi đến câu ${questionIndex + 1}${answered ? ", đã chọn đáp án" : ", chưa chọn đáp án"}"
           >${questionIndex + 1}</button>
         `;
       }).join("");
+    }
+
+    function openExamQuestion(number, focus=false) {
+      const card=document.getElementById(`question-${number}`);
+      if (!card || !state.active) return;
+      const previous=document.getElementById(`question-${state.currentQuestion}`);
+      if(previous) previous.hidden=true;
+      state.currentQuestion=number;
+      card.hidden=false;
+      document.getElementById('examPosition').textContent=`Câu ${number} / ${state.questions.length}`;
+      document.getElementById('previousQuestion').disabled=number===1;
+      document.getElementById('nextQuestion').disabled=number===state.questions.length;
+      questionNavGrid.querySelector('[aria-current]')?.removeAttribute('aria-current');
+      questionNavGrid.querySelector(`[data-question-number="${number}"]`)?.setAttribute('aria-current','step');
+      if(focus){
+        card.tabIndex=-1;
+        card.focus();
+      }
     }
 
     function updateProgress() {
@@ -2052,22 +2104,21 @@
 
       resultView.innerHTML = `
         <div class="result-layout">
-          <aside class="panel history-panel">
-            <h3 class="history-title">Lịch sử thi (${history.length})</h3>
-            <div class="history-list">${historyHtml}</div>
-          </aside>
-          <div class="result-main">
             <section class="panel result-summary">
+              <div class="v2-result-status">${portalIcon(passed ? 'pass' : 'retry')}<h2>Kết quả bài kiểm tra</h2></div>
               <div class="result-user">
                 <span>Người làm bài: <strong>${escapeHtml(data.participant.name)}</strong></span>
                 <span>Công ty: <strong>${escapeHtml(data.participant.company)}</strong></span>
                 <span>Email: <strong>${escapeHtml(data.participant.email)}</strong></span>
                 <span>Bài kiểm tra: <strong>${escapeHtml(data.course ? data.course.title : "")}</strong></span>
+                ${data.submittedAt ? `<span>Đã nộp: <strong>${escapeHtml(data.submittedAt)}</strong></span>` : ""}
+                ${data.course?.passPercent != null ? `<span>Ngưỡng đạt: <strong>${escapeHtml(data.course.passPercent)}%</strong></span>` : ""}
+                ${data.remainingAttempts != null ? `<span>Lượt còn lại: <strong>${escapeHtml(data.remainingAttempts)}</strong></span>` : ""}
               </div>
               <div class="metrics">
                 <div class="metric">
                   <div class="metric-label">Kết quả</div>
-                  <div class="metric-value ${passed ? "pass-text" : "failed-text"}">${escapeHtml(data.result)}</div>
+                  <div class="metric-value ${passed ? "pass-text" : "failed-text"}">${passed ? "Đạt" : "Chưa đạt"}</div>
                 </div>
                 <div class="metric">
                   <div class="metric-label">Điểm bài thi</div>
@@ -2090,6 +2141,11 @@
                 </div>
               </div>
             </section>
+            <aside class="panel history-panel" aria-label="Lịch sử thi">
+              <h3 class="history-title">Lịch sử thi (${history.length})</h3>
+              <div class="history-list">${historyHtml}</div>
+            </aside>
+          <div class="result-main">
             <section class="panel analysis-panel">
               <div class="score-ring" style="background:${categoryRing}">
                 <div class="score-ring-copy">Tỷ lệ chính xác<strong>${escapeHtml(data.percent)}%</strong></div>
@@ -2162,6 +2218,7 @@
 
     function logoutParticipant() {
       if(state.active){window.alert('Hãy nộp bài trước khi đăng xuất.');return;}
+      window.LearningPortal?.close();
       const previousEmail = state.email;
       callApi("logoutParticipant",{deviceId:state.deviceId}).catch(()=>{});
       Portal.session("");
@@ -2179,6 +2236,7 @@
     }
 
     function handleParticipantAuthLoss(error,clearToken=true){
+      window.LearningPortal?.close();
       if(state.active)saveSession();
       state.authEpoch++;resetExamState(false);state.participant=null;state.courses=[];
       if(clearToken)Portal.session('');loginForm.reset();document.getElementById('deviceVerification').hidden=true;
@@ -2386,12 +2444,10 @@
     questionNavGrid.addEventListener("click", (event) => {
       const button = event.target.closest(".question-nav-button");
       if (!button) return;
-      const questionNumber = Number(button.dataset.questionNumber);
-      const questionCard = document.getElementById(`question-${questionNumber}`);
-      if (questionCard) {
-        questionCard.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
+      openExamQuestion(Number(button.dataset.questionNumber),true);
     });
+    document.getElementById('previousQuestion').addEventListener('click',()=>openExamQuestion(state.currentQuestion-1,true));
+    document.getElementById('nextQuestion').addEventListener('click',()=>openExamQuestion(state.currentQuestion+1,true));
 
     resultView.addEventListener("click", (event) => {
       const historyButton = event.target.closest("[data-history-token]");
@@ -2575,6 +2631,9 @@
           const restore=authenticateParticipant('',true);epoch=state.authEpoch;await restore;
         }else{
           const config=await callApi('getPublicConfig',{});
+          state.learningReady=config.learningReady===true;
+          document.getElementById('learningPortal').hidden=!state.learningReady;
+          document.getElementById('academyNavigation').hidden=!state.learningReady;
           if(epoch!==state.authEpoch)return;
           if(config.authSchema!==3||!config.ready){Portal.recovery('Hệ thống cần quản trị cập nhật Apps Script và chạy setupPlatformV2.',initialize);return;}
           showLoginForm();setLoginLoading(false);
@@ -2589,5 +2648,8 @@
     window.addEventListener('pageshow',event=>{if(event.persisted){if(state.active)saveSession();resetExamState(false);initialize();}});
     initialize();
   </script>
+  <section id="learningCertificate" aria-label="Chứng nhận"></section>
+  <script src="learning.js?v=20261113"></script>
+  <script src="portal-workspace.js?v=20261113"></script>
 </body>
 </html>
