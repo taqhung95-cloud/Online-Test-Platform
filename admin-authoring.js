@@ -16,10 +16,6 @@
         status.textContent = 'Nhập tên bài học và chọn tệp có nội dung.';
         return;
       }
-      if (file.size > 1024 ** 3) {
-        status.textContent = 'Dung lượng tối đa là 1 GB mỗi tệp.';
-        return;
-      }
       if (job?.file !== file || job.title !== title) job = {id:crypto.randomUUID(), file, title};
       button.disabled = input.disabled = form.elements.title.disabled = true;
       progress.hidden = false;
