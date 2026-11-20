@@ -3340,7 +3340,17 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
   body.v5.v4-focus .v4-drawer .v4-sidebar{display:flex}
 }
 </style>
-<style>body>.header{display:none!important}body:has(#bootView:not([hidden])) main{display:grid;place-items:center;min-height:100dvh;width:100%;max-width:none}#bootView{margin:auto}.v5-course-viewer .v5-video-stage{position:relative;min-inline-size:0}.v5-course-viewer .v5-drive-preview{position:absolute;inset:0;display:block;inline-size:100%;block-size:100%;border:0}.v5-course-actions .learning-row{flex-wrap:wrap}</style>
+<style>body>.header{display:none!important}body:has(#bootView:not([hidden])) main{display:grid;place-items:center;min-height:100dvh;width:100%;max-width:none}#bootView{margin:auto}.v5-course-viewer .v5-video-stage{position:relative;min-inline-size:0}.v5-course-viewer .v5-drive-preview{position:absolute;inset:0;display:block;inline-size:100%;block-size:100%;border:0}
+.v5-lesson-list{display:grid;gap:8px;margin:0;padding:0;list-style:none;max-block-size:42dvh;overflow-y:auto}
+.v5-lesson-list li{display:grid;grid-template-columns:minmax(0,1fr) 44px;align-items:stretch;gap:4px}
+.v5-lesson-choice{display:grid;gap:3px;min-block-size:44px;padding:8px 10px;text-align:start;font:inherit;color:inherit;background:var(--sg-glass-base,#fff);border:1px solid var(--sg-line,#ccd8e6);border-radius:10px;cursor:pointer;overflow-wrap:anywhere}
+.v5-lesson-choice span{font-size:var(--sg-type-compact,.8rem);color:var(--sg-muted,#465a6e)}
+.v5-lesson-choice[aria-current=true]{border-color:var(--sg-action,#9c420d);background:#ffefe0}
+.v5-lesson-check{display:grid;place-items:center;min-block-size:44px}
+.v5-lesson-check input{inline-size:20px;block-size:20px;margin:0;accent-color:var(--sg-action,#9c420d)}
+.v5-lesson-status{margin:4px 0 0}
+.v5-lesson-status:empty{display:none}
+</style>
 <style>
 .portal-spinner {
   width: 34px;
@@ -5299,7 +5309,12 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
       const button=event.target.closest('[data-learning-tab]');
       if(button) select(button.dataset.learningTab);
     });
-    window.LearningPortal = { getHome: () => home,select, open:() => select('overview'), close:() => {generation++; home = null; content.replaceChildren(); status.textContent = '';}};
+    async function completeLesson(learningId,lessonId) {
+      await request('completeLearningLesson',{learningId,lessonId});
+      const lesson=home?.courses.find(item=>item.id===learningId)?.lessons.find(item=>item.id===lessonId);
+      if(lesson)lesson.completed=true;
+    }
+    window.LearningPortal = { getHome: () => home,completeLesson,select, open:() => select('overview'), close:() => {generation++; home = null; content.replaceChildren(); status.textContent = '';}};
   }
 
   if (admin) {
@@ -5987,22 +6002,73 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
    player.className='v5-drive-preview';
    player.allowFullscreen=true;
    player.referrerPolicy='no-referrer';
-   function showLesson(link,title){
-     const id=new URL(link.href).pathname.split('/')[3];
-     if(!/^[\w-]{10,150}$/.test(id||''))return;
-     player.title=title;
-     player.src='https://drive.google.com/file/d/'+encodeURIComponent(id)+'/preview';
+   const list=document.createElement('ol');
+   list.className='v5-lesson-list';
+   list.setAttribute('aria-label','Danh sách bài học');
+   const status=document.createElement('p');
+   status.className='v5-lesson-status';
+   status.setAttribute('role','status');
+   let completed=done;
+   let currentButton;
+   function updateProgress(){
+     $('progress',course).value=completed;
+     $('.v5-course-state span',course).textContent=completed+'/'+rows.length+' bài đã hoàn thành';
    }
-   for(const row of rows){
+   rows.forEach((row,index)=>{
      const link=$('a',row);
-     const title=$('strong',row).textContent;
-     link.textContent='Mở trên Drive';
-     const open=document.createElement('button');
-     open.type='button';open.className='button secondary-button';open.textContent='Xem trước';
-     open.onclick=()=>showLesson(link,title);
-     row.append(open);actions.append(row);
-   }
-   if(rows.length){stage.append(player);showLesson($('a',rows[0]),$('strong',rows[0]).textContent);}
+     const saved=$('[data-lesson]',row);
+     const lessonTitle=$('strong',row).textContent;
+     const label='Bài '+(index+1)+' – '+lessonTitle;
+     const fileId=new URL(link.href).pathname.split('/')[3];
+     const item=document.createElement('li');
+     const select=document.createElement('button');
+     select.className='v5-lesson-choice';
+     select.type='button';
+     const number=document.createElement('span');
+     number.textContent='Bài '+(index+1);
+     const name=document.createElement('strong');
+     name.textContent=lessonTitle;
+     select.append(number,name);
+     function showLesson(){
+       if(currentButton===select)return;
+       if(!/^[\w-]{10,150}$/.test(fileId||'')){
+         status.textContent='Tệp bài học chưa có liên kết hợp lệ.';
+         return;
+       }
+       currentButton?.removeAttribute('aria-current');
+       currentButton=select;
+       select.setAttribute('aria-current','true');
+       player.title=label;
+       player.src='https://drive.google.com/file/d/'+encodeURIComponent(fileId)+'/preview';
+       status.textContent='';
+     }
+     select.addEventListener('click',showLesson);
+     const checkLabel=document.createElement('label');
+     checkLabel.className='v5-lesson-check';
+     const check=document.createElement('input');
+     check.type='checkbox';
+     check.setAttribute('aria-label','Đánh dấu hoàn thành '+label);
+     check.checked=check.disabled=saved.disabled;
+     check.addEventListener('change',async()=>{
+       if(!check.checked)return;
+       check.disabled=true;
+       try{
+         await LearningPortal.completeLesson(saved.dataset.course,saved.dataset.lesson);
+         completed++;
+         updateProgress();
+         status.textContent='Đã hoàn thành '+label+'.';
+       }catch(error){
+         check.checked=false;
+         check.disabled=false;
+         status.textContent=error.message;
+       }
+     });
+     checkLabel.append(check);
+     item.append(select,checkLabel);
+     list.append(item);
+     if(index===0)showLesson();
+   });
+   if(rows.length){stage.append(player);actions.append(list,status);}
    else stage.textContent='Chưa có bài học.';
    const exam=$('[data-learning-exam]',generic);
    if(exam)course.lastElementChild.append(exam);
@@ -8620,7 +8686,17 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
   body.v5.v4-focus .v4-drawer .v4-sidebar{display:flex}
 }
 </style>
-<style>body>.header{display:none!important}body:has(#bootView:not([hidden])) main{display:grid;place-items:center;min-height:100dvh;width:100%;max-width:none}#bootView{margin:auto}.v5-course-viewer .v5-video-stage{position:relative;min-inline-size:0}.v5-course-viewer .v5-drive-preview{position:absolute;inset:0;display:block;inline-size:100%;block-size:100%;border:0}.v5-course-actions .learning-row{flex-wrap:wrap}</style>
+<style>body>.header{display:none!important}body:has(#bootView:not([hidden])) main{display:grid;place-items:center;min-height:100dvh;width:100%;max-width:none}#bootView{margin:auto}.v5-course-viewer .v5-video-stage{position:relative;min-inline-size:0}.v5-course-viewer .v5-drive-preview{position:absolute;inset:0;display:block;inline-size:100%;block-size:100%;border:0}
+.v5-lesson-list{display:grid;gap:8px;margin:0;padding:0;list-style:none;max-block-size:42dvh;overflow-y:auto}
+.v5-lesson-list li{display:grid;grid-template-columns:minmax(0,1fr) 44px;align-items:stretch;gap:4px}
+.v5-lesson-choice{display:grid;gap:3px;min-block-size:44px;padding:8px 10px;text-align:start;font:inherit;color:inherit;background:var(--sg-glass-base,#fff);border:1px solid var(--sg-line,#ccd8e6);border-radius:10px;cursor:pointer;overflow-wrap:anywhere}
+.v5-lesson-choice span{font-size:var(--sg-type-compact,.8rem);color:var(--sg-muted,#465a6e)}
+.v5-lesson-choice[aria-current=true]{border-color:var(--sg-action,#9c420d);background:#ffefe0}
+.v5-lesson-check{display:grid;place-items:center;min-block-size:44px}
+.v5-lesson-check input{inline-size:20px;block-size:20px;margin:0;accent-color:var(--sg-action,#9c420d)}
+.v5-lesson-status{margin:4px 0 0}
+.v5-lesson-status:empty{display:none}
+</style>
 <style>
 .portal-spinner {
   width: 34px;
@@ -10160,22 +10236,73 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
    player.className='v5-drive-preview';
    player.allowFullscreen=true;
    player.referrerPolicy='no-referrer';
-   function showLesson(link,title){
-     const id=new URL(link.href).pathname.split('/')[3];
-     if(!/^[\w-]{10,150}$/.test(id||''))return;
-     player.title=title;
-     player.src='https://drive.google.com/file/d/'+encodeURIComponent(id)+'/preview';
+   const list=document.createElement('ol');
+   list.className='v5-lesson-list';
+   list.setAttribute('aria-label','Danh sách bài học');
+   const status=document.createElement('p');
+   status.className='v5-lesson-status';
+   status.setAttribute('role','status');
+   let completed=done;
+   let currentButton;
+   function updateProgress(){
+     $('progress',course).value=completed;
+     $('.v5-course-state span',course).textContent=completed+'/'+rows.length+' bài đã hoàn thành';
    }
-   for(const row of rows){
+   rows.forEach((row,index)=>{
      const link=$('a',row);
-     const title=$('strong',row).textContent;
-     link.textContent='Mở trên Drive';
-     const open=document.createElement('button');
-     open.type='button';open.className='button secondary-button';open.textContent='Xem trước';
-     open.onclick=()=>showLesson(link,title);
-     row.append(open);actions.append(row);
-   }
-   if(rows.length){stage.append(player);showLesson($('a',rows[0]),$('strong',rows[0]).textContent);}
+     const saved=$('[data-lesson]',row);
+     const lessonTitle=$('strong',row).textContent;
+     const label='Bài '+(index+1)+' – '+lessonTitle;
+     const fileId=new URL(link.href).pathname.split('/')[3];
+     const item=document.createElement('li');
+     const select=document.createElement('button');
+     select.className='v5-lesson-choice';
+     select.type='button';
+     const number=document.createElement('span');
+     number.textContent='Bài '+(index+1);
+     const name=document.createElement('strong');
+     name.textContent=lessonTitle;
+     select.append(number,name);
+     function showLesson(){
+       if(currentButton===select)return;
+       if(!/^[\w-]{10,150}$/.test(fileId||'')){
+         status.textContent='Tệp bài học chưa có liên kết hợp lệ.';
+         return;
+       }
+       currentButton?.removeAttribute('aria-current');
+       currentButton=select;
+       select.setAttribute('aria-current','true');
+       player.title=label;
+       player.src='https://drive.google.com/file/d/'+encodeURIComponent(fileId)+'/preview';
+       status.textContent='';
+     }
+     select.addEventListener('click',showLesson);
+     const checkLabel=document.createElement('label');
+     checkLabel.className='v5-lesson-check';
+     const check=document.createElement('input');
+     check.type='checkbox';
+     check.setAttribute('aria-label','Đánh dấu hoàn thành '+label);
+     check.checked=check.disabled=saved.disabled;
+     check.addEventListener('change',async()=>{
+       if(!check.checked)return;
+       check.disabled=true;
+       try{
+         await LearningPortal.completeLesson(saved.dataset.course,saved.dataset.lesson);
+         completed++;
+         updateProgress();
+         status.textContent='Đã hoàn thành '+label+'.';
+       }catch(error){
+         check.checked=false;
+         check.disabled=false;
+         status.textContent=error.message;
+       }
+     });
+     checkLabel.append(check);
+     item.append(select,checkLabel);
+     list.append(item);
+     if(index===0)showLesson();
+   });
+   if(rows.length){stage.append(player);actions.append(list,status);}
    else stage.textContent='Chưa có bài học.';
    const exam=$('[data-learning-exam]',generic);
    if(exam)course.lastElementChild.append(exam);
