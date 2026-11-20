@@ -8,6 +8,7 @@
   <link rel="icon" href="sungrow-elearning-icon.svg" type="image/svg+xml">
   <link rel="preload" href="v5-assets/deb3edc82cb2.woff2" as="font" type="font/woff2" crossorigin>
   <script src="platform.js?v=20261120-v5"></script>
+  <script src="admin-authoring.js?v=1"></script>
 </head>
 <body>
   <noscript>Cần bật JavaScript để sử dụng Sungrow E-learning.</noscript>
@@ -8943,7 +8944,7 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
     async function requestAdmin(action,payload){
       const epoch=adminEpoch;
       try{return await Portal.request(APPS_SCRIPT_URL,action,payload);}catch(error){
-        if(epoch===adminEpoch&&['getAdminDashboard','listCourseWindows','updateCourseWindow','unlinkParticipantDevice','adminLearningCatalog','saveLearningContent'].includes(action)&&Portal.isAuthError(error))showLogin(localizeServerMessage(error.message));
+        if(epoch===adminEpoch&&['getAdminDashboard','listCourseWindows','updateCourseWindow','unlinkParticipantDevice','adminLearningCatalog','saveLearningContent','adminExamEditor','adminSaveExam','adminBeginLessonUpload','adminUploadLessonChunk'].includes(action)&&Portal.isAuthError(error))showLogin(localizeServerMessage(error.message));
         throw error;
       }
     }
@@ -8952,6 +8953,16 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
       Portal.showView('dashboardView');
       if (document.getElementById('learningAdmin').dataset.available === undefined)
         window.updateAdminWorkspace?.(true);
+      const nav = document.getElementById('v2AdminNav');
+      if (!nav.dataset.authoringChecked) {
+        nav.dataset.authoringChecked = 'true';
+        const epoch = adminEpoch;
+        const request = (action, values) => callApi(action, {...values, adminToken});
+        request('getPublicConfig', {}).then(config => {
+          if (epoch === adminEpoch && config.authoringReady)
+            AdminAuthoring.installExamEditor(nav, document.querySelector('main'), request);
+        }).catch(() => { delete nav.dataset.authoringChecked; });
+      }
       dashboardView.hidden = false;
       adminMeta.hidden = false;
       window.refreshCourseWindows?.();
@@ -9547,6 +9558,7 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
     const request = (action, data = {}) => callApi(action, {...data, adminToken:sessionStorage.getItem(ADMIN_SESSION_KEY) || adminToken});
     function render(data, selected = '') {
       const course = data.courses.find(item => item.id === selected);
+      const createKey = !course && data.authoringReady ? crypto.randomUUID() : "";
       content.innerHTML = `<label for="learningCoursePicker">Khóa học</label>
         <select id="learningCoursePicker"><option value="">Tạo khóa mới</option>${data.courses.map(item =>
           `<option value="${escape(item.id)}" ${item.id === selected ? 'selected' : ''}>${escape(item.title)} · ${item.published ? 'Đã xuất bản' : 'Nháp'}</option>`).join('')}</select>
@@ -9570,10 +9582,15 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
       content.querySelector('select').onchange = event => render(data, event.target.value);
       wireForm(content.querySelector('#learningCourseForm'), async values => {
         const saved = await request('saveLearningContent', {...values, kind:'course', learningId:selected,
-          award:values.award === 'on', published:values.published === 'on'});
-        render(saved, selected || saved.courses.find(item => !data.courses.some(old => old.id === item.id))?.id);
+          award:values.award === 'on', published:values.published === 'on',
+          manageFolder:data.authoringReady === true, createKey});
+        render(saved, selected || createKey || saved.courses.find(item => !data.courses.some(old => old.id === item.id))?.id);
       }, status);
       if (!course) return;
+      if (data.authoringReady) AdminAuthoring.installCourseUpload(content, course, request, updated => {
+        render(updated, selected);
+        status.textContent = 'Đã thêm bài học.';
+      });
       const lessonForm = content.querySelector('#learningLessonForm');
       content.querySelectorAll('[data-edit-lesson]').forEach(button => button.onclick = () => {
         const lesson = course.lessons.find(item => item.id === button.dataset.editLesson);
@@ -9642,6 +9659,7 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
       main.querySelectorAll('[data-admin-section]').forEach(section => {
         section.hidden = !section.dataset.adminSection.split(' ').includes(target) ||
           (section.id === 'learningAdmin' && section.dataset.available !== 'true');
+        if(section.hidden && section instanceof HTMLDetailsElement) section.open = false;
       });
       const panel = document.getElementById(target === 'learning' ? 'learningAdmin' : 'schedulePanel');
       if (target !== 'reports' && panel && !panel.hidden) panel.open = true;
