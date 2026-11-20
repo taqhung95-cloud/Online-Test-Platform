@@ -189,6 +189,9 @@
   }
 
   function installCourseUpload(content, course, request, refresh) {
+    const heading = document.createElement('h4');
+    heading.textContent = 'Tải tệp từ máy';
+    content.append(document.createElement('hr'), heading);
     const note = document.createElement('p');
     if (!course.folderId) {
       note.textContent = 'Lưu khóa học để tạo thư mục Drive riêng.';
@@ -206,7 +209,7 @@
     form.id = 'trainingUploadForm';
     form.innerHTML = `
       <label>Tên bài học<input name="title" required maxlength="150"></label>
-      <label>Tệp đào tạo<input name="file" type="file" required accept=".mp4,.webm,.mov,.m4v,.pdf,.ppt,.pptx,.doc,.docx,.xls,.xlsx"></label>
+      <label>Tệp video, PDF hoặc PowerPoint<input name="file" type="file" required accept=".mp4,.webm,.mov,.m4v,.pdf,.ppt,.pptx,.doc,.docx,.xls,.xlsx"></label>
       <button class="button" type="submit">Tải lên và thêm bài học</button>
       <progress hidden aria-label="Tiến độ tải tài liệu"></progress>
       <p role="status" aria-live="polite"></p>`;

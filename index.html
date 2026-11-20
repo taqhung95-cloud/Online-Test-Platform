@@ -8,7 +8,7 @@
   <link rel="icon" href="sungrow-edu-favicon.ico" type="image/x-icon" sizes="16x16">
   <link rel="preload" href="v5-assets/deb3edc82cb2.woff2" as="font" type="font/woff2" crossorigin>
   <script src="platform.js?v=20261120-v5"></script>
-  <script src="admin-authoring.js?v=2"></script>
+  <script src="admin-authoring.js?v=3"></script>
 </head>
 <body>
   <noscript>Cần bật JavaScript để sử dụng Sungrow E-learning.</noscript>
@@ -5320,13 +5320,14 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
           <label class="learning-check"><input name="published" type="checkbox" ${course?.published ? 'checked' : ''}> Xuất bản cho học viên</label>
           <button class="button" type="submit">Lưu khóa học</button>
         </form>
-        ${course ? `<h3>Bài học và video</h3><p>Tải video vào Drive của Sungrow rồi dán đường dẫn hoặc mã tệp. Hãy kiểm tra quyền xem với tài khoản học viên.</p>
+        ${course ? `<h3>Tài liệu bài học</h3><p>Mỗi bài học dùng một tệp video, PDF hoặc PowerPoint. Chọn một trong hai cách bên dưới.</p>
           ${course.lessons.map(lesson => `<div class="learning-row"><a href="https://drive.google.com/file/d/${encodeURIComponent(lesson.fileId)}/view" target="_blank" rel="noopener noreferrer">${escape(lesson.title)}</a>
             <button type="button" class="button secondary" data-edit-lesson="${escape(lesson.id)}">Sửa</button></div>`).join('')}
+          <h4>Dùng tệp đã có trên Drive</h4>
           <form class="learning-form" id="learningLessonForm"><input type="hidden" name="lessonId">
             <label>Tên bài học<input name="title" required maxlength="150"></label>
-            <label>Video Google Drive<input name="file" required maxlength="400"></label>
-            <button class="button" type="submit">Lưu bài học</button>
+            <label>Liên kết hoặc mã tệp Drive<input name="file" required maxlength="400"></label>
+            <button class="button" type="submit">Lưu bài học từ liên kết</button>
           </form>` : ''}`;
       content.querySelector('select').onchange = event => render(data, event.target.value);
       wireForm(content.querySelector('#learningCourseForm'), async values => {
@@ -9571,13 +9572,14 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
           <label class="learning-check"><input name="published" type="checkbox" ${course?.published ? 'checked' : ''}> Xuất bản cho học viên</label>
           <button class="button" type="submit">Lưu khóa học</button>
         </form>
-        ${course ? `<h3>Bài học và video</h3><p>Tải video vào Drive của Sungrow rồi dán đường dẫn hoặc mã tệp. Hãy kiểm tra quyền xem với tài khoản học viên.</p>
+        ${course ? `<h3>Tài liệu bài học</h3><p>Mỗi bài học dùng một tệp video, PDF hoặc PowerPoint. Chọn một trong hai cách bên dưới.</p>
           ${course.lessons.map(lesson => `<div class="learning-row"><a href="https://drive.google.com/file/d/${encodeURIComponent(lesson.fileId)}/view" target="_blank" rel="noopener noreferrer">${escape(lesson.title)}</a>
             <button type="button" class="button secondary" data-edit-lesson="${escape(lesson.id)}">Sửa</button></div>`).join('')}
+          <h4>Dùng tệp đã có trên Drive</h4>
           <form class="learning-form" id="learningLessonForm"><input type="hidden" name="lessonId">
             <label>Tên bài học<input name="title" required maxlength="150"></label>
-            <label>Video Google Drive<input name="file" required maxlength="400"></label>
-            <button class="button" type="submit">Lưu bài học</button>
+            <label>Liên kết hoặc mã tệp Drive<input name="file" required maxlength="400"></label>
+            <button class="button" type="submit">Lưu bài học từ liên kết</button>
           </form>` : ''}`;
       content.querySelector('select').onchange = event => render(data, event.target.value);
       wireForm(content.querySelector('#learningCourseForm'), async values => {
