@@ -2408,7 +2408,49 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
   body.v5.v4-focus .v4-mobile{display:flex}
   body.v5.v4-focus .v4-drawer .v4-sidebar{display:flex}
 }
-</style><style>body>.header{display:none!important}body:has(#bootView:not([hidden])) main{display:grid;place-items:center;min-height:100dvh;width:100%;max-width:none}#bootView{margin:auto;background:var(--sg-glass-base,#f3f8ff);border-color:var(--sg-glass-border,#fff)}.v5-video-stage iframe{border:0;width:100%;min-height:280px;aspect-ratio:16/9}.v5-course-actions .learning-row{flex-wrap:wrap}</style></head>
+</style><style>body>.header{display:none!important}body:has(#bootView:not([hidden])) main{display:grid;place-items:center;min-height:100dvh;width:100%;max-width:none}#bootView{margin:auto}.v5-video-stage iframe{border:0;width:100%;min-height:280px;aspect-ratio:16/9}.v5-course-actions .learning-row{flex-wrap:wrap}</style><style>
+.portal-spinner {
+  width: 34px;
+  height: 34px;
+  margin: 0;
+  appearance: none;
+  background: transparent;
+  border: 3px solid transparent;
+  border-inline-start-color: var(--sg-action, #9c420d);
+  border-block-start-color: var(--sg-action, #9c420d);
+  border-radius: 50%;
+  animation: portal-spin .9s linear infinite;
+}
+.portal-spinner::-webkit-progress-bar { display: none; }
+.portal-spinner::-moz-progress-bar { display: none; }
+@keyframes portal-spin { to { transform: rotate(1turn); } }
+@media (prefers-reduced-motion: reduce) {
+  .portal-spinner { animation-duration: 6s; }
+}
+@media (forced-colors: active) {
+  .portal-spinner { forced-color-adjust: none; border-inline-start-color: CanvasText; border-block-start-color: CanvasText; }
+}
+#bootView { display: grid; justify-items: center; gap: 14px; text-align: center; }
+#bootView[hidden],
+#bootView[aria-busy="true"] #bootMessage,
+#bootView[aria-busy="false"] .portal-spinner,
+#loginBusy[hidden],
+body:not(:has(#loginView:not([hidden]))) #loginBusy { display: none; }
+#bootMessage { max-width: 32rem; margin: 0; }
+#loginBusy {
+  position: fixed;
+  inset-inline-end: max(20px, env(safe-area-inset-right));
+  inset-block-end: max(20px, env(safe-area-inset-bottom));
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--sg-glass-base, #f3f8ff);
+  pointer-events: none;
+}
+</style></head>
 <body class="admin-v2"><a class="v3-skip" href="#main-content">Bỏ qua tới nội dung chính</a>
   <header class="header">
     <div class="header-inner">
@@ -2431,7 +2473,11 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
   </header>
 
   <main id="main-content">
-    <section id="bootView" class="panel login-panel" aria-live="polite" aria-busy="true"><p class="eyebrow">Sungrow · Quản trị</p><h2>Đang mở trang quản trị</h2><p id="bootMessage" class="intro">Đang kiểm tra phiên đăng nhập…</p><button id="bootRetry" class="button" type="button" hidden>Thử lại kết nối</button></section>
+    <section id="bootView" aria-busy="true">
+      <progress class="portal-spinner" aria-label="Đang tải"></progress>
+      <p id="bootMessage" role="status"></p>
+      <button id="bootRetry" class="button" type="button" hidden>Thử lại kết nối</button>
+    </section>
     
 
     <section id="dashboardView" class="dashboard" hidden>
