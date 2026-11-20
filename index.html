@@ -3340,7 +3340,7 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
   body.v5.v4-focus .v4-drawer .v4-sidebar{display:flex}
 }
 </style>
-<style>body>.header{display:none!important}body:has(#bootView:not([hidden])) main{display:grid;place-items:center;min-height:100dvh;width:100%;max-width:none}#bootView{margin:auto}.v5-video-stage iframe{border:0;width:100%;min-height:280px;aspect-ratio:16/9}.v5-course-actions .learning-row{flex-wrap:wrap}</style>
+<style>body>.header{display:none!important}body:has(#bootView:not([hidden])) main{display:grid;place-items:center;min-height:100dvh;width:100%;max-width:none}#bootView{margin:auto}.v5-course-viewer .v5-video-stage{position:relative;min-inline-size:0}.v5-course-viewer .v5-drive-preview{position:absolute;inset:0;display:block;inline-size:100%;block-size:100%;border:0}.v5-course-actions .learning-row{flex-wrap:wrap}</style>
 <style>
 .portal-spinner {
   width: 34px;
@@ -5984,7 +5984,7 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
    const stage=$('.v5-video-stage',course);
    const actions=$('.v5-course-actions',course);
    const player=document.createElement('iframe');
-   player.className='v3-player';
+   player.className='v5-drive-preview';
    player.allowFullscreen=true;
    player.referrerPolicy='no-referrer';
    function showLesson(link,title){
@@ -8620,7 +8620,7 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
   body.v5.v4-focus .v4-drawer .v4-sidebar{display:flex}
 }
 </style>
-<style>body>.header{display:none!important}body:has(#bootView:not([hidden])) main{display:grid;place-items:center;min-height:100dvh;width:100%;max-width:none}#bootView{margin:auto}.v5-video-stage iframe{border:0;width:100%;min-height:280px;aspect-ratio:16/9}.v5-course-actions .learning-row{flex-wrap:wrap}</style>
+<style>body>.header{display:none!important}body:has(#bootView:not([hidden])) main{display:grid;place-items:center;min-height:100dvh;width:100%;max-width:none}#bootView{margin:auto}.v5-course-viewer .v5-video-stage{position:relative;min-inline-size:0}.v5-course-viewer .v5-drive-preview{position:absolute;inset:0;display:block;inline-size:100%;block-size:100%;border:0}.v5-course-actions .learning-row{flex-wrap:wrap}</style>
 <style>
 .portal-spinner {
   width: 34px;
@@ -10157,7 +10157,7 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
    const stage=$('.v5-video-stage',course);
    const actions=$('.v5-course-actions',course);
    const player=document.createElement('iframe');
-   player.className='v3-player';
+   player.className='v5-drive-preview';
    player.allowFullscreen=true;
    player.referrerPolicy='no-referrer';
    function showLesson(link,title){
