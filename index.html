@@ -4,7 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f06f22">
-  <title>CỔNG ĐÁNH GIÁ KIẾN THỨC SẢN PHẨM SUNGROW</title>
+  <title>Sungrow E-learning</title>
+  <link rel="icon" href="sungrow-elearning-icon.svg" type="image/svg+xml">
   <meta name="author" content="Sungrow Product Training">
   
   
@@ -3353,23 +3354,25 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
 #bootView { display: grid; justify-items: center; gap: 14px; text-align: center; }
 #bootView[hidden],
 #bootView[aria-busy="true"] #bootMessage,
-#bootView[aria-busy="false"] .portal-spinner,
-#loginBusy[hidden],
-body:not(:has(#loginView:not([hidden]))) #loginBusy { display: none; }
+#bootView[aria-busy="false"] .portal-spinner { display: none; }
 #bootMessage { max-width: 32rem; margin: 0; }
-#loginBusy {
-  position: fixed;
-  inset-inline-end: max(20px, env(safe-area-inset-right));
-  inset-block-end: max(20px, env(safe-area-inset-bottom));
-  z-index: 20;
-  display: grid;
-  place-items: center;
-  width: 52px;
-  height: 52px;
+:is(#loginButton, #registrationSubmitButton)[aria-busy="true"]::before {
+  content: "";
+  display: inline-block;
+  width: .85em;
+  height: .85em;
+  margin-inline-end: .5em;
+  vertical-align: -.08em;
+  border: 2px solid transparent;
+  border-block-start-color: currentColor;
+  border-inline-start-color: currentColor;
   border-radius: 50%;
-  background: var(--sg-glass-base, #f3f8ff);
-  pointer-events: none;
+  animation: portal-spin .9s linear infinite;
 }
+@media (prefers-reduced-motion: reduce) {
+  :is(#loginButton, #registrationSubmitButton)[aria-busy="true"]::before { animation-duration: 6s; }
+}
+
 </style></head>
 <body class="learner-v2"><a class="v3-skip" href="#main-content">Bỏ qua tới nội dung chính</a>
   <header class="header">
@@ -3482,7 +3485,6 @@ body:not(:has(#loginView:not([hidden]))) #loginBusy { display: none; }
 
       <div class="security-note">Mỗi tài khoản được thi tối đa 2 lần cho từng khóa học. Bài phải được nộp trước giờ đóng khóa học. Khi rời tab hoặc chuyển ứng dụng quá 60 giây, bài thi sẽ tự kết thúc; hệ thống ghi nhận số lần rời bài. Tải lại trang khi đang thi sẽ kết thúc và tính lượt thi sau khi xác nhận.</div>
     </section>
-    <div id="loginBusy" hidden><progress class="portal-spinner" aria-label="Đang xác thực đăng nhập"></progress></div>
 
     <section id="courseView" class="course-view academy-shell" hidden>
       <div id="courseUser" class="course-user" hidden></div>
@@ -3685,7 +3687,7 @@ body:not(:has(#loginView:not([hidden]))) #loginBusy { display: none; }
 
     function setLoginLoading(isLoading) {
       loginButton.disabled = isLoading;
-      document.getElementById('loginBusy').hidden = !isLoading;
+      loginButton.setAttribute('aria-busy', String(isLoading));
       loginButton.textContent = isLoading ? "Đang xác thực..." : "Đăng nhập";
     }
 
@@ -4131,6 +4133,7 @@ body:not(:has(#loginView:not([hidden]))) #loginBusy { display: none; }
       registrationSubmitButton.disabled = isLoading || !registrationOtpSent;
       registrationBackButton.disabled = isLoading;
       registrationOtpButton.disabled = isLoading || otpCooldownRemaining > 0;
+      registrationSubmitButton.setAttribute('aria-busy', String(isLoading));
       registrationSubmitButton.textContent = isLoading ? "Đang xác thực..." : "Đăng ký";
       if (isLoading) {
         registrationOtpButton.textContent = "Đang xử lý...";

@@ -4,7 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f06f22">
-  <title>Quản trị kết quả đánh giá Sungrow</title>
+  <title>Quản trị | Sungrow E-learning</title>
+  <link rel="icon" href="sungrow-elearning-icon.svg" type="image/svg+xml">
   
   
   <style>
@@ -2433,23 +2434,8 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
 #bootView { display: grid; justify-items: center; gap: 14px; text-align: center; }
 #bootView[hidden],
 #bootView[aria-busy="true"] #bootMessage,
-#bootView[aria-busy="false"] .portal-spinner,
-#loginBusy[hidden],
-body:not(:has(#loginView:not([hidden]))) #loginBusy { display: none; }
+#bootView[aria-busy="false"] .portal-spinner { display: none; }
 #bootMessage { max-width: 32rem; margin: 0; }
-#loginBusy {
-  position: fixed;
-  inset-inline-end: max(20px, env(safe-area-inset-right));
-  inset-block-end: max(20px, env(safe-area-inset-bottom));
-  z-index: 20;
-  display: grid;
-  place-items: center;
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  background: var(--sg-glass-base, #f3f8ff);
-  pointer-events: none;
-}
 </style></head>
 <body class="admin-v2"><a class="v3-skip" href="#main-content">Bỏ qua tới nội dung chính</a>
   <header class="header">
@@ -2603,7 +2589,7 @@ body:not(:has(#loginView:not([hidden]))) #loginBusy { display: none; }
     const ADMIN_LANGUAGE_KEY = "sungrow_admin_language_v1";
     const TRANSLATIONS = {
       vi: {
-        browserTitle: "Quản trị kết quả đánh giá Sungrow", pageTitle: "QUẢN TRỊ KẾT QUẢ ĐÁNH GIÁ",
+        browserTitle: "Quản trị | Sungrow E-learning", pageTitle: "QUẢN TRỊ KẾT QUẢ ĐÁNH GIÁ",
         logout: "Đăng xuất", adminAccount: "Tài khoản quản trị", adminLogin: "Đăng nhập quản trị",
         loginIntro: "Sử dụng email đã được kích hoạt và mật khẩu trong sheet Admins.", adminEmail: "Email quản trị",
         password: "Mật khẩu", passwordPlaceholder: "Nhập mật khẩu quản trị", adminLoginButton: "Đăng nhập quản trị",
@@ -2630,7 +2616,7 @@ body:not(:has(#loginView:not([hidden]))) #loginBusy { display: none; }
         termination: "Kết thúc", tabLeaves: "Rời tab", minutesShort: "ph", secondsShort: "giây"
       },
       en: {
-        browserTitle: "Sungrow Assessment Results Administration", pageTitle: "ASSESSMENT RESULTS ADMINISTRATION",
+        browserTitle: "Admin | Sungrow E-learning", pageTitle: "ASSESSMENT RESULTS ADMINISTRATION",
         logout: "Log out", adminAccount: "Administrator account", adminLogin: "Administrator login",
         loginIntro: "Use an activated email address and the password stored in the Admins sheet.", adminEmail: "Administrator email",
         password: "Password", passwordPlaceholder: "Enter administrator password", adminLoginButton: "Log in",
