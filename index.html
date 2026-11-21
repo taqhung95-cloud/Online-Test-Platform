@@ -2938,47 +2938,47 @@ body.v5 .v5-document-stage img{
 }
 body.v5 .v3-course-grid.v5-single-course{
   grid-template-columns:minmax(0,1fr) clamp(18rem,26%,23rem);
+  flex:none;
+  align-content:start;
 }
+body.v5 #learningPortal .learning-content:has(> .v5-single-course){overflow-y:auto}
 body.v5 .v5-course-header .v5-title{
   display:flex;
   flex-wrap:wrap;
   align-items:center;
   gap:8px 12px;
 }
-.v5-course-type{
-  flex:none;
-  padding:3px 8px;
-  border-radius:6px;
-  background:#eaf3f9;
-  color:var(--sg-muted);
-  font-size:var(--sg-type-compact);
-  font-weight:600;
-}
 body.v5 .v5-single-course>section.v5-course-viewer{
   block-size:auto;
   min-block-size:0;
-  align-self:stretch;
+  align-self:start;
   padding:8px;
 }
 body.v5 .v5-single-course .v5-video-stage{
-  flex:1 1 auto;
+  flex:none;
   block-size:auto;
-  aspect-ratio:auto;
+  aspect-ratio:16/9;
   border-radius:14px;
 }
+.v5-media{display:grid;gap:6px;min-inline-size:0}
+.v5-media-toolbar{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:4px 8px;border:1px solid var(--sg-line);border-radius:10px;background:var(--sg-glass-base)}
+.v5-media-toolbar span[data-lesson-position]{color:var(--sg-muted);font-size:var(--sg-type-detail)}
+.v5-media-toolbar .button{display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.v5-media-toolbar svg{inline-size:16px;block-size:16px;flex:none}
+body.v5 .v5-media:fullscreen{grid-template-rows:minmax(0,1fr) auto;padding:8px;background:#142238}
+body.v5 .v5-media:fullscreen .v5-video-stage{aspect-ratio:auto;border-radius:0}
+.v5-current-lesson{margin:0;padding:4px 8px;overflow-wrap:anywhere}
+.v5-lesson-navigation{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:8px 0 0;border-top:1px solid var(--sg-line)}
+.v5-lesson-navigation .button{display:grid;justify-items:start;gap:2px;min-inline-size:0;white-space:normal;overflow-wrap:anywhere;text-align:start}
+.v5-lesson-navigation button[data-next-lesson]{grid-column:2;justify-items:end;text-align:end;background:#fff4e8;border-color:#d59970}
+.v5-lesson-navigation span{font-size:var(--sg-type-compact);color:var(--sg-muted)}
+.v5-lesson-navigation strong{font-size:var(--sg-type-detail);font-weight:600}
 body.v5 .v5-single-course>section.v5-course-info{
   block-size:auto;
   align-self:start;
   gap:12px;
 }
 .v5-course-info > *{flex-shrink:0}
-@media(min-width:1024px){
-  body.v5 .v3-course-grid.v5-single-course{grid-template-rows:minmax(0,1fr)}
-  body.v5 .v5-single-course>section.v5-course-info{max-block-size:100%;overflow-y:auto}
-}
-@media(max-width:1023px){
-  body.v5 .v5-single-course .v5-video-stage{flex:none;block-size:clamp(14rem,50dvh,29rem)}
-}
 .v5-course-about{color:var(--sg-muted)}
 .v5-course-state{
   display:flex;
@@ -3626,7 +3626,7 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
 .v5-lesson-list li:has(.v5-lesson-choice[aria-current=true]){border-color:var(--sg-action);background:#ffefe0}
 .v5-lesson-choice{display:grid;align-content:center;gap:3px;min-block-size:52px;padding:8px 4px 8px 10px;text-align:start;font:inherit;color:inherit;background:transparent;border:0;border-radius:9px;cursor:pointer;overflow-wrap:anywhere}
 .v5-lesson-choice span{font-size:var(--sg-type-compact,.8rem);color:var(--sg-muted,#465a6e)}
-.v5-lesson-choice strong{font-size:var(--sg-type-detail,0.9rem);line-height:1.4;font-weight:600}
+.v5-lesson-choice strong{font-size:.8125rem;line-height:1.4;font-weight:600}
 .v5-lesson-choice:focus-visible{outline-offset:-3px}
 .v5-lesson-check{display:grid;place-items:center;min-block-size:44px}
 .v5-lesson-check:focus-within{outline:2px solid var(--sg-action);outline-offset:-3px;border-radius:9px}
@@ -6459,7 +6459,23 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
    const course=document.createElement('div');
    course.className='v3-course-grid v5-single-course';
    course.dataset.v4='true';
-   course.innerHTML='<section class="panel v5-course-viewer" aria-label="Nội dung khóa học"><div class="v5-video-stage"></div></section><section class="panel v5-course-info"><h3>Thông tin khóa học</h3><p class="v5-course-about"></p><div class="v5-course-state"><div><strong>Tiến độ</strong><span></span></div><progress aria-label="Tiến độ khóa học"></progress></div><div class="v5-course-actions"></div></section>';
+   course.innerHTML=`<section class="panel v5-course-viewer" aria-label="Nội dung khóa học">
+     <div class="v5-media">
+       <div class="v5-video-stage"></div>
+       <div class="v5-media-toolbar" role="group" aria-label="Điều khiển khung xem" hidden>
+         <span data-lesson-position></span>
+         <button type="button" class="button secondary-button" data-fullscreen>
+           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 9V4h5m6 0h5v5m0 6v5h-5m-6 0H4v-5"/></svg>
+           <span>Toàn màn hình</span>
+         </button>
+       </div>
+     </div>
+     <h3 class="v5-current-lesson" tabindex="-1" hidden></h3>
+     <nav class="v5-lesson-navigation" aria-label="Chuyển bài học" hidden>
+       <button type="button" class="button secondary-button" data-previous-lesson hidden><span>← Bài trước</span><strong></strong></button>
+       <button type="button" class="button secondary-button" data-next-lesson hidden><span>Bài tiếp theo →</span><strong></strong></button>
+     </nav>
+   </section><section class="panel v5-course-info"><h3>Thông tin khóa học</h3><p class="v5-course-about"></p><div class="v5-course-state"><div><strong>Tiến độ</strong><span></span></div><progress aria-label="Tiến độ khóa học"></progress></div><div class="v5-course-actions"></div></section>`;
    $('.v5-course-about',course).textContent=$('p',generic).textContent;
    const rows=$$('.learning-row',generic);
    const done=$$('[data-lesson]:disabled',generic).length;
@@ -6478,8 +6494,61 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
    const status=document.createElement('p');
    status.className='v5-lesson-status';
    status.setAttribute('role','status');
+   const media=$('.v5-media',course);
+   const toolbar=$('.v5-media-toolbar',course);
+   const caption=$('.v5-current-lesson',course);
+   const navigation=$('.v5-lesson-navigation',course);
+   const previous=$('[data-previous-lesson]',navigation);
+   const next=$('[data-next-lesson]',navigation);
+   const fullscreen=$('[data-fullscreen]',toolbar);
+   fullscreen.hidden=!document.fullscreenEnabled||typeof media.requestFullscreen!=='function';
+   fullscreen.addEventListener('click',async()=>{
+     try{
+       if(document.fullscreenElement===media)await document.exitFullscreen();
+       else await media.requestFullscreen();
+     }catch{status.textContent='Trình duyệt chưa mở được chế độ toàn màn hình.';}
+   });
+   media.addEventListener('fullscreenchange',()=>{
+     $('span',fullscreen).textContent=document.fullscreenElement===media?'Thoát toàn màn hình':'Toàn màn hình';
+   });
    let completed=done;
-   let currentButton;
+   let currentIndex=-1;
+   const lessons=[];
+   function updateNavigation(button,lesson){
+     button.hidden=!lesson;
+     $('strong',button).textContent=lesson?.title||'';
+   }
+   function showLesson(index){
+     const lesson=lessons[index];
+     if(!lesson||index===currentIndex)return false;
+     if(!/^[\w-]{10,150}$/.test(lesson.fileId||'')){
+       status.textContent='Tệp bài học chưa có liên kết hợp lệ.';
+       return false;
+     }
+     lessons[currentIndex]?.button.removeAttribute('aria-current');
+     currentIndex=index;
+     lesson.button.setAttribute('aria-current','true');
+     player.title=lesson.label;
+     player.src='https://drive.google.com/file/d/'+encodeURIComponent(lesson.fileId)+'/preview';
+     if(!player.isConnected)stage.replaceChildren(player);
+     $('[data-lesson-position]',toolbar).textContent='Bài '+(index+1)+' / '+lessons.length;
+     toolbar.hidden=false;
+     caption.textContent=lesson.label;
+     caption.hidden=false;
+     updateNavigation(previous,lessons[index-1]);
+     updateNavigation(next,lessons[index+1]);
+     navigation.hidden=previous.hidden&&next.hidden;
+     status.textContent='';
+     return true;
+   }
+   function changeLesson(offset){
+     if(showLesson(currentIndex+offset)){
+       caption.focus({preventScroll:true});
+       media.scrollIntoView({block:'nearest',inline:'nearest'});
+     }
+   }
+   previous.addEventListener('click',()=>changeLesson(-1));
+   next.addEventListener('click',()=>changeLesson(1));
    function updateProgress(){
      $('progress',course).value=completed;
      $('.v5-course-state span',course).textContent=completed+'/'+rows.length+' bài đã hoàn thành';
@@ -6489,7 +6558,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
      const saved=$('[data-lesson]',row);
      const lessonTitle=$('strong',row).textContent;
      const label='Bài '+(index+1)+' – '+lessonTitle;
-     const fileId=new URL(link.href).pathname.split('/')[3];
+     const fileId=link?.pathname.split('/')[3];
      const item=document.createElement('li');
      const select=document.createElement('button');
      select.className='v5-lesson-choice';
@@ -6499,20 +6568,10 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
      const name=document.createElement('strong');
      name.textContent=lessonTitle;
      select.append(number,name);
-     function showLesson(){
-       if(currentButton===select)return;
-       if(!/^[\w-]{10,150}$/.test(fileId||'')){
-         status.textContent='Tệp bài học chưa có liên kết hợp lệ.';
-         return;
-       }
-       currentButton?.removeAttribute('aria-current');
-       currentButton=select;
-       select.setAttribute('aria-current','true');
-       player.title=label;
-       player.src='https://drive.google.com/file/d/'+encodeURIComponent(fileId)+'/preview';
-       status.textContent='';
-     }
-     select.addEventListener('click',showLesson);
+     lessons.push({title:lessonTitle,label,fileId,button:select});
+     select.addEventListener('click',()=>{
+       if(showLesson(index)&&innerWidth<=1023)media.scrollIntoView({block:'start',inline:'nearest'});
+     });
      const checkLabel=document.createElement('label');
      checkLabel.className='v5-lesson-check';
      const check=document.createElement('input');
@@ -6536,18 +6595,17 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
      checkLabel.append(check);
      item.append(select,checkLabel);
      list.append(item);
-     if(index===0)showLesson();
    });
    if(rows.length){
      const lessonsHeading=document.createElement('h4');
      lessonsHeading.textContent='Bài học';
-     stage.append(player);
      actions.append(lessonsHeading,list,status);
    }
    else stage.textContent='Chưa có bài học.';
    const exam=$('[data-learning-exam]',generic);
    if(exam)course.lastElementChild.append(exam);
    content.replaceChildren(heading,course);
+   if(rows.length&&!showLesson(0))stage.textContent='Bài học chưa sẵn sàng.';
    const header=pagehead(content,heading);
    header.classList.add('v5-course-header');
    $('.v5-head-actions',header).append(back(content,()=>LearningPortal.select('courses'),'Thư viện khóa học'));
