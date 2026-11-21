@@ -254,8 +254,6 @@ body:is(.learner-v2,.admin-v2) {
   background: radial-gradient(ellipse at 16% 0%, #e8effc, transparent 56%), #f5f7fb;
 }
 body:is(.learner-v2,.admin-v2) main { min-width: 0; }
-#portalNavigationStatus { margin: 0 0 12px; }
-#portalNavigationStatus:empty { margin: 0; }
 body:is(.learner-v2,.admin-v2) .header,
 .v2-exam-tools {
   background: var(--v2-glass);

@@ -1349,6 +1349,8 @@ label{font-weight:500}
 .learning-nav button[aria-pressed=true]{color:#843500;background:#fff1e5;border-color:#ffd3ad}
 .learning-workspace :focus-visible,.learning-admin :focus-visible{outline:3px solid var(--orange-dark);outline-offset:3px}
 .learning-status:empty{display:none}
+#portalNavigationStatus{margin:0}
+#portalNavigationStatus:empty{position:absolute}
 .learning-status{margin:12px 0;color:var(--portal-ink)}
 .learning-content{padding-block:12px}
 .learning-hero{padding:clamp(22px,5vw,55px);border-radius:14px;background:#172b46;color:white;border-inline-start:6px solid var(--orange)}
@@ -3867,6 +3869,7 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
       <div class="v2-admin-main">
       <h2 id="v2AdminTitle">Báo cáo đào tạo</h2>
       <div id="adminMeta" hidden><span id="adminIdentity"></span><button id="languageToggle" type="button" class="button secondary-button">EN</button></div>
+      <p id="portalNavigationStatus" role="status"></p>
       <details id="learningAdmin" class="panel learning-admin" data-admin-section="learning" hidden>
         <summary>Quản lý khóa học, video và chứng nhận</summary>
         <p class="learning-status" role="status"></p>
@@ -5994,7 +5997,6 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
 </script><script>(() => {
  const admin=false,main=document.querySelector('main'),header=document.querySelector('body>.header'),logo=header.querySelector('img').src;
  const shell=document.createElement('div');shell.className='v4-shell';
- const navigationStatus=document.createElement('p');navigationStatus.id='portalNavigationStatus';navigationStatus.setAttribute('role','status');main.prepend(navigationStatus);
  const scroll=document.createElement('div');scroll.className='v4-scroll';
  const side=document.createElement('aside');side.className='v4-sidebar';side.setAttribute('aria-label',admin?'Quản trị đào tạo':'Cổng học viên');
  const icon=name=>name==='profile'?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/></svg>':portalIcon(name);
