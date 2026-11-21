@@ -3721,6 +3721,20 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
 .v5-lesson-status:empty{display:none}
 .portal-policy-links{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 14px;margin-block-start:12px;font-size:.875rem}
 .portal-policy-links a{color:var(--sg-action,#873704);text-underline-offset:.15em}
+#loginPolicyLinks{display:none;padding-block-end:env(safe-area-inset-bottom,0px);text-align:center}
+main#main-content:has(> #loginView:not([hidden]) #loginContent:not([hidden])) > #loginPolicyLinks{display:flex}
+#loginPolicyLinks a{display:inline-flex;align-items:center;min-block-size:32px}
+@media(min-width:721px){
+  body.learner-v2 main#main-content:has(> #loginView:not([hidden]) #loginContent:not([hidden])){
+    grid-template-rows:minmax(0,1fr) auto minmax(min-content,1fr);
+  }
+  main#main-content:has(> #loginView:not([hidden]) #loginContent:not([hidden])) > #loginView{grid-row:2}
+  #loginPolicyLinks{grid-column:1;grid-row:3;align-self:end}
+}
+@media(max-width:720px){
+  #loginPolicyLinks{order:2;flex-shrink:0;margin-block-start:auto;padding-block-start:10px}
+  #loginPolicyLinks a{min-block-size:44px}
+}
 </style>
 <style>
 .portal-load-track {
@@ -3860,11 +3874,6 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
           <button id="passwordSetupToggle" class="registration-link" type="button">Quên mật khẩu</button>
           <p id="loginMessage" class="login-message" role="alert"></p>
         </form>
-        <nav class="portal-policy-links" aria-label="Thông tin về cổng đào tạo">
-          <a href="about.html">Giới thiệu</a>
-          <a href="privacy.html">Quyền riêng tư</a>
-          <a href="terms.html">Điều khoản</a>
-        </nav>
       </div>
 
       <form id="passwordSetupForm" class="registration-form account-form" aria-labelledby="recoveryTitle" hidden>
@@ -3915,6 +3924,12 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
 
       <div class="security-note">Mỗi tài khoản được thi tối đa 2 lần cho từng khóa học. Bài phải được nộp trước giờ đóng khóa học. Khi rời tab hoặc chuyển ứng dụng quá 60 giây, bài thi sẽ tự kết thúc; hệ thống ghi nhận số lần rời bài. Tải lại trang khi đang thi sẽ kết thúc và tính lượt thi sau khi xác nhận.</div>
     </section>
+
+    <nav id="loginPolicyLinks" class="portal-policy-links" aria-label="Thông tin về cổng đào tạo">
+      <a href="about.html">Giới thiệu</a>
+      <a href="privacy.html">Quyền riêng tư</a>
+      <a href="terms.html">Điều khoản</a>
+    </nav>
 
     <section id="courseView" class="course-view academy-shell" hidden>
       <div id="courseUser" class="course-user" hidden></div>
