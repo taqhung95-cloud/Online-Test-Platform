@@ -3697,6 +3697,15 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
 <style>body>.header{display:none!important}body:has(#bootView:not([hidden])) main{display:grid;place-items:center;min-height:100dvh;width:100%;max-width:none}#bootView{margin:auto}.v5-course-viewer .v5-video-stage{position:relative;min-inline-size:0}.v5-course-viewer .v5-media-player{position:absolute;inset:0;display:block;inline-size:100%;block-size:100%;border:0;object-fit:contain}
 .v5-media-feedback{display:grid;justify-items:center;gap:12px;padding:20px;text-align:center;color:#fff}
 .v5-media-feedback p{margin:0}
+.v5-media-toolbar{flex-wrap:wrap}
+.v5-pdf-scroll{position:absolute;inset:0;box-sizing:border-box;overflow:auto;padding:10px}
+.v5-pdf-scroll canvas{display:block;margin-inline:auto;background:#fff}
+.v5-pdf-toolbar:not([hidden]),.v5-pdf-toolbar [role=group]{display:flex;flex-wrap:wrap;align-items:center;gap:4px}
+.v5-pdf-toolbar:not([hidden]){gap:4px 10px}
+.v5-pdf-toolbar [role=status]{min-inline-size:3em;text-align:center;font-size:var(--sg-type-detail,.9rem);white-space:nowrap}
+.v5-pdf-toolbar .button{min-inline-size:38px;min-block-size:38px;padding:0 7px;font-size:1.15rem}
+.v5-pdf-toolbar [aria-disabled=true]{opacity:.5;cursor:default}
+@media(pointer:coarse){.v5-pdf-toolbar .button{min-inline-size:44px;min-block-size:44px}}
 .v5-course-actions h4{margin:0;font-size:var(--sg-type-detail,0.9rem)}
 .v5-lesson-list{display:grid;gap:8px;margin:0;padding:0;list-style:none}
 .v5-lesson-list li{display:grid;grid-template-columns:minmax(0,1fr) 44px;align-items:stretch;border:1px solid var(--sg-line);border-radius:10px;background:var(--sg-glass-base)}
@@ -6568,6 +6577,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
        <div class="v5-video-stage"></div>
        <div class="v5-media-toolbar" role="group" aria-label="Điều khiển khung xem" hidden>
          <span data-lesson-position></span>
+         <div class="v5-pdf-toolbar" data-pdf-toolbar hidden></div>
          <button type="button" class="button secondary-button" data-fullscreen>
            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 9V4h5m6 0h5v5m0 6v5h-5m-6 0H4v-5"/></svg>
            <span>Toàn màn hình</span>
@@ -6599,6 +6609,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
    status.setAttribute('role','status');
    const media=$('.v5-media',course);
    const toolbar=$('.v5-media-toolbar',course);
+   const pdfToolbar=$('[data-pdf-toolbar]',toolbar);
    const caption=$('.v5-current-lesson',course);
    const navigation=$('.v5-lesson-navigation',course);
    const previous=$('[data-previous-lesson]',navigation);
@@ -6652,6 +6663,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
      stage.replaceChildren(loading);
      function showError(message){
        if(!active())return;
+       clearPlayer();
        stage.removeAttribute('aria-busy');
        const feedback=document.createElement('div');
        feedback.className='v5-media-feedback';
@@ -6680,10 +6692,24 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
        if(source.origin!==ticket.origin||source.pathname!==ticket.pathname.replace(/^\/lesson\//,'/media/'))
          throw new Error('Địa chỉ tài liệu không hợp lệ.');
        if(media.type==='application/pdf'){
-         player=document.createElement('iframe');
-         player.title=lesson.label;
-         player.referrerPolicy='no-referrer';
-       }else if(String(media.type).startsWith('video/')){
+         const {showLessonPdf}=await import('./lesson-pdf.mjs?v=20261122-pdf');
+         if(!active())return;
+         const view=document.createElement('div');
+         view.className='v5-pdf-scroll';
+         view.tabIndex=0;
+         view.setAttribute('role','region');
+         view.setAttribute('aria-label','Nội dung tài liệu');
+         player=view;
+         stage.append(view);
+         await showLessonPdf({url:source.href,view,toolbar:pdfToolbar,label:lesson.label,signal:controller.signal,
+           onError:()=>showError('Chưa mở được trang tài liệu. Vui lòng thử lại.')});
+         if(active()){
+           loading.remove();
+           stage.removeAttribute('aria-busy');
+         }
+         return;
+       }
+       if(String(media.type).startsWith('video/')){
          player=document.createElement('video');
          player.controls=true;
          player.playsInline=true;
