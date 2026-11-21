@@ -7,7 +7,7 @@
   <title>Sungrow E-learning</title>
   <link rel="icon" href="sungrow-edu-favicon.ico" type="image/x-icon" sizes="16x16">
   <link rel="preload" href="v5-assets/deb3edc82cb2.woff2" as="font" type="font/woff2" crossorigin>
-  <script src="platform.js?v=20261121-concurrency"></script>
+  <script src="platform.js?v=20261121-private-media"></script>
   <script src="admin-authoring.js?v=7"></script>
 </head>
 <body class="learner-v2">
@@ -3694,7 +3694,9 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
   body.v5.v4-focus .v4-drawer .v4-sidebar{display:flex}
 }
 </style>
-<style>body>.header{display:none!important}body:has(#bootView:not([hidden])) main{display:grid;place-items:center;min-height:100dvh;width:100%;max-width:none}#bootView{margin:auto}.v5-course-viewer .v5-video-stage{position:relative;min-inline-size:0}.v5-course-viewer .v5-drive-preview{position:absolute;inset:0;display:block;inline-size:100%;block-size:100%;border:0}
+<style>body>.header{display:none!important}body:has(#bootView:not([hidden])) main{display:grid;place-items:center;min-height:100dvh;width:100%;max-width:none}#bootView{margin:auto}.v5-course-viewer .v5-video-stage{position:relative;min-inline-size:0}.v5-course-viewer .v5-media-player{position:absolute;inset:0;display:block;inline-size:100%;block-size:100%;border:0;object-fit:contain}
+.v5-media-feedback{display:grid;justify-items:center;gap:12px;padding:20px;text-align:center;color:#fff}
+.v5-media-feedback p{margin:0}
 .v5-course-actions h4{margin:0;font-size:var(--sg-type-detail,0.9rem)}
 .v5-lesson-list{display:grid;gap:8px;margin:0;padding:0;list-style:none}
 .v5-lesson-list li{display:grid;grid-template-columns:minmax(0,1fr) 44px;align-items:stretch;border:1px solid var(--sg-line);border-radius:10px;background:var(--sg-glass-base)}
@@ -4220,7 +4222,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
         if(action==='submitAttempt'&&epoch===state.authEpoch)window.LearningPortal?.invalidate();
         return data;
       }catch(error){
-        if(epoch===state.authEpoch&&['listCourses','startAttempt','resumeAttempt','saveAttemptProgress','submitAttempt','getLatestResult','getAttemptResult','reportAttention','learningHome','updateLearningProfile','completeLearningLesson'].includes(action)&&Portal.isAuthError(error))handleParticipantAuthLoss(error);
+        if(epoch===state.authEpoch&&['listCourses','startAttempt','resumeAttempt','saveAttemptProgress','submitAttempt','getLatestResult','getAttemptResult','reportAttention','learningHome','updateLearningProfile','completeLearningLesson','getLearningPlayback'].includes(action)&&Portal.isAuthError(error))handleParticipantAuthLoss(error);
         throw error;
       }
     }
@@ -5811,8 +5813,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
           const completed = course.lessons.filter(lesson => lesson.completed).length;
           return `<article class="learning-card"><h3>${escape(course.title)}</h3><p>${escape(course.description)}</p>
             <p>${completed}/${course.lessons.length} bài học hoàn thành</p>${course.lessons.map(lesson =>
-              `<div class="learning-row"><span><strong>${escape(lesson.title)}</strong>
-                <a href="https://drive.google.com/file/d/${encodeURIComponent(lesson.fileId)}/view" target="_blank" rel="noopener noreferrer">Mở trên Drive</a></span>
+              `<div class="learning-row"><span><strong>${escape(lesson.title)}</strong></span>
                 <button type="button" class="button secondary-button" data-course="${escape(course.id)}" data-lesson="${escape(lesson.id)}"
                   ${lesson.completed ? 'disabled' : ''}>${lesson.completed ? 'Đã hoàn thành' : 'Đánh dấu hoàn thành'}</button></div>`).join('')}
             ${course.examId ? `<button type="button" class="button secondary-button" data-learning-exam="${escape(course.examId)}">Xem bài kiểm tra</button>` : ''}</article>`;
@@ -5938,6 +5939,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
       if(original!==home||homeRequest)invalidate();
     }
     window.LearningPortal = {getHome:()=>home,completeLesson,select,seed,invalidate,cancelNavigation,
+      getPlayback:(learningId,lessonId)=>request('getLearningPlayback',{learningId,lessonId}),
       open:()=>select('overview'),close:()=>{cancelNavigation();invalidate();home=null;}};
   }
 
@@ -6575,10 +6577,9 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
    $('.v5-course-state span',course).textContent=done+'/'+rows.length+' bài đã hoàn thành';
    const stage=$('.v5-video-stage',course);
    const actions=$('.v5-course-actions',course);
-   const player=document.createElement('iframe');
-   player.className='v5-drive-preview';
-   player.allowFullscreen=true;
-   player.referrerPolicy='no-referrer';
+   stage.setAttribute('role','region');
+   stage.setAttribute('aria-label','Trình xem bài học');
+   let player, pendingMedia, playbackRevision=0;
    const list=document.createElement('ol');
    list.className='v5-lesson-list';
    list.setAttribute('aria-label','Danh sách bài học');
@@ -6609,19 +6610,97 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
      button.hidden=!lesson;
      $('strong',button).textContent=lesson?.title||'';
    }
-   function showLesson(index){
-     const lesson=lessons[index];
-     if(!lesson||index===currentIndex)return false;
-     if(!/^[\w-]{10,150}$/.test(lesson.fileId||'')){
-       status.textContent='Tệp bài học chưa có liên kết hợp lệ.';
-       return false;
+   function clearPlayer(){
+     pendingMedia?.abort();
+     pendingMedia=null;
+     if(player instanceof HTMLVideoElement){
+       player.pause();
+       player.removeAttribute('src');
+       player.load();
      }
+     player?.remove();
+     player=null;
+   }
+   const playerCleanup=new MutationObserver(()=>{
+     if(course.isConnected)return;
+     playerCleanup.disconnect();
+     clearPlayer();
+   });
+   async function loadLesson(lesson,index){
+     const revision=++playbackRevision;
+     clearPlayer();
+     const controller=new AbortController();
+     pendingMedia=controller;
+     const active=()=>revision===playbackRevision&&!controller.signal.aborted&&course.isConnected;
+     const loading=document.createElement('div');
+     loading.className='portal-load-track';
+     const progress=document.createElement('progress');
+     progress.setAttribute('aria-label','Đang tải tài liệu');
+     loading.append(progress);
+     stage.setAttribute('aria-busy','true');
+     stage.replaceChildren(loading);
+     function showError(message){
+       if(!active())return;
+       stage.removeAttribute('aria-busy');
+       const feedback=document.createElement('div');
+       feedback.className='v5-media-feedback';
+       const label=document.createElement('p');
+       label.setAttribute('role','status');
+       const retry=document.createElement('button');
+       retry.type='button';
+       retry.className='button secondary-button';
+       retry.textContent='Thử lại';
+       retry.addEventListener('click',()=>showLesson(index,true));
+       feedback.append(label,retry);
+       stage.replaceChildren(feedback);
+       label.textContent=message;
+     }
+     try{
+       const {playbackUrl}=await LearningPortal.getPlayback(lesson.courseId,lesson.id);
+       if(!active())return;
+       const ticket=new URL(playbackUrl);
+       if(ticket.protocol!=='https:'||!ticket.hostname.endsWith('.workers.dev')||!ticket.pathname.startsWith('/lesson/'))
+         throw new Error('Địa chỉ trình xem không hợp lệ.');
+       const response=await fetch(ticket,{signal:controller.signal,credentials:'omit',referrerPolicy:'no-referrer',redirect:'error'});
+       const media=await response.json();
+       if(!response.ok)throw new Error(media.message||'Chưa mở được tài liệu.');
+       if(!active())return;
+       const source=new URL(media.src,ticket.origin);
+       if(source.origin!==ticket.origin||source.pathname!==ticket.pathname.replace(/^\/lesson\//,'/media/'))
+         throw new Error('Địa chỉ tài liệu không hợp lệ.');
+       if(media.type==='application/pdf'){
+         player=document.createElement('iframe');
+         player.title=lesson.label;
+         player.referrerPolicy='no-referrer';
+       }else if(String(media.type).startsWith('video/')){
+         player=document.createElement('video');
+         player.controls=true;
+         player.playsInline=true;
+         player.preload='metadata';
+         player.width=1280;
+         player.height=720;
+         player.setAttribute('aria-label',lesson.label);
+       }else{
+         throw new Error('Tài liệu chưa có định dạng hỗ trợ xem.');
+       }
+       player.className='v5-media-player';
+       player.addEventListener('error',()=>showError('Chưa mở được tài liệu. Vui lòng thử lại.'),{once:true});
+       player.src=source.href;
+       stage.replaceChildren(player);
+       stage.removeAttribute('aria-busy');
+     }catch(error){
+       const message=error instanceof TypeError?'Chưa kết nối được trình xem. Vui lòng thử lại.':
+         error.message==='Yêu cầu không hợp lệ.'?'Trình xem tài liệu đang được thiết lập.':error.message;
+       showError(message||'Chưa mở được tài liệu. Vui lòng thử lại.');
+     }
+   }
+   function showLesson(index,retry=false){
+     const lesson=lessons[index];
+     if(!lesson||index===currentIndex&&!retry)return false;
      lessons[currentIndex]?.button.removeAttribute('aria-current');
      currentIndex=index;
      lesson.button.setAttribute('aria-current','true');
-     player.title=lesson.label;
-     player.src='https://drive.google.com/file/d/'+encodeURIComponent(lesson.fileId)+'/preview';
-     if(!player.isConnected)stage.replaceChildren(player);
+     loadLesson(lesson,index);
      $('[data-lesson-position]',toolbar).textContent='Bài '+(index+1)+' / '+lessons.length;
      toolbar.hidden=false;
      caption.textContent=lesson.label;
@@ -6645,11 +6724,9 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
      $('.v5-course-state span',course).textContent=completed+'/'+rows.length+' bài đã hoàn thành';
    }
    rows.forEach((row,index)=>{
-     const link=$('a',row);
      const saved=$('[data-lesson]',row);
      const lessonTitle=$('strong',row).textContent;
      const label='Bài '+(index+1)+' – '+lessonTitle;
-     const fileId=link?.pathname.split('/')[3];
      const item=document.createElement('li');
      const select=document.createElement('button');
      select.className='v5-lesson-choice';
@@ -6659,7 +6736,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
      const name=document.createElement('strong');
      name.textContent=lessonTitle;
      select.append(number,name);
-     lessons.push({title:lessonTitle,label,fileId,button:select});
+     lessons.push({title:lessonTitle,label,id:saved.dataset.lesson,courseId:saved.dataset.course,button:select});
      select.addEventListener('click',()=>{
        if(showLesson(index)&&innerWidth<=1023)media.scrollIntoView({block:'start',inline:'nearest'});
      });
@@ -6696,6 +6773,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
    const exam=$('[data-learning-exam]',generic);
    if(exam)course.lastElementChild.append(exam);
    content.replaceChildren(heading,course);
+   playerCleanup.observe(content,{childList:true});
    if(rows.length&&!showLesson(0))stage.textContent='Bài học chưa sẵn sàng.';
    const header=pagehead(content,heading);
    header.classList.add('v5-course-header');
