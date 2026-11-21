@@ -3710,6 +3710,8 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
 .v5-lesson-check input{inline-size:20px;block-size:20px;margin:0;accent-color:var(--sg-action,#9c420d)}
 .v5-lesson-status{margin:4px 0 0}
 .v5-lesson-status:empty{display:none}
+.portal-policy-links{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 14px;margin-block-start:12px;font-size:.875rem}
+.portal-policy-links a{color:var(--sg-action,#873704);text-underline-offset:.15em}
 </style>
 <style>
 .portal-load-track {
@@ -3849,6 +3851,11 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
           <button id="passwordSetupToggle" class="registration-link" type="button">Quên mật khẩu</button>
           <p id="loginMessage" class="login-message" role="alert"></p>
         </form>
+        <nav class="portal-policy-links" aria-label="Thông tin về cổng đào tạo">
+          <a href="about.html">Giới thiệu</a>
+          <a href="privacy.html">Quyền riêng tư</a>
+          <a href="terms.html">Điều khoản</a>
+        </nav>
       </div>
 
       <form id="passwordSetupForm" class="registration-form account-form" aria-labelledby="recoveryTitle" hidden>
@@ -5842,7 +5849,11 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
           <label>Email<input value="${escape(home.profile.email)}" readonly></label>
           <label>Họ và tên<input name="name" autocomplete="name" maxlength="120" required value="${escape(home.profile.name)}"></label>
           <label>Công ty<input name="company" autocomplete="organization" maxlength="150" required value="${escape(home.profile.company)}"></label>
-          <button type="submit" class="button">Lưu hồ sơ</button></form>`;
+          <button type="submit" class="button">Lưu hồ sơ</button></form>
+          <nav class="portal-policy-links" aria-label="Thông tin về cổng đào tạo">
+            <a href="privacy.html">Chính sách quyền riêng tư</a>
+            <a href="terms.html">Điều khoản sử dụng</a>
+          </nav>`;
         wireForm(content.querySelector('form'), async data => {
           const current = home;
           await request('updateLearningProfile', data);

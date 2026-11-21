@@ -1,0 +1,85 @@
+:root {
+  color: #182738;
+  background: #eaf3fa;
+  font: 1rem/1.65 system-ui, sans-serif;
+}
+
+body {
+  box-sizing: border-box;
+  max-inline-size: 56rem;
+  margin-inline: auto;
+  padding: clamp(1rem, 4vw, 2.5rem);
+}
+
+.site-header,
+footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .65rem 1.25rem;
+}
+
+.site-header {
+  justify-content: space-between;
+  margin-block-end: 1.25rem;
+}
+
+.site-header img {
+  display: block;
+  max-inline-size: 100%;
+  object-fit: contain;
+}
+
+a {
+  color: #873704;
+  text-underline-offset: .15em;
+  overflow-wrap: anywhere;
+}
+
+a:focus-visible {
+  outline: 2px solid #873704;
+  outline-offset: 4px;
+}
+
+.primary-link {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 2.75rem;
+  padding-inline: .9rem;
+  border: 1px solid #d9b395;
+  border-radius: .625rem;
+  background: #fff7f0;
+  font-weight: 650;
+}
+
+main {
+  padding: clamp(1.25rem, 5vw, 3rem);
+  background: #fff;
+  border: 1px solid #cbdde9;
+  border-radius: 1.25rem;
+}
+
+h1 {
+  margin: 0 0 .75rem;
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  line-height: 1.2;
+}
+
+h2 {
+  margin: 1.5rem 0 .25rem;
+  font-size: 1.2rem;
+  line-height: 1.4;
+}
+
+p {
+  margin: 0 0 .75rem;
+  max-inline-size: 70ch;
+}
+
+.intro {
+  color: #41546a;
+}
+
+footer {
+  padding: 1rem .1rem;
+}
