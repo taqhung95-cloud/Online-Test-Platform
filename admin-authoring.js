@@ -6,7 +6,32 @@
     const status = form.querySelector('[role=status]');
     const progress = form.querySelector('progress');
     const input = form.elements.file;
+    const minimumChunk = 256 * 1024;
+    const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
     let job;
+    async function checkUpload() {
+      status.textContent = 'Đang kiểm tra phần Drive đã nhận…';
+      try {
+        return await request('adminUploadLessonChunk', {uploadId:job.id, offset:0});
+      } catch (error) {
+        if (!error.isTransportError) throw error;
+        await pause(1000);
+        return request('adminUploadLessonChunk', {uploadId:job.id, offset:0});
+      }
+    }
+    function recordProgress(result) {
+      const offset = result.offset;
+      if (!Number.isSafeInteger(offset) || offset < 0 || offset > job.file.size ||
+          (result.done && offset !== job.file.size)) {
+        throw new Error('Drive trả về tiến độ tải tệp không hợp lệ.');
+      }
+      job.offset = offset;
+      job.done = result.done === true;
+      progress.value = offset;
+      status.textContent = job.done
+        ? 'Đã lưu bài học. Đang cập nhật danh sách…'
+        : 'Drive đã nhận ' + Math.floor(100 * offset / job.file.size) + '%';
+    }
     form.addEventListener('submit', async event => {
       event.preventDefault();
       if (button.disabled || !form.reportValidity()) return;
@@ -16,38 +41,67 @@
         status.textContent = 'Nhập tên bài học và chọn tệp có nội dung.';
         return;
       }
-      if (job?.file !== file || job.title !== title) job = {id:crypto.randomUUID(), file, title};
+      if (job?.file !== file || job.title !== title) job = {id:crypto.randomUUID(), file, title, offset:0};
       button.disabled = input.disabled = form.elements.title.disabled = true;
       progress.hidden = false;
       progress.max = file.size;
+      progress.value = job.offset;
       status.textContent = 'Đang chuẩn bị tải lên Drive…';
-      const stale = job.started;
       try {
-        const {chunkSize} = await request('adminBeginLessonUpload', {
-          uploadId:job.id, learningId, title, fileName:file.name, size:file.size
-        });
-        job.started = true;
-        let result = stale ? await request('adminUploadLessonChunk',{uploadId:job.id,offset:0})
-          : {offset:0,done:false};
-        while (!result.done) {
-          const offset = result.offset;
-          const blob = file.slice(offset, offset + chunkSize);
-          if (!blob.size) throw new Error('Drive chưa xác nhận tệp hoàn tất. Bấm Thử lại.');
+        if (!job.done && job.started) recordProgress(await checkUpload());
+        if (!job.started) {
+          const {chunkSize, variableChunks} = await request('adminBeginLessonUpload', {
+            uploadId:job.id, learningId, title, fileName:file.name, size:file.size, variableChunks:true
+          });
+          if (!Number.isSafeInteger(chunkSize) || chunkSize < 1) throw new Error('Máy chủ chưa gửi kích thước phần tải hợp lệ.');
+          job.started = true;
+          job.variableChunks = variableChunks === true;
+          job.chunkSize = job.variableChunks && file.size <= 32 * 1024 * 1024
+            ? Math.min(chunkSize, 1024 * 1024)
+            : chunkSize;
+        }
+        let stalls = 0;
+        while (!job.done) {
+          const offset = job.offset;
+          const blob = file.slice(offset, offset + job.chunkSize);
+          if (!blob.size) {
+            recordProgress(await checkUpload());
+            if (!job.done && job.offset >= file.size) throw new Error('Drive đang xác nhận tệp. Bấm Thử lại để kiểm tra.');
+            continue;
+          }
           const data = await new Promise((resolve,reject) => {
             const reader = new FileReader();
             reader.onload = () => resolve(String(reader.result).split(',')[1]);
             reader.onerror = () => reject(new Error('Không đọc được tệp đã chọn.'));
             reader.readAsDataURL(blob);
           });
-          result = await request('adminUploadLessonChunk',{uploadId:job.id,offset,data});
-          if (!result.done && result.offset <= offset) throw new Error('Tải bị gián đoạn. Bấm Thử lại để tiếp tục.');
-          progress.value = result.offset;
-          status.textContent = 'Đã tải ' + Math.floor(100 * result.offset / file.size) + '%';
+          let result;
+          try {
+            result = await request('adminUploadLessonChunk', {uploadId:job.id, offset, data});
+          } catch (error) {
+            if (!error.isTransportError) throw error;
+            result = await checkUpload();
+          }
+          recordProgress(result);
+          if (job.done || job.offset > offset) { stalls = 0; continue; }
+          if (++stalls >= 3) throw new Error('Drive chưa nhận thêm dữ liệu. Bấm Thử lại để tiếp tục.');
+          if (job.variableChunks) job.chunkSize = Math.max(minimumChunk,
+            Math.floor(job.chunkSize / (2 * minimumChunk)) * minimumChunk);
+          await pause(700 * stalls);
         }
         await refresh();
       } catch (error) {
-        status.textContent = error.message;
-        if (/hết hạn/i.test(error.message)) job = undefined;
+        if (job.done) {
+          status.textContent = 'Bài học đã được lưu. Bấm Thử lại để cập nhật danh sách.';
+        } else if (/Lượt tải tệp đã hết hạn/i.test(error.message)) {
+          job = undefined;
+          progress.value = 0;
+          status.textContent = 'Lượt tải đã hết hạn. Bấm Thử lại để bắt đầu lại với tệp đã chọn.';
+        } else {
+          status.textContent = error.isTransportError
+            ? 'Chưa nhận được xác nhận từ Drive. Bấm Thử lại để tiếp tục với tệp đã chọn.'
+            : error.message;
+        }
         button.textContent = 'Thử lại';
       } finally {
         button.disabled = input.disabled = form.elements.title.disabled = false;

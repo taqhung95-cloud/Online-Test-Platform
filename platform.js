@@ -40,7 +40,12 @@ window.Portal = (() => {
       for(const [name,value] of Object.entries({action,payload:JSON.stringify(body),transport:'iframe',requestId})){
         const input=document.createElement('input');input.type='hidden';input.name=name;input.value=value;form.append(input);
       }
-      const timer=setTimeout(()=>fail(Object.assign(new Error(action==='startAttempt'?'Chưa nhận được xác nhận tạo đề. Yêu cầu có thể vẫn đang xử lý; bấm Kiểm tra lại yêu cầu để nhận đúng lượt cũ.':'Máy chủ chưa xác nhận. Bài làm vẫn được giữ trên thiết bị.'),{isTransportError:true,uncertain:true})),timeoutMs);
+      const timeoutMessage=action==='startAttempt'
+        ? 'Chưa nhận được xác nhận tạo đề. Yêu cầu có thể vẫn đang xử lý; bấm Kiểm tra lại yêu cầu để nhận đúng lượt cũ.'
+        : ['adminBeginLessonUpload','adminUploadLessonChunk'].includes(action)
+          ? 'Chưa nhận được xác nhận tải tài liệu từ Drive.'
+          : 'Máy chủ chưa xác nhận. Bài làm vẫn được giữ trên thiết bị.';
+      const timer=setTimeout(()=>fail(Object.assign(new Error(timeoutMessage),{isTransportError:true,uncertain:true})),timeoutMs);
       function cleanup(){clearTimeout(timer);window.removeEventListener('message',receive);form.remove();frame.remove();}
       function fail(error){cleanup();reject(error);}
       function receive(event){
@@ -64,9 +69,11 @@ window.Portal = (() => {
     const interactive=['startAttempt','resumeAttempt','listCourses','getAdminDashboard'].includes(action);
     const retry=interactive?2:['submitAttempt','saveAttemptProgress'].includes(action)?6:1;
     const deadline=interactive?Date.now()+45000:Infinity;
+    const timeout=action==='adminUploadLessonChunk'&&stable.data?90000:
+      ['adminBeginLessonUpload','adminUploadLessonChunk'].includes(action)?60000:35000;
     if(action==='submitAttempt')await pause(Math.random()*1800);
     for(let attempt=0;attempt<retry;attempt++){
-      try{return await once(endpoint,action,stable,Math.min(35000,Math.max(1,deadline-Date.now())));}catch(e){
+      try{return await once(endpoint,action,stable,Math.min(timeout,Math.max(1,deadline-Date.now())));}catch(e){
         document.dispatchEvent(new CustomEvent('portal:connection',{detail:'retry'}));
         if(!e.isTransportError||attempt===retry-1||interactive&&(e.uncertain||Date.now()+2000>=deadline))throw e;
         await pause(Math.min(16000,800*2**attempt)+Math.random()*1800);
