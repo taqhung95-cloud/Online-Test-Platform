@@ -36,7 +36,7 @@ window.Portal = (() => {
       const requestRevision=revision;
       frame.name='portal_'+requestId;frame.hidden=true;frame.title='Kết nối bảo mật';
       form.method='POST';form.action=endpoint;form.target=frame.name;form.hidden=true;
-      const body={...payload,sessionToken:payload.sessionToken||token,clientOrigin:location.origin};
+      const body={...payload,clientOrigin:location.origin};
       for(const [name,value] of Object.entries({action,payload:JSON.stringify(body),transport:'iframe',requestId})){
         const input=document.createElement('input');input.type='hidden';input.name=name;input.value=value;form.append(input);
       }
@@ -44,9 +44,19 @@ window.Portal = (() => {
         ? 'Chưa nhận được xác nhận tạo đề. Yêu cầu có thể vẫn đang xử lý; bấm Kiểm tra lại yêu cầu để nhận đúng lượt cũ.'
         : ['adminBeginLessonUpload','adminUploadLessonChunk'].includes(action)
           ? 'Chưa nhận được xác nhận tải tài liệu từ Drive.'
-          : 'Máy chủ chưa xác nhận. Bài làm vẫn được giữ trên thiết bị.';
-      const timer=setTimeout(()=>fail(Object.assign(new Error(timeoutMessage),{isTransportError:true,uncertain:true})),timeoutMs);
-      function cleanup(){clearTimeout(timer);window.removeEventListener('message',receive);form.remove();frame.remove();}
+          : ['submitAttempt','saveAttemptProgress'].includes(action)
+            ? 'Máy chủ chưa xác nhận. Bài làm vẫn được giữ trên thiết bị.'
+            : 'Máy chủ chưa phản hồi. Vui lòng thử lại.';
+      const timedOut=()=>fail(Object.assign(new Error(timeoutMessage),{isTransportError:true,uncertain:true}));
+      const timer=setTimeout(timedOut,timeoutMs);
+      let responseTimer;
+      if(retryableRequest(action,payload)){
+        frame.onload=()=>{
+          try{if(frame.contentWindow.location.href==='about:blank')return;}catch{/* Google response is cross-origin. */}
+          if(!responseTimer)responseTimer=setTimeout(timedOut,6000);
+        };
+      }
+      function cleanup(){clearTimeout(timer);clearTimeout(responseTimer);frame.onload=null;window.removeEventListener('message',receive);form.remove();frame.remove();}
       function fail(error){cleanup();reject(error);}
       function receive(event){
         // Apps Script wraps HtmlService in a sandbox iframe. Validate its Google
@@ -55,28 +65,46 @@ window.Portal = (() => {
         if(origin.protocol!=='https:' || !(origin.hostname==='script.google.com'||/^([a-z0-9-]+[.-])?script\.googleusercontent\.com$/.test(origin.hostname)))return;
         const m=event.data;if(!m||m.source!=='MGRL_APPS_SCRIPT'||m.requestId!==requestId)return;
         cleanup();const data=m.data;
-        if(!data?.ok){reject(Object.assign(new Error(data?.message||'Yêu cầu chưa hoàn tất.'),{isTransportError:!!data?.retryable,code:data?.code}));return;}
-        if(data.sessionToken&&requestRevision!==revision){reject(Object.assign(new Error('Yêu cầu đăng nhập cũ đã bị hủy.'),{code:'STALE_AUTH'}));return;}
+        if(requestRevision!==revision){reject(staleRequest());return;}
+        if(!data?.ok){reject(Object.assign(new Error(data?.message||'Yêu cầu chưa hoàn tất.'),{isTransportError:!!data?.retryable,code:data?.code,receiptTicket:data?.receiptTicket}));return;}
         if(data.sessionToken)session(data.sessionToken,data.remember===true);
         document.dispatchEvent(new CustomEvent('portal:connection',{detail:'online'}));resolve(data);
       }
       window.addEventListener('message',receive);document.body.append(frame,form);form.submit();
     });
   }
-  async function request(endpoint,action,payload={}){
-    // Preserve the answer snapshot across every retry of a single request.
-    const stable=JSON.parse(JSON.stringify(payload));
-    const interactive=['startAttempt','resumeAttempt','listCourses','getAdminDashboard'].includes(action);
-    const retry=interactive?2:['submitAttempt','saveAttemptProgress'].includes(action)?6:1;
-    const deadline=interactive?Date.now()+45000:Infinity;
+  const staleRequest=()=>Object.assign(new Error('Phiên đã thay đổi trong lúc chờ phản hồi.'),{code:'STALE_AUTH'});
+  const isLogin=(action,payload)=>action==='loginParticipant'||action==='loginAdmin'&&payload.portalLogin===true;
+  function retryableRequest(action,payload){
+    return isLogin(action,payload)||action==='startAttempt'&&!!payload.startRequestId||
+      ['resumeAttempt','listCourses','learningHome','completeLearningLesson','getLatestResult','getAttemptResult','submitAttempt','saveAttemptProgress'].includes(action);
+  }
+  async function request(endpoint,action,payload={},onReceipt){
+    const stable=JSON.parse(JSON.stringify({...payload,sessionToken:payload.sessionToken||token}));
+    const requestRevision=revision;
+    const login=isLogin(action,stable);
+    if(login)stable.loginRequestId=crypto.randomUUID();
+    const canRetry=retryableRequest(action,stable);
+    const tries=canRetry?7:action==='getAdminDashboard'?2:1;
+    const deadline=canRetry?Date.now()+105000:Infinity;
     const timeout=action==='adminUploadLessonChunk'&&stable.data?90000:
       ['adminBeginLessonUpload','adminUploadLessonChunk'].includes(action)?60000:35000;
-    if(action==='submitAttempt')await pause(Math.random()*1800);
-    for(let attempt=0;attempt<retry;attempt++){
+    if(login||action==='startAttempt'||action==='learningHome'){
+      await pause(Math.random()*(login?2600:action==='startAttempt'?2200:900));
+    }
+    for(let attempt=0;attempt<tries;attempt++){
+      if(requestRevision!==revision)throw staleRequest();
       try{return await once(endpoint,action,stable,Math.min(timeout,Math.max(1,deadline-Date.now())));}catch(e){
+        if(e.code==='STALE_AUTH'||!e.isTransportError)throw e;
         document.dispatchEvent(new CustomEvent('portal:connection',{detail:'retry'}));
-        if(!e.isTransportError||attempt===retry-1||interactive&&(e.uncertain||Date.now()+2000>=deadline))throw e;
-        await pause(Math.min(16000,800*2**attempt)+Math.random()*1800);
+        if(e.receiptTicket){
+          stable.receiptTicket=e.receiptTicket;
+          onReceipt?.(e.receiptTicket);
+        }
+        if(stable.receiptTicket)e.receiptTicket=stable.receiptTicket;
+        const backoff=450+Math.random()*Math.min(12000,1600*2**attempt);
+        if(attempt===tries-1||e.uncertain&&!canRetry||Date.now()+backoff+3000>=deadline)throw e;
+        await pause(backoff);
       }
     }
   }

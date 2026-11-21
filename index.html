@@ -7,7 +7,7 @@
   <title>Sungrow E-learning</title>
   <link rel="icon" href="sungrow-edu-favicon.ico" type="image/x-icon" sizes="16x16">
   <link rel="preload" href="v5-assets/deb3edc82cb2.woff2" as="font" type="font/woff2" crossorigin>
-  <script src="platform.js?v=20261121-upload"></script>
+  <script src="platform.js?v=20261121-concurrency"></script>
   <script src="admin-authoring.js?v=7"></script>
 </head>
 <body class="learner-v2">
@@ -4205,7 +4205,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
       return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
     }
 
-    async function callApi(action,payload={}) { return requestParticipant(action,payload); }
+    async function callApi(action,payload={},onReceipt) { return requestParticipant(action,payload,onReceipt); }
 
     function setLoginLoading(isLoading) {
       loginButton.disabled = isLoading;
@@ -4213,10 +4213,10 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
       loginButton.textContent = isLoading ? "Đang xác thực..." : "Đăng nhập";
     }
 
-    async function requestParticipant(action,payload){
+    async function requestParticipant(action,payload,onReceipt){
       const epoch=state.authEpoch;
       try{
-        const data=await Portal.request(APPS_SCRIPT_URL,action,payload);
+        const data=await Portal.request(APPS_SCRIPT_URL,action,payload,onReceipt);
         if(action==='submitAttempt'&&epoch===state.authEpoch)window.LearningPortal?.invalidate();
         return data;
       }catch(error){
@@ -4340,10 +4340,17 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
         if(saved.email===state.email){
           if(!saved.token)throw new Error('Bản lưu bài thi thiếu mã lượt. Dữ liệu chưa bị xóa; vui lòng liên hệ quản trị.');
           Portal.loading(saved.pendingSubmission?'Đang xác nhận lại bài đã gửi…':'Đang xác nhận kết thúc bài thi trước do tải lại trang…');
+          const pending=saved.pendingSubmission??{autoSubmitted:true,terminationReason:"PAGE_RELOAD"};
+          pending.answerVersion??=Number(saved.answerVersion||0)+1;
+          saved.pendingSubmission=pending;
+          localStorage.setItem(ACTIVE_SESSION_KEY,JSON.stringify(saved));
           const result=await callApi("submitAttempt",{email:state.email,deviceId:state.deviceId,attemptToken:saved.token,
-            answers:saved.answers||{},answerVersion:Number(saved.answerVersion||0)+1,
-            autoSubmitted:saved.pendingSubmission?!!saved.pendingSubmission.autoSubmitted:true,
-            terminationReason:saved.pendingSubmission?.terminationReason||"PAGE_RELOAD",tabViolations:Number(saved.tabViolations||0)});
+            answers:saved.answers||{},answerVersion:pending.answerVersion,receiptTicket:pending.receiptTicket,
+            autoSubmitted:!!pending.autoSubmitted,terminationReason:pending.terminationReason,tabViolations:Number(saved.tabViolations||0)}, ticket=>{
+            if(epoch!==state.authEpoch)return;
+            pending.receiptTicket=ticket;
+            localStorage.setItem(ACTIVE_SESSION_KEY,JSON.stringify(saved));
+          });
           if(epoch!==state.authEpoch)return false;
           clearSession();state.course=result.course;renderResult(result);return true;
         }
@@ -4629,9 +4636,10 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
 
     function scheduleProgressSave() {
       clearTimeout(state.progressSaveTimerId);
+      const nearDeadline=remainingSeconds()<=45;
       state.progressSaveTimerId = setTimeout(() => {
         saveAttemptProgress();
-      }, 12000 + Math.random() * 6000);
+      }, nearDeadline ? 1000 + Math.random() * 1800 : 12000 + Math.random() * 6000);
     }
 
     function startProgressSync() {
@@ -4802,10 +4810,12 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
 
       clearTimeout(state.submitRetryTimerId);
       state.submitRetryTimerId = null;
-      state.pendingSubmission = {
+      state.pendingSubmission ??= {
         autoSubmitted: Boolean(autoSubmitted),
-        terminationReason
+        terminationReason,
+        answerVersion: ++state.answerVersion
       };
+      state.pendingSubmission.answerVersion ??= ++state.answerVersion;
       state.submitting = true;
       submitButton.disabled = true;
       submitButton.textContent = "Đang nộp bài...";
@@ -4823,10 +4833,15 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
           email: state.email,
           deviceId: state.deviceId,
           answers: state.answers,
-          autoSubmitted: Boolean(autoSubmitted),
-          answerVersion: ++state.answerVersion,
-          terminationReason,
+          autoSubmitted: state.pendingSubmission.autoSubmitted,
+          answerVersion: state.pendingSubmission.answerVersion,
+          terminationReason: state.pendingSubmission.terminationReason,
+          receiptTicket: state.pendingSubmission.receiptTicket,
           tabViolations: state.tabViolations
+        }, ticket=>{
+          if(epoch!==state.authEpoch || !state.pendingSubmission)return;
+          state.pendingSubmission.receiptTicket=ticket;
+          saveSession();
         });
         if(epoch!==state.authEpoch)return;
         state.active = false;
@@ -4839,6 +4854,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
         if(epoch!==state.authEpoch)return;
         state.submitting = false;
         if (error.isTransportError) {
+          if(error.receiptTicket)state.pendingSubmission.receiptTicket=error.receiptTicket;
           state.submitRetryCount += 1;
           const retryDelay = Math.min(
             30000,
@@ -4846,7 +4862,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
           ) + Math.floor(Math.random() * 1500);
           submitButton.disabled = true;
           submitButton.textContent = navigator.onLine
-            ? "Mất kết nối - đang gửi lại..."
+            ? "Đang chờ máy chủ xác nhận..."
             : "Đang chờ có mạng để nộp bài...";
           saveSession();
           state.submitRetryTimerId = window.setTimeout(() => {
@@ -4861,7 +4877,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
           if (!state.submitFailureNotified) {
             state.submitFailureNotified = true;
             window.alert(
-              "Kết nối với hệ thống đang bị gián đoạn. Bài làm đã được giữ trên thiết bị và sẽ tự động gửi lại; vui lòng không đóng trang này."
+              "Máy chủ chưa xác nhận nộp bài. Bài làm đã được lưu trên thiết bị và sẽ tự động gửi lại. Vui lòng giữ trang này mở."
             );
           }
           state.submitting = true;
@@ -5359,7 +5375,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
     });
 
     quizForm.addEventListener("change", (event) => {
-      if (!state.active || !['radio','checkbox'].includes(event.target.type)) return;
+      if (!state.active || state.pendingSubmission || !['radio','checkbox'].includes(event.target.type)) return;
       if (event.target.type === 'checkbox') {
         const values = [...quizForm.querySelectorAll('input[type=checkbox]:checked')].filter(input=>input.name===event.target.name).map(input=>input.value);
         if (values.length) state.answers[event.target.name]=values; else delete state.answers[event.target.name];
@@ -5539,7 +5555,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
     });
 
     window.addEventListener("online", () => {
-      if (!state.active || !state.pendingSubmission) return;
+      if (!state.active || !state.pendingSubmission || state.submitRetryTimerId===null) return;
       clearTimeout(state.submitRetryTimerId);
       state.submitRetryTimerId = null;
       state.submitting = false;
