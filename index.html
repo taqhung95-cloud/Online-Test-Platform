@@ -4130,7 +4130,11 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
 
     async function requestParticipant(action,payload){
       const epoch=state.authEpoch;
-      try{return await Portal.request(APPS_SCRIPT_URL,action,payload);}catch(error){
+      try{
+        const data=await Portal.request(APPS_SCRIPT_URL,action,payload);
+        if(action==='submitAttempt'&&epoch===state.authEpoch)window.LearningPortal?.invalidate();
+        return data;
+      }catch(error){
         if(epoch===state.authEpoch&&['listCourses','startAttempt','resumeAttempt','saveAttemptProgress','submitAttempt','getLatestResult','getAttemptResult','reportAttention','learningHome','updateLearningProfile','completeLearningLesson'].includes(action)&&Portal.isAuthError(error))handleParticipantAuthLoss(error);
         throw error;
       }
@@ -4207,16 +4211,16 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
 
     let requestedLearnerTab = '';
     let adminLearnerToken = '';
-    async function authenticateParticipant(email,restore=false,adminTab='') {
+    function signInFields(email){
+      return {email,password:document.getElementById('learnerPassword').value,
+        remember:document.getElementById('rememberLogin').checked,
+        confirmTransfer:document.getElementById('confirmTransfer').checked,
+        otp:document.getElementById('learnerOtp').value.trim(),deviceId:state.deviceId,includeHome:true};
+    }
+    async function authenticateParticipant(email,restore=false,adminTab='',prefetched=null) {
       const epoch=++state.authEpoch;
-      const data = adminTab ? await window.portalAdmin.openLearnerSession(state.deviceId) : await callApi(restore?"listCourses":"loginParticipant", restore?{deviceId:state.deviceId}:{
-        email,
-        password: document.getElementById("learnerPassword").value,
-        remember: document.getElementById("rememberLogin").checked,
-        confirmTransfer: document.getElementById("confirmTransfer").checked,
-        otp: document.getElementById("learnerOtp").value.trim(),
-        deviceId: state.deviceId
-      });
+      const data = prefetched || (adminTab ? await window.portalAdmin.openLearnerSession(state.deviceId)
+        : await callApi(restore?"listCourses":"loginParticipant",restore?{deviceId:state.deviceId,includeHome:true}:signInFields(email)));
       if(epoch!==state.authEpoch)return false;
       if(adminTab){
         if(!data.adminLearnerToken||!data.participant)throw new Error('Máy chủ chưa xác nhận quyền mở mục học viên.');
@@ -4263,6 +4267,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
       if (state.learningReady) {
         const tab=requestedLearnerTab || 'overview';
         requestedLearnerTab='';
+        if(data.home)window.LearningPortal.seed(data.home);
         await window.LearningPortal.select(tab);
         if(epoch!==state.authEpoch)return false;
         window.setActiveNav?.(tab);
@@ -5102,31 +5107,29 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
       let epoch;
       try {
         const email=emailInput.value.trim();
-        const password=document.getElementById('learnerPassword').value;
         epoch=state.authEpoch;
+        let loginData;
         if(document.getElementById('deviceVerification').hidden && !window.portalAdmin?.isAuthenticated()){
-          let admin;
           try{
-            admin=await Portal.request(APPS_SCRIPT_URL,'loginAdmin',{email,password});
+            loginData=await Portal.request(APPS_SCRIPT_URL,'loginAdmin',{...signInFields(email),portalLogin:true});
           }catch(error){
             if(error.message!=='Email này không có quyền quản trị hoặc đã bị khóa.')throw error;
           }
           if(epoch!==state.authEpoch)return;
-          if(admin?.ok&&admin.adminToken){
+          if(loginData?.adminToken){
             document.getElementById('learnerPassword').value='';
-            sessionStorage.setItem('sungrow_admin_session_v1',admin.adminToken);
-            await window.portalAdmin.signIn(admin.adminToken);
+            await window.portalAdmin.signIn(loginData);
             return;
           }
         }
-        const login=authenticateParticipant(email);epoch=state.authEpoch;await login;
+        const login=authenticateParticipant(email,false,'',loginData);epoch=state.authEpoch;await login;
       } catch (error) {
         if(epoch!==state.authEpoch)return;
         if(Portal.isAuthError(error))handleParticipantAuthLoss(error);
         else if(!document.getElementById('bootView').hidden)Portal.recovery(error.message,initialize);
         else loginMessage.textContent = error.message;
       } finally {
-        if(epoch===state.authEpoch)setLoginLoading(false);
+        if(epoch===state.authEpoch||!loginView.hidden)setLoginLoading(false);
       }
     });
 
@@ -5464,21 +5467,16 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
 
     let initializing=false;
     async function initialize(){
-      if(initializing)return;initializing=true;Portal.loading();
+      if(initializing)return;
+      if(!Portal.session()){
+        showLoginForm();setLoginLoading(false);
+        if(localStorage.getItem(ACTIVE_SESSION_KEY))loginMessage.textContent='Có bài làm chưa được xác nhận. Đăng nhập lại để xác nhận kết quả; dữ liệu vẫn được giữ trên trình duyệt.';
+        return;
+      }
+      initializing=true;Portal.loading();
       let epoch=state.authEpoch;
       try{
-        if(Portal.session()){
-          const restore=authenticateParticipant('',true);epoch=state.authEpoch;await restore;
-        }else{
-          const config=await callApi('getPublicConfig',{});
-          state.learningReady=config.learningReady===true;
-          document.getElementById('learningPortal').hidden=!state.learningReady;
-          document.getElementById('academyNavigation').hidden=!state.learningReady;
-          if(epoch!==state.authEpoch)return;
-          if(config.authSchema!==3||!config.ready){Portal.recovery('Hệ thống cần quản trị cập nhật Apps Script và chạy setupPlatformV2.',initialize);return;}
-          showLoginForm();setLoginLoading(false);
-          if(localStorage.getItem(ACTIVE_SESSION_KEY))loginMessage.textContent='Có bài làm chưa được xác nhận. Đăng nhập lại để xác nhận kết quả; dữ liệu vẫn được giữ trên trình duyệt.';
-        }
+        const restore=authenticateParticipant('',true);epoch=state.authEpoch;await restore;
       }catch(error){
         if(epoch!==state.authEpoch)return;
         if(Portal.isAuthError(error))handleParticipantAuthLoss(error);
@@ -5494,7 +5492,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
     window.cancelLearnerNavigation = () => {
       state.authEpoch++;
       setLoginLoading(false);
-      window.LearningPortal?.close();
+      window.LearningPortal?.cancelNavigation();
       releaseAdminLearnerLoad?.();
       document.getElementById('portalNavigationStatus').textContent='';
     };
@@ -5580,7 +5578,35 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
     let releaseContentLoad;
     let active = 'overview';
     let home;
+    let homeExpiresAt=0, homeRequest, homeRevision=0;
     let selectedCourse = '';
+    function seed(data){
+      home=data;
+      homeExpiresAt=Date.now()+60_000;
+    }
+    function invalidate(){
+      homeExpiresAt=0;
+      homeRevision++;
+      homeRequest=null;
+    }
+    function getLearningHome(){
+      if(homeRequest)return homeRequest;
+      const revision=homeRevision;
+      const pending=request('learningHome').then(data=>{
+        if(revision===homeRevision)seed(data);
+        return revision===homeRevision;
+      }).finally(()=>{
+        if(homeRequest===pending)homeRequest=null;
+      });
+      homeRequest=pending;
+      return pending;
+    }
+    function cancelNavigation(){
+      generation++;
+      releaseContentLoad?.();
+      content.replaceChildren();
+      status.textContent='';
+    }
     function catalog(title, items, filterLabel, options, card) {
       content.innerHTML = `<h2>${title}</h2><div class="catalog-tools">
         <label>Tìm theo tên<input type="search" id="catalogSearch"></label>
@@ -5741,13 +5767,13 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
         button.setAttribute('aria-pressed', String(button.dataset.learningTab === tab)));
       status.textContent = '';
       if (tab === 'exams') return;
+      if(home&&Date.now()<homeExpiresAt){render();return;}
       content.replaceChildren();
       const endLoading=Portal.contentLoading(content);
       releaseContentLoad=endLoading;
       try {
-        const data = await request('learningHome');
-        if (id !== generation || document.getElementById('courseView').hidden) return;
-        home = data;
+        const fresh = await getLearningHome();
+        if (!fresh||id !== generation || document.getElementById('courseView').hidden) return;
         render();
         status.textContent = '';
       } catch (error) {
@@ -5790,7 +5816,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
       if (button.dataset.lesson) {
         button.disabled = true;
         try {
-          await request('completeLearningLesson', {learningId:button.dataset.course, lessonId:button.dataset.lesson});
+          await completeLesson(button.dataset.course,button.dataset.lesson);
           if (active === 'courses' && selectedCourse === button.dataset.course) await select('courses', selectedCourse);
         } catch (error) {
           status.textContent = error.message;
@@ -5803,11 +5829,15 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
       if(button) select(button.dataset.learningTab);
     });
     async function completeLesson(learningId,lessonId) {
+      const original=home,epoch=state.authEpoch;
       await request('completeLearningLesson',{learningId,lessonId});
-      const lesson=home?.courses.find(item=>item.id===learningId)?.lessons.find(item=>item.id===lessonId);
+      if(epoch!==state.authEpoch)return;
+      const lesson=original?.courses.find(item=>item.id===learningId)?.lessons.find(item=>item.id===lessonId);
       if(lesson)lesson.completed=true;
+      if(original!==home||homeRequest)invalidate();
     }
-    window.LearningPortal = { getHome: () => home,completeLesson,select, open:() => select('overview'), close:() => {generation++; releaseContentLoad?.(); home = null; content.replaceChildren(); status.textContent = '';}};
+    window.LearningPortal = {getHome:()=>home,completeLesson,select,seed,invalidate,cancelNavigation,
+      open:()=>select('overview'),close:()=>{cancelNavigation();invalidate();home=null;}};
   }
 
 })();
@@ -6808,37 +6838,47 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
 
     async function requestAdmin(action,payload){
       const epoch=adminEpoch;
-      try{return await Portal.request(APPS_SCRIPT_URL,action,payload);}catch(error){
+      try{
+        const data=await Portal.request(APPS_SCRIPT_URL,action,payload);
+        if(epoch===adminEpoch&&(['saveLearningContent','adminSaveExam'].includes(action)||action==='adminUploadLessonChunk'&&data.done))
+          window.LearningPortal?.invalidate();
+        return data;
+      }catch(error){
         if(epoch===adminEpoch&&['getAdminDashboard','listCourseWindows','updateCourseWindow','unlinkParticipantDevice','adminLearningCatalog','saveLearningContent','adminExamEditor','adminSaveExam','adminBeginLessonUpload','adminUploadLessonChunk','adminOpenLearner'].includes(action)&&Portal.isAuthError(error))showLogin(error.message);
         throw error;
       }
     }
 
-    function showDashboard(admin) {
+    function enableAdminFeatures(admin) {
       adminVerified = true;
       window.setPortalAccount(admin,'Quản trị viên');
       const catalogAvailable=document.getElementById('learningAdmin').dataset.available;
       for(const item of adminItems())item.hidden=item.dataset.adminPage==='learning'&&catalogAvailable!=='true';
       if (document.getElementById('learningAdmin').dataset.available === undefined)
         window.updateAdminWorkspace?.(true);
-      if (!nav.dataset.authoringChecked) {
-        nav.dataset.authoringChecked = 'true';
-        const epoch = adminEpoch;
-        const request = (action, values) => callApi(action, {...values, adminToken});
-        request('getPublicConfig', {}).then(config => {
-          if (epoch === adminEpoch && config.authoringReady)
-            AdminAuthoring.installExamEditor(nav, document.querySelector('main'), request);
-        }).catch(() => { delete nav.dataset.authoringChecked; });
-      }
-      window.refreshCourseWindows?.();
       clearInterval(refreshTimer);
-      refreshTimer = setInterval(() => loadDashboard(true), 5 * 60 * 1000);
+      refreshTimer = setInterval(() => {if(!document.hidden&&reportsSelected())loadDashboard(true);}, 5 * 60 * 1000);
+    }
+
+    function reportsSelected(){
+      return !dashboardView.hidden&&nav.querySelector('[data-admin-page=reports]').dataset.selected==='true';
+    }
+
+    async function enableAuthoring(available){
+      if(nav.querySelector('[data-admin-page=exam-authoring]'))return;
+      const epoch=adminEpoch;
+      const request=(action,values)=>callApi(action,{...values,adminToken});
+      try{
+        const ready=typeof available==='boolean'?available:(await request('getPublicConfig',{})).authoringReady;
+        if(ready&&epoch===adminEpoch&&adminVerified)AdminAuthoring.installExamEditor(nav,document.querySelector('main'),request);
+      }catch(error){console.warn('Không kiểm tra được quyền cập nhật bài thi.',error.message);}
     }
 
     function showAdminPanel() {
       adminSelected = true;
       Portal.showView('dashboardView');
       window.setActiveNav(nav.querySelector('[data-admin-page][data-selected=true]'));
+      if(reportsSelected()&&(!dashboardData||Date.now()-lastDashboardLoadAt>=5*60*1000))loadDashboard();
     }
 
     function showLogin(message) {
@@ -6863,34 +6903,45 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
       adminSelected = false;
     }
 
-    async function openAdmin(token,show=true) {
+    async function openAdmin(token,show=true,bootstrap=null) {
       if (!token) return false;
       adminToken = token;
+      sessionStorage.setItem(ADMIN_SESSION_KEY,token);
       if(show)Portal.loading();
-      if(!adminVerified)await loadDashboard(false,show);
-      if(show && adminVerified && !await window.openLearnerTab('overview') && adminVerified)showAdminPanel();
+      const epoch=adminEpoch;
+      try{
+        const data=bootstrap?.adminLearnerToken ? bootstrap : await openLearnerSession(state.deviceId);
+        if(epoch!==adminEpoch)return true;
+        if(!data.adminLearnerToken||!data.participant)throw new Error('Máy chủ chưa xác nhận quyền mở mục học viên.');
+        enableAdminFeatures(data.admin||bootstrap?.admin||data.participant);
+        if(show)await authenticateParticipant('',false,'overview',data);
+        if(epoch===adminEpoch)enableAuthoring(data.authoringReady);
+      }catch(error){
+        if(show&&epoch===adminEpoch)Portal.recovery(error.message,()=>openAdmin(token));
+      }
       return true;
     }
 
+    const openLearnerSession=deviceId=>requestAdmin('adminOpenLearner',{adminToken,deviceId,includeHome:true});
     window.portalAdmin = {
       restore:show => openAdmin(adminToken,show),
       isShowing:() => adminSelected,
-      signIn:openAdmin,
+      signIn:data=>openAdmin(data.adminToken,true,data),
       showLearner,
       returnToAdminFeature:showAdminPanel,
       clearSession:showLogin,
-      openLearnerSession:deviceId=>requestAdmin('adminOpenLearner',{adminToken,deviceId}),
+      openLearnerSession,
       isAuthenticated:() => adminVerified
     };
 
-    async function loadDashboard(silent = false,restoring=false) {
+    async function loadDashboard(silent = false) {
       if (!adminToken) return;
       if (dashboardLoading&&dashboardRequestEpoch===adminEpoch) return;
       if (silent && Date.now() - lastDashboardLoadAt < 30000) return;
       dashboardLoading = true;
       const epoch=adminEpoch;dashboardRequestEpoch=epoch;
       const reports=dashboardView.querySelector('[data-admin-section=reports]');
-      const endLoading=!silent&&!restoring ? Portal.contentLoading(reports) : null;
+      const endLoading=!silent ? Portal.contentLoading(reports) : null;
       if (!silent) {
         applyFilterButton.disabled = true;
       }
@@ -6903,15 +6954,14 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
         if(!data.metrics||!Array.isArray(data.rankings)||!Array.isArray(data.attempts))throw new Error('Dữ liệu quản trị chưa hợp lệ. Hãy thử tải lại dữ liệu.');
         renderFilterOptions(data.options || {});
         renderDashboard(data);
-        dashboardData = data;lastDashboardLoadAt = Date.now();showDashboard(data.admin);
+        dashboardData = data;lastDashboardLoadAt = Date.now();
       } catch (error) {
         if(epoch!==adminEpoch)return;
         if (Portal.isAuthError(error)) {
           showLogin(error.message);
           return;
         }
-        if(!dashboardData && restoring)Portal.recovery(error.message,()=>openAdmin(adminToken));
-        else dashboardStatus.textContent = error.message;
+        dashboardStatus.textContent = error.message;
       } finally {
         endLoading?.();
         if(dashboardRequestEpoch===epoch){dashboardLoading = false;applyFilterButton.disabled = false;applyFilterButton.textContent = t("update");}
@@ -7197,7 +7247,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
       });
     });
     document.addEventListener("visibilitychange", () => {
-      if (!document.hidden && adminToken) loadDashboard(true);
+      if(!document.hidden&&adminToken&&reportsSelected())loadDashboard(true);
     });
 
     initializeReportLabels();
