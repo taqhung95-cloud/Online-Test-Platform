@@ -190,32 +190,41 @@
     });
   }
 
-  function installCourseUpload(content, course, request, refresh) {
+  function installCourseUpload(sources, course, request, refresh) {
+    const option = document.createElement('section');
+    option.className = 'lesson-material-option';
     const heading = document.createElement('h4');
     heading.textContent = 'Tải tệp từ máy';
-    content.append(document.createElement('hr'), heading);
-    const note = document.createElement('p');
+    option.append(heading);
+    sources.append(option);
     if (!course.folderId) {
+      const note = document.createElement('p');
       note.textContent = 'Lưu khóa học để tạo thư mục Drive riêng.';
-      content.append(note);
+      option.append(note);
       return;
     }
-    const folder = document.createElement('a');
-    folder.href = 'https://drive.google.com/drive/folders/' + encodeURIComponent(course.folderId);
-    folder.target = '_blank';
-    folder.rel = 'noopener noreferrer';
-    folder.textContent = 'Mở thư mục khóa học trên Drive';
-    note.append(folder);
     const form = document.createElement('form');
     form.className = 'learning-form';
     form.id = 'trainingUploadForm';
     form.innerHTML = `
       <label>Tên bài học<input name="title" required maxlength="150"></label>
-      <label>Tệp video, PDF hoặc PowerPoint<input name="file" type="file" required accept=".mp4,.webm,.mov,.m4v,.pdf,.ppt,.pptx,.doc,.docx,.xls,.xlsx"></label>
+      <label>Tệp video, PDF hoặc PowerPoint
+        <span class="training-file-picker">
+          <input name="file" type="file" required accept=".mp4,.webm,.mov,.m4v,.pdf,.ppt,.pptx,.doc,.docx,.xls,.xlsx"
+            aria-label="Chọn tệp đào tạo" aria-describedby="trainingFileName">
+          <span class="training-file-button" aria-hidden="true">Chọn tệp</span>
+          <span id="trainingFileName" class="training-file-name" aria-live="polite">Chưa chọn tệp</span>
+        </span>
+      </label>
       <button class="button" type="submit">Tải lên và thêm bài học</button>
       <progress hidden aria-label="Tiến độ tải tài liệu"></progress>
       <p role="status" aria-live="polite"></p>`;
-    content.append(note, form);
+    const name = form.querySelector('#trainingFileName');
+    form.elements.file.addEventListener('change', () => {
+      name.textContent = form.elements.file.files[0]?.name || 'Chưa chọn tệp';
+      name.title = form.elements.file.files[0]?.name || '';
+    });
+    option.append(form);
     bindUpload(form, request, course.id, async () => {
       const updated = await request('adminLearningCatalog');
       if (form.isConnected) refresh(updated);

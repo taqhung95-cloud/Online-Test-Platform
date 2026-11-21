@@ -8,7 +8,7 @@
   <link rel="icon" href="sungrow-edu-favicon.ico" type="image/x-icon" sizes="16x16">
   <link rel="preload" href="v5-assets/deb3edc82cb2.woff2" as="font" type="font/woff2" crossorigin>
   <script src="platform.js?v=20261121-layout"></script>
-  <script src="admin-authoring.js?v=5"></script>
+  <script src="admin-authoring.js?v=6"></script>
 </head>
 <body class="learner-v2">
   <noscript>Cần bật JavaScript để sử dụng Sungrow E-learning.</noscript>
@@ -3415,16 +3415,16 @@ body.v5 .v5-admin-dashboard #learningCoursePicker{
   inline-size:min(100%,28rem);
   align-self:start;
 }
-body.v5 .v5-admin-dashboard :is(#learningCourseForm,#learningLessonForm,#scheduleForm){
+body.v5 .v5-admin-dashboard :is(#learningCourseForm,#scheduleForm){
   display:grid;
   gap:var(--admin-form-gap);
   align-items:end;
   margin:0;
 }
-body.v5 .v5-admin-dashboard :is(#learningCourseForm,#learningLessonForm){
+body.v5 .v5-admin-dashboard #learningCourseForm{
   grid-template-columns:repeat(2,minmax(0,1fr));
 }
-body.v5 .v5-admin-dashboard :is(#learningCourseForm,#learningLessonForm) label{
+body.v5 .v5-admin-dashboard #learningCourseForm label{
   margin:0;
   min-inline-size:0;
 }
@@ -3443,7 +3443,7 @@ body.v5 .v5-admin-dashboard #learningCourseForm .learning-check{
   background:#edf6fc;
   align-items:center;
 }
-body.v5 .v5-admin-dashboard :is(#learningCourseForm,#learningLessonForm)>button{
+body.v5 .v5-admin-dashboard #learningCourseForm>button{
   grid-column:1/-1;
   justify-self:end;
 }
@@ -3460,6 +3460,80 @@ body.v5 .v5-admin-dashboard :is(#learningAdmin,#schedulePanel)>.v5-pagehead{
   background:transparent;
 }
 body.v5 .v5-admin-dashboard #learningAdmin .learning-content{padding-block-start:0}
+body.v5 #learningAdmin.v5-panel-scroll{
+  --lesson-scroll-thumb:#627f92;
+  --lesson-scroll-track:transparent;
+  scrollbar-width:thin;
+  scrollbar-color:var(--lesson-scroll-thumb) var(--lesson-scroll-track);
+  scrollbar-gutter:stable;
+}
+@supports not (scrollbar-color:auto){
+  body.v5 #learningAdmin.v5-panel-scroll{scrollbar-width:auto}
+  body.v5 #learningAdmin.v5-panel-scroll::-webkit-scrollbar{width:8px}
+  body.v5 #learningAdmin.v5-panel-scroll::-webkit-scrollbar-thumb{background:var(--lesson-scroll-thumb);border-radius:999px}
+  body.v5 #learningAdmin.v5-panel-scroll::-webkit-scrollbar-track{background:var(--lesson-scroll-track)}
+  body.v5 #learningAdmin.v5-panel-scroll::-webkit-scrollbar-button{display:none}
+}
+@media (forced-colors:active){
+  body.v5 #learningAdmin.v5-panel-scroll{scrollbar-color:auto}
+}
+.lesson-materials{
+  display:grid;
+  align-content:start;
+  gap:14px;
+  min-inline-size:0;
+  margin-block-start:8px;
+  padding-block-start:16px;
+  border-block-start:1px solid var(--sg-line);
+}
+.lesson-materials-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 16px}
+.lesson-materials-header h3,.lesson-materials-header p,.lesson-material-option h4{margin:0}
+.lesson-materials-header>div{display:grid;gap:3px}
+.lesson-materials-header p{color:var(--sg-muted);font-size:var(--sg-type-detail)}
+.lesson-materials-list{display:grid;gap:6px}
+.lesson-materials-list .learning-row a{overflow-wrap:anywhere}
+.lesson-material-sources{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,19rem),1fr));
+  gap:12px;
+}
+.lesson-material-option{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  min-inline-size:0;
+  padding:clamp(12px,1.3vw,18px);
+  border:1px solid var(--sg-line);
+  border-radius:14px;
+  background:var(--sg-glass-base);
+}
+body.v5 .lesson-material-option .learning-form{
+  display:flex;
+  flex:1;
+  flex-direction:column;
+  align-items:stretch;
+  gap:10px;
+  margin:0;
+}
+.lesson-material-option .learning-form label{min-inline-size:0;margin:0}
+.lesson-material-option .learning-form>button{align-self:end;margin-block-start:auto}
+.lesson-material-option :is(progress,[role=status]){inline-size:100%;margin:0}
+.lesson-material-option [role=status]:empty{display:none}
+.training-file-picker{
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-block-size:44px;
+  padding:4px 8px;
+  border:1px solid var(--sg-line);
+  border-radius:10px;
+  background:var(--sg-input);
+}
+.training-file-picker:focus-within{outline:2px solid var(--sg-action);outline-offset:2px}
+.training-file-picker input[type=file]{position:absolute;inset:0;inline-size:100%;block-size:100%;margin:0;opacity:0;cursor:pointer}
+.training-file-picker .training-file-button{flex:none;padding:5px 8px;border-radius:6px;background:var(--sg-glass-base);color:var(--sg-action);font-weight:600}
+.training-file-picker .training-file-name{min-inline-size:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--sg-muted)}
 body.v5 .v5-admin-dashboard .v5-admin-device{
   display:flex;
   flex-wrap:wrap;
@@ -3481,7 +3555,7 @@ body.v5 .v5-admin-dashboard #unlinkDeviceButton{
   body.v5 .v5-admin-dashboard #scheduleForm label:first-child{grid-column:1/-1}
 }
 @media(max-width:580px){
-  body.v5 .v5-admin-dashboard :is(#learningCourseForm,#learningLessonForm,#scheduleForm){
+  body.v5 .v5-admin-dashboard :is(#learningCourseForm,#scheduleForm){
     grid-template-columns:minmax(0,1fr);
   }
   body.v5 .v5-admin-dashboard #learningCourseForm label:has([name=examId]),
@@ -7404,15 +7478,25 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
           <label class="learning-check"><input name="published" type="checkbox" ${course?.published ? 'checked' : ''}> Xuất bản cho học viên</label>
           <button class="button" type="submit">Lưu khóa học</button>
         </form>
-        ${course ? `<h3>Tài liệu bài học</h3><p>Mỗi bài học dùng một tệp video, PDF hoặc PowerPoint. Chọn một trong hai cách bên dưới.</p>
-          ${course.lessons.map(lesson => `<div class="learning-row"><a href="https://drive.google.com/file/d/${encodeURIComponent(lesson.fileId)}/view" target="_blank" rel="noopener noreferrer">${escape(lesson.title)}</a>
-            <button type="button" class="button secondary" data-edit-lesson="${escape(lesson.id)}">Sửa</button></div>`).join('')}
-          <h4>Dùng tệp đã có trên Drive</h4>
-          <form class="learning-form" id="learningLessonForm"><input type="hidden" name="lessonId">
-            <label>Tên bài học<input name="title" required maxlength="150"></label>
-            <label>Liên kết hoặc mã tệp Drive<input name="file" required maxlength="400"></label>
-            <button class="button" type="submit">Lưu bài học từ liên kết</button>
-          </form>` : ''}`;
+        ${course ? `<section class="lesson-materials" aria-labelledby="lessonMaterialsTitle">
+          <header class="lesson-materials-header">
+            <div><h3 id="lessonMaterialsTitle">Tài liệu bài học</h3><p>Mỗi bài học dùng một tệp.</p></div>
+            ${course.folderId ? `<a href="https://drive.google.com/drive/folders/${encodeURIComponent(course.folderId)}" target="_blank" rel="noopener noreferrer">Mở thư mục khóa học trên Drive</a>` : ''}
+          </header>
+          ${course.lessons.length ? `<div class="lesson-materials-list">${course.lessons.map(lesson => `
+            <div class="learning-row"><a href="https://drive.google.com/file/d/${encodeURIComponent(lesson.fileId)}/view" target="_blank" rel="noopener noreferrer">${escape(lesson.title)}</a>
+              <button type="button" class="button secondary" data-edit-lesson="${escape(lesson.id)}">Sửa</button></div>`).join('')}</div>` : ''}
+          <div class="lesson-material-sources">
+            <section class="lesson-material-option">
+              <h4>Dùng tệp đã có trên Drive</h4>
+              <form class="learning-form" id="learningLessonForm"><input type="hidden" name="lessonId">
+                <label>Tên bài học<input name="title" required maxlength="150"></label>
+                <label>Liên kết hoặc mã tệp Drive<input name="file" required maxlength="400"></label>
+                <button class="button" type="submit">Lưu bài học từ liên kết</button>
+              </form>
+            </section>
+          </div>
+        </section>` : ''}`;
       content.querySelector('select').onchange = event => render(data, event.target.value);
       wireForm(content.querySelector('#learningCourseForm'), async values => {
         const saved = await request('saveLearningContent', {...values, kind:'course', learningId:selected,
@@ -7421,7 +7505,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
         render(saved, selected || createKey || saved.courses.find(item => !data.courses.some(old => old.id === item.id))?.id);
       }, status);
       if (!course) return;
-      if (data.authoringReady) AdminAuthoring.installCourseUpload(content, course, request, updated => {
+      if (data.authoringReady) AdminAuthoring.installCourseUpload(content.querySelector('.lesson-material-sources'), course, request, updated => {
         render(updated, selected);
         status.textContent = 'Đã thêm bài học.';
       });
