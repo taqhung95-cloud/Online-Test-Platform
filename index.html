@@ -7,8 +7,8 @@
   <title>Sungrow E-learning</title>
   <link rel="icon" href="sungrow-edu-favicon.ico" type="image/x-icon" sizes="16x16">
   <link rel="preload" href="v5-assets/deb3edc82cb2.woff2" as="font" type="font/woff2" crossorigin>
-  <script src="platform.js?v=20261120-v5"></script>
-  <script src="admin-authoring.js?v=4"></script>
+  <script src="platform.js?v=20261121-layout"></script>
+  <script src="admin-authoring.js?v=5"></script>
 </head>
 <body class="learner-v2">
   <noscript>Cần bật JavaScript để sử dụng Sungrow E-learning.</noscript>
@@ -1471,7 +1471,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 .result-summary{border-top:4px solid var(--v2-orange);padding:24px}
 .v2-result-status{display:flex;align-items:center;gap:12px}
 .v2-result-status .v2-icon{width:40px;height:40px}
-.v2-admin-shell{display:grid;grid-template-columns:210px minmax(0,1fr);gap:20px}
 .v2-admin-nav{position:sticky;top:86px;align-self:start;display:grid;gap:6px;padding:12px;border-radius:10px;background:#fff;border:1px solid var(--v2-border)}
 .v2-admin-nav button{display:flex;align-items:center;gap:8px;min-height:44px;padding:8px;border:0;background:none;border-radius:6px;text-align:left;cursor:pointer;color:var(--v2-text)}
 .v2-admin-nav button[aria-pressed=true]{background:#fff0e3;color:var(--v2-accent);font-weight:700}
@@ -1480,7 +1479,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 .v2-admin-main>[hidden]{display:none}
 .v2-admin-main .learning-admin{margin:0}
 @media(max-width:1100px){.v2-overview{grid-template-columns:190px minmax(0,1fr)}.v2-journey{grid-column:1/-1}.course-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:780px){.v2-admin-shell,.exam-layout,.result-layout{grid-template-columns:minmax(0,1fr)}.v2-admin-nav{position:static;display:flex;flex-wrap:wrap}.question-nav-panel,.exam-question-column,.result-main,.history-panel{grid-column:auto;grid-row:auto}.history-panel{order:2}.v2-exam-tools{grid-template-columns:1fr 1fr}}
+@media(max-width:780px){.exam-layout,.result-layout{grid-template-columns:minmax(0,1fr)}.v2-admin-nav{position:static;display:flex;flex-wrap:wrap}.question-nav-panel,.exam-question-column,.result-main,.history-panel{grid-column:auto;grid-row:auto}.history-panel{order:2}.v2-exam-tools{grid-template-columns:1fr 1fr}}
 @media(max-width:580px){.course-grid,.v2-overview{grid-template-columns:minmax(0,1fr)}.v2-journey{grid-column:auto}.v2-profile{order:2}.v2-journey{order:3}.v2-profile .v2-metrics{margin-bottom:0}.learning-nav button{padding-inline:9px}.header-inner{min-height:58px}.header .connection-status{display:none}body:has(:is(#loginView,#bootView):not([hidden])) main{background-image:none;min-height:calc(100vh - 58px)}}
 .v2-admin-nav [hidden]{display:none}
 .v2-admin-main [data-admin-section=reports]>.metrics{margin-block:16px 0}
@@ -1516,17 +1515,17 @@ body:has(.academy-shell:not([hidden])) main,body:has(#dashboardView:not([hidden]
 }
 
 /* Shared navigation and the illustrated sign-in page. */
-body:is(.learner-v2,.admin-v2) .header-inner{display:flex;flex-wrap:wrap;max-width:none;width:100%;min-height:58px;padding:0 clamp(16px,3vw,48px);gap:clamp(8px,2vw,28px)}
-body:is(.learner-v2,.admin-v2) .header .brand{flex:0 0 auto}
-body:is(.learner-v2,.admin-v2) .header .brand img{width:124px;height:auto;display:block}
-body:is(.learner-v2,.admin-v2) .header .brand-copy{border:0;padding:0}
-.admin-v2 .header .brand-copy{display:none}
-body:is(.learner-v2,.admin-v2) .header .portal-nav{margin-left:auto;gap:4px}
-body:is(.learner-v2,.admin-v2) .header .portal-nav a,.learner-v2 .header #logoutButton{
+body.learner-v2 .header-inner{display:flex;flex-wrap:wrap;max-width:none;width:100%;min-height:58px;padding:0 clamp(16px,3vw,48px);gap:clamp(8px,2vw,28px)}
+body.learner-v2 .header .brand{flex:0 0 auto}
+body.learner-v2 .header .brand img{width:124px;height:auto;display:block}
+body.learner-v2 .header .brand-copy{border:0;padding:0}
+.header .brand-copy{display:none}
+body.learner-v2 .header .portal-nav{margin-left:auto;gap:4px}
+body.learner-v2 .header .portal-nav a,.learner-v2 .header #logoutButton{
   min-height:44px;display:inline-flex;align-items:center;padding:0 10px;border:0;border-radius:0;background:none;color:var(--v2-muted);font:inherit;text-decoration:none;cursor:pointer
 }
-body:is(.learner-v2,.admin-v2) .header .portal-nav a[aria-current=page]{color:var(--v2-accent);box-shadow:inset 0 -2px var(--v2-orange)}
-body:is(.learner-v2,.admin-v2) .header #connectionStatus:not([data-status=retry]){display:none}
+body.learner-v2 .header .portal-nav a[aria-current=page]{color:var(--v2-accent);box-shadow:inset 0 -2px var(--v2-orange)}
+body.learner-v2 .header #connectionStatus:not([data-status=retry]){display:none}
 .learner-v2:not(:has(#courseView:not([hidden]))) #academyNavigation,
 .learner-v2:not(:has(#courseView:not([hidden]))) .header #logoutButton,
 .learner-v2:has(#examView:not([hidden])) #adminNavLink{display:none}
@@ -1560,10 +1559,7 @@ body.learner-v2:has(:is(#loginView,#bootView):not([hidden])) main{width:100%;max
 }
 
 /* The shared frame spans the viewport on both entry points. */
-body:is(.learner-v2,.admin-v2) main{width:100%;max-width:none;padding-inline:clamp(16px,2.4vw,48px);box-sizing:border-box}
-.admin-v2 #dashboardView{width:100%;max-width:none}
-.admin-v2 .v2-admin-shell{grid-template-columns:clamp(190px,15vw,260px) minmax(0,1fr)}
-@media(max-width:780px){.admin-v2 .v2-admin-shell{grid-template-columns:minmax(0,1fr)}}
+body.learner-v2 main{width:100%;max-width:none;padding-inline:clamp(16px,2.4vw,48px);box-sizing:border-box}
 
 /* Match the reference's compact forms, flat cards and dashboard grid. */
 body.learner-v2:has(:is(#loginView,#bootView):not([hidden])) main{background-size:cover}
@@ -1614,19 +1610,19 @@ body.learner-v2:has(:is(#loginView,#bootView):not([hidden])) main{background-siz
   --v2-radius: 18px;
   --v2-gap: clamp(16px, 1.4vw, 26px);
 }
-body:is(.learner-v2,.admin-v2) {
+body.learner-v2 {
   font-size: 16px;
   line-height: 1.55;
   background: radial-gradient(ellipse at 16% 0%, #e8effc, transparent 56%), #f5f7fb;
 }
-body:is(.learner-v2,.admin-v2) main { min-width: 0; }
-body:is(.learner-v2,.admin-v2) .header,
+body.learner-v2 main { min-width: 0; }
+body.learner-v2 .header,
 .v2-exam-tools {
   background: var(--v2-glass);
   backdrop-filter: blur(18px) saturate(145%);
   box-shadow: inset 0 1px rgb(255 255 255 / 85%), 0 6px 24px rgb(31 46 73 / 7%);
 }
-body:is(.learner-v2,.admin-v2) .header-inner { min-width: 0; }
+body.learner-v2 .header-inner { min-width: 0; }
 #academyNavigation button, .portal-nav a, .portal-nav button { font-size: 15px; }
 #academyNavigation button[aria-pressed=true] {
   border-radius: 999px;
@@ -1635,19 +1631,19 @@ body:is(.learner-v2,.admin-v2) .header-inner { min-width: 0; }
   min-height: 44px;
   margin-block: 6px;
 }
-:is(.learner-v2,.admin-v2) :is(.panel,.learning-card,.v2-task,.v2-profile,.v2-journey,.v2-admin-nav) {
+.learner-v2 :is(.panel,.learning-card,.v2-task,.v2-profile,.v2-journey,.v2-admin-nav) {
   border-radius: var(--v2-radius);
   overflow-wrap: anywhere;
 }
-:is(.learner-v2,.admin-v2) :is(button,input,select,textarea) { font-family: inherit; }
-:is(.learner-v2,.admin-v2) :is(input:not([type=checkbox]):not([type=radio]),select,textarea) { font-size: 16px; }
-:is(.learner-v2,.admin-v2) :is(.intro,.learning-row,.v2-journey .learning-row,.course-description,.category-name,.history-time,.status,.result-user,.section-note) {
+.learner-v2 :is(button,input,select,textarea) { font-family: inherit; }
+.learner-v2 :is(input:not([type=checkbox]):not([type=radio]),select,textarea) { font-size: 16px; }
+.learner-v2 :is(.intro,.learning-row,.v2-journey .learning-row,.course-description,.category-name,.history-time,.status,.result-user,.section-note) {
   font-size: 15px;
   color: var(--v2-muted);
 }
-:is(.learner-v2,.admin-v2) :is(.v2-chip,.v2-task small,.v2-metrics div,.learning-row small,.metric-label) { font-size: 14px; }
-:is(.learner-v2,.admin-v2) .button { min-height: 44px; border-radius: 11px; font-size: 15px; }
-:is(.learner-v2,.admin-v2) button:disabled {
+.learner-v2 :is(.v2-chip,.v2-task small,.v2-metrics div,.learning-row small,.metric-label) { font-size: 14px; }
+.learner-v2 .button { min-height: 44px; border-radius: 11px; font-size: 15px; }
+.learner-v2 button:disabled {
   opacity: 1;
   background: #eef1f6;
   border-color: #dce3ee;
@@ -1718,7 +1714,7 @@ body:is(.learner-v2,.admin-v2) .header-inner { min-width: 0; }
 .v2-exam-meta { font-size: 15px; }
 #courseGrid .course-actions { justify-content: flex-start; }
 :is(.exam-question-column,.result-main,.v2-admin-main) { min-width: 0; }
-.admin-v2 .v2-admin-nav { background: var(--v2-glass); backdrop-filter: blur(16px); }
+.v2-admin-nav { background: var(--v2-glass); backdrop-filter: blur(16px); }
 @media (max-width: 720px) {
   .v2-exam-tools { grid-template-columns: repeat(2,minmax(0,1fr)); }
   .v2-exam-tools label:first-child { grid-column: 1/-1; }
@@ -1727,7 +1723,7 @@ body:is(.learner-v2,.admin-v2) .header-inner { min-width: 0; }
   .v2-exam-tools { grid-template-columns: minmax(0,1fr); }
 }
 @media (prefers-reduced-transparency: reduce) {
-  :is(.learner-v2,.admin-v2) .header,.v2-exam-tools,.admin-v2 .v2-admin-nav {
+  .learner-v2 .header,.v2-exam-tools,.v2-admin-nav {
     background: #fff;
     backdrop-filter: none;
   }
@@ -1735,6 +1731,11 @@ body:is(.learner-v2,.admin-v2) .header-inner { min-width: 0; }
 </style>
 <script>(() => {
   const shapes = {
+    profile:'<circle cx="12" cy="8" r="4" fill="none" stroke="#354967" stroke-width="1.5"/><path d="M4 21v-2a8 8 0 0 1 16 0v2" fill="none" stroke="#354967" stroke-width="1.5"/>',
+    reports:'<path d="M5 3h10l4 4v14H5z" fill="#e3f2ff" stroke="#285978" stroke-linejoin="round"/><path d="M15 3v5h4M8 17v-3m4 3v-5m4 5v-7" fill="none" stroke="#285978" stroke-width="1.5" stroke-linecap="round"/>',
+    courseEditor:'<rect x="3" y="4" width="18" height="15" rx="2" fill="#e1f4ee" stroke="#276955"/><path d="m10 8 5 3.5-5 3.5z" fill="#276955"/><path d="M8 22h8" stroke="#276955" stroke-linecap="round"/>',
+    examEditor:'<path d="M12 4H5v16h13v-7" fill="#eee8ff" stroke="#644597" stroke-linecap="round" stroke-linejoin="round"/><path d="m9 15 1-4 7-7 3 3-7 7z" fill="#c9b8ef" stroke="#644597" stroke-linejoin="round"/>',
+    calendar:'<rect x="3" y="5" width="18" height="16" rx="2" fill="#ffe9df" stroke="#8f411e"/><path d="M7 3v5m10-5v5M3 10h18m-14 5h2m2 0h2m2 0h2m-10 3h2m2 0h2" stroke="#8f411e" stroke-linecap="round"/>',
     medal:'<path d="m8 14-2 8 4-2 2 3 2-5m2-4 2 8-4-2-2 3" fill="#ff7900"/><circle cx="12" cy="10" r="7" fill="#ffe0a2" stroke="#934600"/><path d="m12 6 1.2 2.4 2.6.4-1.9 1.9.4 2.6-2.3-1.2-2.3 1.2.4-2.6-1.9-1.9 2.6-.4Z" fill="#934600"/>',
     certificate:'<rect x="3" y="3" width="18" height="15" rx="2" fill="#fff0dc" stroke="#934600"/><path d="M7 8h9M7 11h6" stroke="#934600"/><path d="m14 17-.6 5 2.6-1.5 2.6 1.5-.6-5" fill="#934600"/><circle cx="16" cy="16" r="3" fill="#ffb35b" stroke="#934600"/>',
     progress:'<rect x="3" y="3" width="18" height="18" rx="5" fill="#d9e7ff"/><path d="M7 16v-3m5 3v-6m5 6V7" stroke="#274e92" stroke-width="2" stroke-linecap="round"/>',
@@ -1748,7 +1749,7 @@ body:is(.learner-v2,.admin-v2) .header-inner { min-width: 0; }
 </script>
 <style>.v2-exam-tools :is(input,select) { box-sizing:border-box; height:48px; }</style>
 <style>/* Translucent chrome with a visible rim and color from the page below. */
-body:is(.learner-v2,.admin-v2) .header,.v2-exam-tools,.admin-v2 .v2-admin-nav {
+body.learner-v2 .header,.v2-exam-tools,.v2-admin-nav {
   background:linear-gradient(120deg,rgb(255 255 255 / 87%),rgb(243 248 255 / 46%) 52%,rgb(255 240 225 / 65%));
   backdrop-filter:blur(24px) saturate(175%);
   box-shadow:inset 0 1px 1px #fff,inset 0 -1px 1px #ffffffc9,0 8px 25px #243b641c;
@@ -1758,7 +1759,7 @@ body:is(.learner-v2,.admin-v2) .header,.v2-exam-tools,.admin-v2 .v2-admin-nav {
   box-shadow:inset 0 1px 2px #fff,0 3px 10px #a8440026;
 }
 @media (prefers-reduced-transparency: reduce) {
-  body:is(.learner-v2,.admin-v2) .header,.v2-exam-tools,.admin-v2 .v2-admin-nav {background:#fff;backdrop-filter:none}
+  body.learner-v2 .header,.v2-exam-tools,.v2-admin-nav {background:#fff;backdrop-filter:none}
 }
 .certificate-sheet {
   box-sizing:border-box; width:min(100%,277mm); aspect-ratio:1.44; margin:auto;
@@ -1841,10 +1842,10 @@ body :is(button,a,input,select,textarea):focus-visible{outline:3px solid #913c00
 body.v4 h1:focus,body.v4 h2:focus,body.v4 [tabindex='-1']:focus{outline:none!important}body.v4 h2{font-size:28px;line-height:1.3;margin:0 0 12px}body.v4 h3{font-size:18px;line-height:1.45;margin:0 0 16px}body.v4 :is(.card,.panel,.learning-card,.catalog-card,.v2-task,.v2-journey){border-radius:16px;border:1px solid #dce3ee;background:#fff;box-shadow:0 4px 16px #20365305;padding:24px}body.v4 .learning-content,body.v4 .academy-main,body.v4 .learning-workspace{padding:0;margin:0;width:100%;max-width:none}body.v4 .academy-shell{display:block}body.v4 .course-header,body.v4 #academyNavigation{display:none!important}.v4-description,.v4-crumb{color:#49566a;font-size:14px;margin:0 0 24px}.v4-crumb{margin-bottom:8px}.v4-page-header{margin-bottom:24px}.v4-page-header h2{margin-bottom:8px}
 body.v4 .v2-overview{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:24px}body.v4 .v2-overview>*{grid-row:auto;order:0}body.v4 .v2-overview-banner{grid-column:1/-1}body.v4 .v2-banner{min-height:180px;padding:24px 32px;border-radius:16px;background:linear-gradient(115deg,#fff0e1,#fff 70%,#edf2f8);color:#182235}body.v4 .v2-shortcuts{display:none}body.v4 .v2-metrics{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin:0}body.v4 .v2-metrics>div{display:grid;grid-template-columns:28px 1fr;align-items:center;gap:4px 12px;padding:20px;background:#fff;border:1px solid #dce3ee;border-radius:16px;font-size:14px}body.v4 .v2-metrics strong{font-size:28px;margin:0}.v4-stat-label{grid-column:2;white-space:nowrap}body.v4 .v2-tasks{grid-column:span 8}body.v4 .v2-journey{grid-column:span 4}body.v4 .v2-task-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}body.v4 .v2-task{min-height:150px;text-align:left}body.v4 .v2-journey .learning-row{display:grid;padding:12px 0;gap:8px}body.v4 :is(.catalog-grid,#courseGrid){display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}body.v4 .catalog-card,body.v4 #courseGrid .course-card{display:flex;flex-direction:column;padding:20px;min-width:0}body.v4 .catalog-card-end,body.v4 #courseGrid .course-actions{margin-top:auto}body.v4 .catalog-card h3,body.v4 .exam-card-heading h3{font-size:18px}.v4-progress{width:100%;accent-color:#a84400;margin:12px 0}
 body.v4 .v3-course-grid{grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:24px;align-items:start}body.v4 .v3-course-grid>section:last-child{position:sticky;top:24px;padding:20px}body.v4 .v3-player{max-height:none}body.v4 .v3-lessons button{display:grid;grid-template-columns:28px minmax(0,1fr);gap:4px 8px;padding:12px;font-size:14px}body.v4 .v3-lessons button b{grid-row:1/3;border-radius:50%;background:#edf1f7;width:26px;height:26px;text-align:center}body.v4 .v3-lessons button small{grid-column:2;font-size:12px;color:#49566a}.v4-exam-gate{border-top:1px solid #dce3ee;padding-top:20px;margin-top:20px}.v4-exam-gate button{width:100%}.v4-exam-gate p{font-size:13px}.v4-exam-gate h4{margin:0 0 12px}
-body.v4 .v3-tabs,body.v4 .tabs{display:flex;gap:8px;border-bottom:1px solid #dce3ee;margin:0 0 24px;padding:0;border-radius:0;background:transparent}body.v4 [role=tab]{border:0;border-bottom:3px solid transparent;background:transparent;color:#49566a;border-radius:0;padding:12px 16px;min-height:44px}body.v4 [role=tab][aria-selected=true]{border-bottom-color:#ff7900;color:#913b00;background:#fff0e4}.v4-results{width:100%;border-collapse:collapse;background:#fff}.v4-results th,.v4-results td{text-align:left;padding:16px;border-bottom:1px solid #dce3ee;font-size:14px}.v4-results th{background:#edf2f8;font-weight:600}.v4-badge{display:inline-block;padding:4px 8px;border-radius:20px;background:#e4f3eb;color:#20533c;white-space:nowrap}.v4-badge.retry{background:#fff0e4;color:#913b00}body.v4 .v2-achievements{grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}body.v4 .result-layout{grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:24px}body.v4 .result-main{grid-column:1;grid-row:1}body.v4 .result-summary{grid-column:2;grid-row:1;position:sticky;top:24px;border-top:3px solid #ff7900}body.v4 .history-panel{grid-column:1/-1;grid-row:2}body.v4 .result-summary .metrics{display:grid;grid-template-columns:1fr 1fr;gap:16px}.result-summary .metric{padding:0!important;border:0!important}body.v4 .result-user{display:grid;gap:8px}body.v4 .analysis-panel{display:block}body.v4 .score-ring{margin:0 auto 24px}body.v4 .result-main>.panel{margin-bottom:24px}body.v4 .result-summary .metric-value{font-size:24px}body.v4 .v4-profile-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:24px}body.v4 .learning-form{display:grid;grid-template-columns:1fr;max-width:none}.v4-focusbar{display:none}body.v4.v4-focus .v4-shell{display:block;height:calc(100dvh - 64px)}body.v4.v4-focus .v4-sidebar{display:none}body.v4.v4-focus .v4-scroll{height:100%}body.v4.v4-focus .v4-focusbar{display:flex;height:64px;padding:8px 32px;align-items:center;gap:24px;background:white;border-bottom:1px solid #dce3ee}.v4-focusbar img{width:130px}.v4-focusbar strong{margin-right:auto}.v4-focusbar .timer{display:block!important}body.v4 .exam-layout{grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:24px}body.v4 .question-nav-panel{top:24px}body.v4 .candidate-info{display:flex;flex-wrap:wrap;gap:12px}body.v4 .v2-admin-shell{display:block}body.v4 #metricsGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:24px 0}body.v4 .filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}body.v4 .toolbar-footer{align-items:center}.v4-export{position:relative}.v4-export summary{cursor:pointer;padding:10px;border:1px solid #ccd5e2;border-radius:10px}.v4-export[open] .export-actions{display:grid;position:absolute;right:0;z-index:10;padding:12px;background:white;box-shadow:0 8px 24px #18223522;border-radius:12px;width:280px}body.v4 .overview-grid{grid-template-columns:1fr}body.v4 .v4-sidebar #adminMeta{display:grid}.v4-drawer{display:none}
+body.v4 .v3-tabs,body.v4 .tabs{display:flex;gap:8px;border-bottom:1px solid #dce3ee;margin:0 0 24px;padding:0;border-radius:0;background:transparent}body.v4 [role=tab]{border:0;border-bottom:3px solid transparent;background:transparent;color:#49566a;border-radius:0;padding:12px 16px;min-height:44px}body.v4 [role=tab][aria-selected=true]{border-bottom-color:#ff7900;color:#913b00;background:#fff0e4}.v4-results{width:100%;border-collapse:collapse;background:#fff}.v4-results th,.v4-results td{text-align:left;padding:16px;border-bottom:1px solid #dce3ee;font-size:14px}.v4-results th{background:#edf2f8;font-weight:600}.v4-badge{display:inline-block;padding:4px 8px;border-radius:20px;background:#e4f3eb;color:#20533c;white-space:nowrap}.v4-badge.retry{background:#fff0e4;color:#913b00}body.v4 .v2-achievements{grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}body.v4 .result-layout{grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:24px}body.v4 .result-main{grid-column:1;grid-row:1}body.v4 .result-summary{grid-column:2;grid-row:1;position:sticky;top:24px;border-top:3px solid #ff7900}body.v4 .history-panel{grid-column:1/-1;grid-row:2}body.v4 .result-summary .metrics{display:grid;grid-template-columns:1fr 1fr;gap:16px}.result-summary .metric{padding:0!important;border:0!important}body.v4 .result-user{display:grid;gap:8px}body.v4 .analysis-panel{display:block}body.v4 .score-ring{margin:0 auto 24px}body.v4 .result-main>.panel{margin-bottom:24px}body.v4 .result-summary .metric-value{font-size:24px}body.v4 .v4-profile-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:24px}body.v4 .learning-form{display:grid;grid-template-columns:1fr;max-width:none}.v4-focusbar{display:none}body.v4.v4-focus .v4-shell{display:block;height:calc(100dvh - 64px)}body.v4.v4-focus .v4-sidebar{display:none}body.v4.v4-focus .v4-scroll{height:100%}body.v4.v4-focus .v4-focusbar{display:flex;height:64px;padding:8px 32px;align-items:center;gap:24px;background:white;border-bottom:1px solid #dce3ee}.v4-focusbar img{width:130px}.v4-focusbar strong{margin-right:auto}.v4-focusbar .timer{display:block!important}body.v4 .exam-layout{grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:24px}body.v4 .question-nav-panel{top:24px}body.v4 .candidate-info{display:flex;flex-wrap:wrap;gap:12px}body.v4 #metricsGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:24px 0}body.v4 .filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}body.v4 .toolbar-footer{align-items:center}.v4-export{position:relative}.v4-export summary{cursor:pointer;padding:10px;border:1px solid #ccd5e2;border-radius:10px}.v4-export[open] .export-actions{display:grid;position:absolute;right:0;z-index:10;padding:12px;background:white;box-shadow:0 8px 24px #18223522;border-radius:12px;width:280px}body.v4 .overview-grid{grid-template-columns:1fr}.v4-drawer{display:none}
 @media(max-width:1023px){body.v4 .v3-course-grid,body.v4 .result-layout,body.v4 .exam-layout,body.v4 .v4-profile-grid{grid-template-columns:1fr}body.v4 .v2-tasks,body.v4 .v2-journey{grid-column:1/-1}body.v4 :is(.catalog-grid,#courseGrid,.v2-achievements){grid-template-columns:repeat(2,minmax(0,1fr))}body.v4 .result-layout>*{grid-column:1;grid-row:auto;position:static}body.v4 .result-summary{order:-1}body.v4 .v2-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}body.v4 .v3-course-grid>section:last-child{position:static}}
 @media(max-width:720px){body.v4 .v4-shell,body.v4.v4-collapsed .v4-shell{display:block;height:calc(100dvh - 64px)}body.v4 .v4-scroll{height:100%}body.v4 .v4-sidebar{display:none}body.v4 .v4-mobile{height:64px;display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:white;border-bottom:1px solid #dce3ee}.v4-mobile img{width:132px}body.v4 main#main-content{padding:24px 16px!important}body.v4 :is(.catalog-grid,#courseGrid,.v2-achievements,.v2-task-grid,.filters){grid-template-columns:1fr}body.v4 h2{font-size:24px}body.v4 .v2-banner{padding:24px}body.v4 .v2-metrics>div{padding:12px;font-size:12px;gap:4px 8px}body.v4 .v2-metrics strong{font-size:24px}body.v4 .v2-overview{gap:24px}body.v4 #metricsGrid{grid-template-columns:repeat(2,minmax(0,1fr))}body.v4 .v4-results thead{display:none}body.v4 .v4-results tr{display:grid;padding:16px;border-bottom:1px solid #dce3ee}body.v4 .v4-results td{padding:4px 0;border:0}body.v4 .v4-results td:before{content:attr(data-label);font-weight:600;margin-right:8px}body.v4.v4-focus .v4-mobile{display:none}body.v4.v4-focus .v4-focusbar{padding:8px 12px;gap:8px}.v4-focusbar strong{font-size:12px}.v4-focusbar img{width:75px}.v4-focusbar button{font-size:12px!important;padding:8px!important}body.v4 .v4-drawer[open]{display:block;position:fixed;inset:0 auto 0 0;margin:0;width:min(300px,85vw);max-width:none;height:100dvh;max-height:none;padding:0;border:0;border-radius:0}body.v4 .v4-drawer .v4-sidebar{display:flex;width:100%;height:100%;position:static}body.v4 .v4-drawer .v4-label,body.v4 .v4-drawer .v4-person,body.v4 .v4-drawer .v4-logo{display:block!important}body.v4 .v4-drawer nav button{justify-content:flex-start}body.v4 .v4-drawer nav button:after{display:none}body.v4 .v2-exam-tools{grid-template-columns:1fr}}
-:root{--muted:#49566a;--v2-muted:#49566a}body.v4 :is(.metric-note,.metric-label,.candidate-label,.section-note,.answered,.question-nav-summary,.course-user-meta,.v2-eyebrow,.catalog-toolbar label){color:#49566a}body.v4 .metric-note{font-size:12px;white-space:normal}body.v4 .v4-sidebar a{color:#913b00}body.v4 .v3-player+h3{margin-top:16px}body.v4 .v4-results-wrap{padding:0;overflow:hidden}body.v4 .v4-bottom>button{min-height:44px}body.v4 .v4-bottom #adminIdentity{overflow-wrap:anywhere;font-size:12px}body.v4 .v4-sidebar nav{flex-shrink:0}body.v4 .exam-stepper{position:sticky;bottom:0;background:#fff;z-index:5}body.v4 .v3-revision{margin-top:0}body.v4 .candidate-bar{padding:12px 16px}body.v4 .candidate-item{padding:0 12px}body.v4 .candidate-value{white-space:normal;overflow:visible;text-overflow:clip}
+:root{--muted:#49566a;--v2-muted:#49566a}body.v4 :is(.metric-note,.metric-label,.candidate-label,.section-note,.answered,.question-nav-summary,.course-user-meta,.v2-eyebrow,.catalog-toolbar label){color:#49566a}body.v4 .metric-note{font-size:12px;white-space:normal}body.v4 .v4-sidebar a{color:#913b00}body.v4 .v3-player+h3{margin-top:16px}body.v4 .v4-results-wrap{padding:0;overflow:hidden}body.v4 .v4-bottom>button{min-height:44px}body.v4 .v4-sidebar nav{flex-shrink:0}body.v4 .exam-stepper{position:sticky;bottom:0;background:#fff;z-index:5}body.v4 .v3-revision{margin-top:0}body.v4 .candidate-bar{padding:12px 16px}body.v4 .candidate-item{padding:0 12px}body.v4 .candidate-value{white-space:normal;overflow:visible;text-overflow:clip}
 @media(max-width:1023px){body.v4 .exam-question-column{grid-row:1;grid-column:1}body.v4 .question-nav-panel{grid-row:2;grid-column:1;position:static}}
 @media(max-width:720px){body.v4 .candidate-bar{display:flex;flex-wrap:wrap;gap:8px 12px;padding:12px}body.v4 .candidate-item{border:0;padding:0;display:flex;gap:6px;align-items:baseline}body.v4 .candidate-label,body.v4 .candidate-value{font-size:12px}body.v4 .candidate-item:nth-child(3),body.v4 .candidate-item:nth-child(4){display:none}body.v4 .exam-stepper{gap:8px;padding:12px}body.v4 .exam-stepper button{font-size:13px;padding:8px}.v4-results-wrap{overflow:visible!important}}
 body.v4 .learning-form label:has(input[type=checkbox]){display:flex;align-items:center;justify-content:flex-start;gap:12px}body.v4 .learning-form input[type=checkbox]{width:20px;height:20px;min-height:20px;flex:0 0 20px;margin:0;accent-color:#a84400}body.v4 .v4-sidebar nav button[aria-current=page]:hover{background:#fff0e4}body.v4 .catalog-card{gap:12px}body.v4 .catalog-card p{margin:0}body.v4 .catalog-card-end{padding-top:12px}body.v4 .result-summary h2{font-size:22px}body.v4 .result-summary .v2-result-status{gap:12px}body.v4 .result-summary .result-user{font-size:14px}
@@ -2014,7 +2015,7 @@ body.v5 #loginView :focus-visible{outline-color:var(--sg-action)}
 html[data-solid-glass] body.v5 #loginView:not([hidden]){background:var(--sg-glass-base);backdrop-filter:none}
 </style>
 <style>html,body{height:100%;overflow:hidden}*{box-sizing:border-box;scrollbar-width:thin;scrollbar-color:#aeb9c8 #edf1f6}::-webkit-scrollbar{width:7px;height:7px}::-webkit-scrollbar-thumb{background:#aeb9c8;border-radius:8px}body.v5{height:100%;font-size:var(--sg-type-body)!important;line-height:1.45}body.v5 [hidden]{display:none!important}body.v5 :is(.v4-shell,.v4-sidebar){height:100%}body.v5 .v4-shell{grid-template-columns:256px minmax(0,1fr)}body.v5 .v4-scroll{overflow:hidden;min-height:0;height:100%;display:grid;grid-template-rows:minmax(0,1fr)}body.v5 main#main-content{max-width:1560px!important;height:100%;padding:20px 24px!important;overflow:hidden;min-height:0}body.v5 main *{min-height:0}body.v5 :is(.card,.panel,.learning-card,.catalog-card,.v2-task,.v2-journey){padding:16px;border-radius:14px}body.v5 h2{font-size:24px;line-height:1.25;margin:0}body.v5 h3{font-size:17px;line-height:1.35;margin:0 0 12px}body.v5 :is(p,.intro,.result-user,.learning-row,.course-description,.v2-exam-meta){font-size:var(--sg-type-body)}body.v5 :is(.section-note,small,.metric-label,.v2-task small,.v4-description){font-size:var(--sg-type-detail)!important}body.v5 .button{min-height:40px;font-size:var(--sg-type-detail);padding:8px 12px;border-radius:9px}body.v5 :is(input:not([type=checkbox]):not([type=radio]),select){min-height:40px;height:40px;font-size:var(--sg-type-detail);padding:8px 10px}body.v5 :is(button,a,input,select):focus-visible{outline:3px solid #913b00;outline-offset:2px}body.v5 .v4-sidebar{padding:20px 16px;gap:24px;position:relative;overflow:visible}body.v5 .v5-sidehead{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0}body.v5 .v4-logo{width:154px;height:30px}body.v5 .v4-toggle{width:32px;height:32px;min-height:32px;font-size:17px;flex:0 0 32px;padding:0}body.v5 .v4-sidebar nav{gap:4px}body.v5 .v4-sidebar nav button{height:40px;min-height:40px;font-size:var(--sg-type-detail);padding:8px;gap:10px}body.v5 .v4-sidebar .v4-bottom{gap:8px}body.v5 .v4-person{padding-top:12px;font-size:var(--sg-type-detail);gap:8px}.v5 .v4-avatar{width:32px;height:32px}.v5 .v4-company{font-size:var(--sg-type-compact)}.v5 .v4-bottom #logoutButton{width:auto;justify-self:start;border:0;background:transparent;font-size:var(--sg-type-detail);min-height:36px;padding:6px 8px}.v5 .v5-user-trigger{display:flex;align-items:center;gap:8px;border:0;background:transparent;text-align:left;padding:4px;cursor:pointer}.v5 .v5-user-menu{width:300px;max-width:calc(100% - 32px);padding:20px}.v5-user-menu .v5-user-links{display:grid;gap:12px}.v5.v4-collapsed .v5-sidehead{justify-content:center}.v5.v4-collapsed .v4-bottom #logoutButton{font-size:var(--sg-type-compact);padding:4px}.v5.v4-collapsed .v5-user-trigger{font-size:var(--sg-type-compact);max-width:54px;overflow-wrap:anywhere}
-body.v5 :is(#courseView,.academy-main,#learningPortal,.learning-content,#learningExams,#resultView,#dashboardView,.v2-admin-shell,.v2-admin-main){height:100%;min-height:0;min-width:0}body.v5 #courseView,body.v5 .academy-main,body.v5 #learningPortal{display:flex;flex-direction:column}body.v5 .learning-content,body.v5 #learningExams,body.v5 #resultView,body.v5 .v2-admin-main{display:flex;flex-direction:column;gap:16px;overflow:hidden}body.v5 .learning-status:empty,body.v5 #courseMessage:empty{display:none}body.v5 #learningPortal:has(>.learning-content[hidden]){display:none}body.v5 .learning-status{margin:0;flex-shrink:0}body.v5 .v5-pagehead{display:flex;align-items:center;justify-content:space-between;gap:16px;flex:0 0 auto;min-height:44px;max-height:76px;margin:0}.v5-title{min-width:0}.v5-title h2{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.v5-head-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}body.v5 .v4-description{margin:4px 0 0}body.v5 .v4-crumb{font-size:var(--sg-type-detail);margin:0 0 4px}body.v5 .v5-back{border:0;background:transparent;color:#913b00;padding:0;font:inherit;min-height:24px;cursor:pointer}.v5-panel-scroll{overflow-y:auto!important;overscroll-behavior:contain;min-height:0;min-width:0;scroll-padding:8px}.v5-panel-scroll thead{position:sticky;top:0;z-index:2;background:#edf2f8}.v5-panel-scroll:focus-visible{outline:2px solid #913b00;outline-offset:-2px}.v5-scroll-title{position:sticky;top:0;background:#fff;z-index:2;padding-bottom:8px}
+body.v5 :is(#courseView,.academy-main,#learningPortal,.learning-content,#learningExams,#resultView,#dashboardView,.v2-admin-main){height:100%;min-height:0;min-width:0}body.v5 #courseView,body.v5 .academy-main,body.v5 #learningPortal{display:flex;flex-direction:column}body.v5 .learning-content,body.v5 #learningExams,body.v5 #resultView,body.v5 .v2-admin-main{display:flex;flex-direction:column;gap:16px;overflow:hidden}body.v5 .learning-status:empty,body.v5 #courseMessage:empty{display:none}body.v5 #learningPortal:has(>.learning-content[hidden]){display:none}body.v5 .learning-status{margin:0;flex-shrink:0}body.v5 .v5-pagehead{display:flex;align-items:center;justify-content:space-between;gap:16px;flex:0 0 auto;min-height:44px;max-height:76px;margin:0}.v5-title{min-width:0}.v5-title h2{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.v5-head-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}body.v5 .v4-description{margin:4px 0 0}body.v5 .v4-crumb{font-size:var(--sg-type-detail);margin:0 0 4px}body.v5 .v5-back{border:0;background:transparent;color:#913b00;padding:0;font:inherit;min-height:24px;cursor:pointer}.v5-panel-scroll{overflow-y:auto!important;overscroll-behavior:contain;min-height:0;min-width:0;scroll-padding:8px}.v5-panel-scroll thead{position:sticky;top:0;z-index:2;background:#edf2f8}.v5-panel-scroll:focus-visible{outline:2px solid #913b00;outline-offset:-2px}.v5-scroll-title{position:sticky;top:0;background:#fff;z-index:2;padding-bottom:8px}
 body.v5 .v5-rail-wrap{display:flex;flex-direction:column;min-height:0;min-width:0;position:relative;gap:8px}.v5-rail-tools{display:flex;justify-content:flex-end;gap:4px;flex:0 0 28px}.v5-rail-tools button{width:28px;height:28px;border:1px solid #c6d0de;border-radius:8px;background:white;color:#182235;cursor:pointer;font-size:17px}.v5-rail-tools button:disabled{opacity:.45}body.v5 .v5-rail{display:flex!important;flex-wrap:nowrap!important;gap:16px;overflow-x:auto!important;overflow-y:hidden!important;scroll-snap-type:x proximity;overscroll-behavior:contain;padding:3px 3px 8px;min-width:0;min-height:0;width:100%;margin:0}.v5-rail>*{scroll-snap-align:start;flex:0 0 clamp(240px,27%,300px);height:auto;min-width:0}.v5-rail-wrap[data-left=true]:before,.v5-rail-wrap[data-right=true]:after{content:'';position:absolute;top:36px;bottom:8px;width:16px;pointer-events:none;z-index:3}.v5-rail-wrap[data-left=true]:before{left:0;background:linear-gradient(90deg,#f5f7fb,transparent)}.v5-rail-wrap[data-right=true]:after{right:0;background:linear-gradient(270deg,#f5f7fb,transparent)}.v5-rail-wrap[data-scroll=false]>.v5-rail-tools{visibility:hidden;height:0;flex-basis:0}.v5-rail-wrap[data-scroll=false]>.v5-rail{scrollbar-width:none}.v5-rail-wrap[data-scroll=false]>.v5-rail::-webkit-scrollbar{display:none}body.v5 .v5-clickable{cursor:pointer;transition:box-shadow .15s,transform .1s}.v5-clickable:hover{box-shadow:0 4px 16px #20365318!important}.v5-clickable:active{transform:translateY(1px)}
 body.v5 .v2-overview{height:100%;display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);grid-template-rows:88px 84px minmax(0,1fr);gap:16px}body.v5 .v2-overview-banner{grid-column:1/-1;grid-row:1}body.v5 .v2-banner{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto auto;align-content:center;column-gap:16px;min-height:0;height:100%;padding:12px 20px;background:linear-gradient(100deg,#fff2e6,#fff);border-radius:14px}body.v5 .v2-banner .v2-eyebrow{display:none}body.v5 .v2-banner h2{font-size:23px;grid-column:1}body.v5 .v2-banner p{grid-column:1;margin:4px 0 0;font-size:var(--sg-type-detail)}body.v5 .v2-banner button{grid-column:2;grid-row:1/3;align-self:center}body.v5 .v2-overview>.v5-rail-wrap{grid-column:1/-1;grid-row:2}body.v5 .v2-metrics{height:100%;gap:12px}body.v5 .v2-metrics>div{flex:1 0 180px;display:flex;align-items:center;gap:12px;padding:12px 16px}body.v5 .v2-metrics strong{font-size:26px}body.v5 .v2-metrics .v4-stat-label{font-size:var(--sg-type-detail);white-space:nowrap}body.v5 .v2-metrics svg{width:24px;flex-shrink:0}body.v5 .v2-tasks{grid-row:3;grid-column:1;min-height:0;display:flex;flex-direction:column;gap:12px}body.v5 .v2-tasks>h3{margin:0}body.v5 .v2-task-grid{height:180px;flex-shrink:0}body.v5 .v2-task{display:flex;flex-direction:column;justify-content:flex-start;gap:12px;min-height:0;height:100%;padding:16px}body.v5 .v2-task strong{font-size:16px}body.v5 .v2-task small{margin-top:auto}body.v5 .v2-journey{grid-row:3;grid-column:2;display:flex;flex-direction:column;gap:12px;height:100%;min-height:0}body.v5 .v2-journey h3{margin:0}body.v5 .v5-journey-list{flex:1}body.v5 .v2-journey .learning-row{display:flex;flex-direction:column;align-items:stretch;gap:3px;border:0;border-bottom:1px solid #e1e6ee;padding:8px 0;background:none;font-size:var(--sg-type-detail);line-height:1.4;border-radius:0}body.v5 .v2-journey .learning-row strong{font-size:var(--sg-type-detail)}.v5-journey-list .learning-row>span:first-child{display:contents}.v5-journey-list .learning-row small{display:inline}.v5-current-course{flex:1;display:flex;flex-direction:column;justify-content:center;gap:8px}.v5-current-course h3,.v5-current-course p{margin:0}.v5-current-course progress{width:100%;accent-color:#a84400}
 body.v5 .catalog-toolbar{padding:12px;flex:0 0 auto;margin:0;gap:12px}body.v5 .catalog-toolbar label{font-size:var(--sg-type-detail)}body.v5 .catalog-grid{height:260px}body.v5 .catalog-card{gap:8px;min-height:0;padding:16px}body.v5 .catalog-card h3{font-size:16px;margin:0}body.v5 .catalog-card p{font-size:var(--sg-type-detail)}body.v5 .catalog-card .catalog-card-end{gap:8px;display:flex;flex-wrap:wrap;padding:4px 0 0;font-size:var(--sg-type-detail)}.v5-course-preview{flex:1;display:flex;align-items:center;justify-content:space-between;gap:24px}.v5-course-preview h3{margin:0 0 8px}.v5-course-preview p{margin:0}.v5-course-preview .v5-preview-copy{max-width:70%}body.v5 .catalog-pagination{margin:0;flex-shrink:0}body.v5 .v3-course-grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:16px;flex:1;min-height:0;align-items:stretch}body.v5 .v3-course-grid>section{height:100%;padding:16px;position:static!important;display:flex;flex-direction:column;gap:12px;overflow:hidden}body.v5 .v3-player{flex:1;min-height:0;max-height:calc(100% - 96px);width:100%;aspect-ratio:16/9;object-fit:contain;background:#17263e;border-radius:12px;place-content:center}body.v5 .v3-course-grid h3{font-size:16px;margin:0}body.v5 .v3-course-grid progress{flex-shrink:0}body.v5 .v3-course-grid>section>p{margin:0;font-size:var(--sg-type-detail)}body.v5 .v3-lessons{flex:1;margin:0;display:block;min-height:0;padding:3px}body.v5 .v3-lessons li{margin-bottom:6px}body.v5 .v3-lessons button{padding:8px;font-size:var(--sg-type-detail);line-height:1.35;gap:4px 8px}body.v5 .v3-lessons small{font-size:var(--sg-type-compact)!important}body.v5 .v4-exam-gate{margin:0;padding-top:12px;flex-shrink:0}body.v5 .v4-exam-gate h4{margin:0 0 8px;font-size:var(--sg-type-detail)}body.v5 .v4-exam-gate p{font-size:var(--sg-type-detail);margin:6px 0 0}.v5-lock{width:16px;height:16px;vertical-align:middle;margin-right:6px}body.v5 .v3-dialog-actions{margin:0;gap:8px;flex-shrink:0}body.v5 .v3-course-grid .v3-dialog-actions{justify-content:flex-end}
@@ -2022,9 +2023,9 @@ body.v5 .v2-exam-tools{display:grid;grid-template-columns:minmax(0,2fr) minmax(0
 body.v5 .v3-tabs,body.v5 .tabs{margin:0;padding:0;border-bottom:1px solid #dce3ee;gap:8px;flex-shrink:0}body.v5 [role=tab]{min-height:40px;padding:8px 12px;font-size:var(--sg-type-detail)}body.v5 .v4-tabpanel{display:flex;flex-direction:column;gap:12px;flex:1;min-height:0;overflow:hidden}body.v5 .v4-results-wrap{flex:1;padding:0;overflow-y:auto!important}body.v5 .v4-results :is(th,td){padding:10px 12px;font-size:var(--sg-type-detail);height:44px}body.v5 .v4-results button{min-height:32px;padding:6px 10px;font-size:var(--sg-type-detail)}body.v5 .v4-tabpanel>h3{margin:0;font-size:16px}body.v5 .v2-achievements{height:200px}.v5 .v2-achievements .learning-card{padding:12px;display:flex;flex-direction:column;gap:8px}.v5 .v2-achievements h3{font-size:15px;margin:0}.v5 .v2-achievements p{font-size:var(--sg-type-detail);margin:0}.v5 .v2-award-icons svg{width:30px;height:30px}.v5 .v2-award-icons{margin:0}.v5 .learning-badge{font-size:var(--sg-type-compact);align-self:start}.v5 .v2-achievements button{margin-top:auto;align-self:start}.v5-history-panel{flex:1;border:1px solid #dce3ee;border-radius:14px;background:white;overflow:hidden}body.v5 .v4-history-table .learning-row{border:0;box-shadow:none;padding:0;border-radius:0;background:transparent}.v5-history-link{color:#913b00;border:0;background:none;padding:0;text-align:left;font:inherit;cursor:pointer}
 body.v5 .result-layout{display:grid;grid-template-columns:1.05fr 1fr 1fr;gap:16px;flex:1;min-height:0;align-items:stretch}body.v5 .result-layout>.v5-result-column{grid-column:auto;grid-row:auto;padding:16px;min-height:0;display:flex;flex-direction:column;gap:12px;overflow:hidden}body.v5 .result-summary{position:static;border-top:0;margin:0;display:contents!important}body.v5 .v5-result-column .score-ring{width:140px;height:140px;margin:0 auto;flex-shrink:0}body.v5 .score-ring-copy strong{font-size:27px}.v5 .v5-result-column .v2-result-status{display:none}body.v5 .result-user{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:var(--sg-type-detail);line-height:1.4}body.v5 .result-user>span{display:flex;flex-direction:column;gap:2px}body.v5 .result-user>span:nth-child(3){display:none}body.v5 .result-summary .metrics,body.v5 .v5-result-column>.metrics{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0;padding:12px 0;border-top:1px solid #dce3ee}body.v5 .metric-value{font-size:22px}body.v5 .metric-value small{font-size:var(--sg-type-detail)}body.v5 .result-main{display:contents}body.v5 .analysis-panel{display:contents}body.v5 .analysis-copy{display:flex;flex-direction:column;height:100%;gap:12px}body.v5 .analysis-copy>p{margin:0;font-size:var(--sg-type-detail)}.v5 .category-performance{display:flex;flex-direction:column;justify-content:space-evenly;flex:1;margin:0;padding-top:12px}.v5 .category-item{margin:0}.v5 .category-performance .category-name{font-size:var(--sg-type-detail)}body.v5 .v3-revision{padding:0;margin:0;border:0;box-shadow:none;flex:1;min-height:0}body.v5 .v3-revision ul{padding:0;list-style:none;display:grid;gap:8px}body.v5 .v3-revision button{font-size:var(--sg-type-detail);text-align:left;width:100%}.v5-result-actions{display:grid;gap:8px;flex-shrink:0}.v5-review-note{font-size:var(--sg-type-detail);border-top:1px solid #dce3ee;padding-top:8px}.v5 .v4-profile-grid{flex:1;min-height:0;align-items:stretch}.v5 .v4-profile-grid>form{align-content:start;gap:16px}.v5 .v4-profile-grid>.card{padding:20px}.v5 .learning-form label{font-size:var(--sg-type-detail)}
 body.v5.v4-focus .v4-focusbar{height:56px;gap:16px;padding:8px 24px}body.v5.v4-focus .v4-shell{height:calc(100% - 56px)}body.v5 #examView{height:100%;display:flex;flex-direction:column;gap:12px}body.v5 #candidateBar,body.v5 .quiz-toolbar{display:none}body.v5 .exam-layout{flex:1;min-height:0;grid-template-columns:minmax(0,2fr) minmax(280px,1fr);gap:16px;align-items:stretch}body.v5 .exam-question-column{display:flex;flex-direction:column;height:100%;min-height:0;background:white;border:1px solid #dce3ee;border-radius:14px;overflow:hidden}body.v5 #quizForm{flex:1;min-height:0;padding:0}body.v5 .exam-layout .question-card:not([hidden]){min-height:0;border:0;box-shadow:none;margin:0;padding:20px}body.v5 .v3-question legend{font-size:18px;line-height:1.5}body.v5 .exam-stepper{position:static;padding:12px 16px;flex-shrink:0;border:0;border-top:1px solid #dce3ee;border-radius:0;box-shadow:none;display:flex;align-items:center;justify-content:space-between;margin:0;gap:12px}body.v5 .question-nav-panel{position:static;grid-column:2;grid-row:1;display:flex;flex-direction:column;gap:12px;height:100%;padding:16px}body.v5 .question-nav-panel h2{font-size:18px;margin:0}body.v5 .question-nav-summary{margin:0;font-size:var(--sg-type-detail)}body.v5 #questionNavGrid{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px;margin:0}body.v5 #questionNavGrid button{width:100%;height:36px;min-height:36px;min-width:0;font-size:var(--sg-type-detail);padding:0}body.v5 .question-nav-legend{display:flex;flex-wrap:wrap;gap:8px;font-size:var(--sg-type-detail)}body.v5 .v5-shortcuts{font-size:var(--sg-type-detail);margin-top:auto;color:#49566a}body.v5 .v5-top-progress{font-size:var(--sg-type-detail);font-weight:700;color:#182235}.v5-info-button{border:1px solid #ccd5e2;border-radius:8px;background:white;padding:8px;color:#182235;min-height:40px;cursor:pointer;font:inherit}.v5 .v4-focusbar strong{font-size:var(--sg-type-body)}.v5 .v4-focusbar img{width:110px}.v5 .answer-option{min-height:44px}
-body.v5 .v2-admin-shell{height:100%}body.v5 .v2-admin-main>[data-admin-section=reports]{display:flex;flex-direction:column;gap:12px;min-height:0;flex-shrink:0}body.v5 .v2-admin-main>[data-admin-section=reports]:last-child{flex:1;overflow:hidden}body.v5 .toolbar{padding:12px;margin:0}body.v5 .filters{display:grid;grid-template-columns:1.1fr 1.1fr 1.1fr 1fr 1fr auto;gap:8px;align-items:end}body.v5 .filters label{font-size:var(--sg-type-compact);margin-bottom:4px}body.v5 .filter-actions{display:contents}body.v5 .toolbar-footer{display:none}body.v5 #metricsGrid{height:90px;display:flex;margin:0;gap:12px}body.v5 #metricsGrid>.metric{flex:1 0 180px;padding:12px;min-height:0}.v5 #metricsGrid .metric-label{font-size:var(--sg-type-compact)}.v5 #metricsGrid .metric-value{font-size:24px}.v5 #metricsGrid .metric-note{font-size:var(--sg-type-compact);margin:0}.v5 .v5-admin-status{max-width:190px;font-size:var(--sg-type-compact);line-height:1.3;color:#49566a}.v5 .v5-head-actions .v4-export summary{font-size:var(--sg-type-detail);min-height:40px;list-style:none}.v5 .v4-export[open] .export-actions{display:grid;z-index:30}.v5 .tab-panel{flex:1;min-height:0;overflow:hidden}.v5 .overview-grid{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;height:100%;gap:16px}.v5 .tab-panel .section{height:100%;display:flex;flex-direction:column;min-height:0;gap:12px}.v5 .section-head{flex-shrink:0;margin:0}.v5 .section-head h3{margin:0;font-size:16px}.v5 :is(#categoryList,#companyTable,#rankingTable,#attemptTable){flex:1;min-height:0}.v5 .category-list{display:block}.v5 .table-wrap{overflow:visible}.v5 table{font-size:var(--sg-type-detail)}.v5 :is(th,td){padding:10px}.v5 :is(#learningAdmin,#schedulePanel){flex:1;min-height:0}.v5 #learningAdmin>.learning-content{height:auto;overflow:visible}.v5 #learningAdmin .learning-form{height:auto}.v5 #learningAdmin summary,.v5 #schedulePanel summary{position:sticky;top:0;background:#fff;z-index:2;padding-bottom:12px}.v5-toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:200;background:#182235;color:white;border-radius:10px;padding:10px 16px;font-size:var(--sg-type-detail);box-shadow:0 4px 20px #18223533;pointer-events:none}.v5 .v3-offline{position:fixed;bottom:8px;left:280px;z-index:50;border-radius:10px;font-size:var(--sg-type-detail);box-shadow:0 2px 12px #18223522}.v5 dialog{overscroll-behavior:contain}.v5 .v5-rail button,.v5 .v5-rail a{scroll-margin:8px}
+body.v5 .v2-admin-main>[data-admin-section=reports]{display:flex;flex-direction:column;gap:12px;min-height:0;flex-shrink:0}body.v5 .v2-admin-main>[data-admin-section=reports]:last-child{flex:1;overflow:hidden}body.v5 .toolbar{padding:12px;margin:0}body.v5 .filters{display:grid;grid-template-columns:1.1fr 1.1fr 1.1fr 1fr 1fr auto;gap:8px;align-items:end}body.v5 .filters label{font-size:var(--sg-type-compact);margin-bottom:4px}body.v5 .filter-actions{display:contents}body.v5 .toolbar-footer{display:none}body.v5 #metricsGrid{height:90px;display:flex;margin:0;gap:12px}body.v5 #metricsGrid>.metric{flex:1 0 180px;padding:12px;min-height:0}.v5 #metricsGrid .metric-label{font-size:var(--sg-type-compact)}.v5 #metricsGrid .metric-value{font-size:24px}.v5 #metricsGrid .metric-note{font-size:var(--sg-type-compact);margin:0}.v5 .v5-admin-status{max-width:190px;font-size:var(--sg-type-compact);line-height:1.3;color:#49566a}.v5 .v5-head-actions .v4-export summary{font-size:var(--sg-type-detail);min-height:40px;list-style:none}.v5 .v4-export[open] .export-actions{display:grid;z-index:30}.v5 .tab-panel{flex:1;min-height:0;overflow:hidden}.v5 .overview-grid{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;height:100%;gap:16px}.v5 .tab-panel .section{height:100%;display:flex;flex-direction:column;min-height:0;gap:12px}.v5 .section-head{flex-shrink:0;margin:0}.v5 .section-head h3{margin:0;font-size:16px}.v5 :is(#categoryList,#companyTable,#rankingTable,#attemptTable){flex:1;min-height:0}.v5 .category-list{display:block}.v5 .table-wrap{overflow:visible}.v5 table{font-size:var(--sg-type-detail)}.v5 :is(th,td){padding:10px}.v5 :is(#learningAdmin,#schedulePanel){flex:1;min-height:0}.v5 #learningAdmin>.learning-content{height:auto;overflow:visible}.v5 #learningAdmin .learning-form{height:auto}.v5 #learningAdmin summary,.v5 #schedulePanel summary{position:sticky;top:0;background:#fff;z-index:2;padding-bottom:12px}.v5-toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:200;background:#182235;color:white;border-radius:10px;padding:10px 16px;font-size:var(--sg-type-detail);box-shadow:0 4px 20px #18223533;pointer-events:none}.v5 .v3-offline{position:fixed;bottom:8px;left:280px;z-index:50;border-radius:10px;font-size:var(--sg-type-detail);box-shadow:0 2px 12px #18223522}.v5 dialog{overscroll-behavior:contain}.v5 .v5-rail button,.v5 .v5-rail a{scroll-margin:8px}
 @media(min-width:1024px) and (max-height:760px){body.v5 main#main-content{padding:12px 20px!important}body.v5 .learning-content,body.v5 #learningExams,body.v5 #resultView,body.v5 .v2-admin-main{gap:12px}body.v5 .v4-description{display:none}.v5 .v4-sidebar{padding:16px 12px!important;gap:20px!important}.v5 .v2-overview{gap:12px!important;grid-template-rows:80px 76px minmax(0,1fr)!important}.v5 .v2-task-grid{height:160px!important}.v5 .v3-lessons button{font-size:var(--sg-type-detail)!important;padding:6px 8px!important}.v5 .v3-course-grid>section{padding:12px!important;gap:8px!important}.v5 .v3-player{max-height:calc(100% - 84px)!important}.v5 .v2-achievements{height:178px!important}.v5 .v5-result-column .score-ring{width:116px!important;height:116px!important}.v5 .result-user{font-size:var(--sg-type-compact)!important}.v5 .v5-result-column{gap:8px!important;padding:12px!important}.v5 .catalog-grid{height:235px!important}.v5 .v5-admin-status{display:none}.v5 .metric-note{font-size:var(--sg-type-compact)!important}}
-@media(max-width:1023px){body.v5 .v4-scroll{overflow-y:auto;height:100%}body.v5 main#main-content{height:auto;min-height:100%;overflow:visible}body.v5 :is(#courseView,.academy-main,#learningPortal,.learning-content,#learningExams,#resultView,#dashboardView,.v2-admin-shell,.v2-admin-main){height:auto;overflow:visible}body.v5 .v2-overview{height:auto;grid-template-columns:1fr;grid-template-rows:88px 90px auto auto}body.v5 .v2-tasks{grid-row:3;grid-column:1}body.v5 .v2-journey{grid-row:4;grid-column:1;height:320px}.v5 .v5-current-course{min-height:130px}.v5 .v3-course-grid{grid-template-columns:1fr!important;flex:none}.v5 .v3-course-grid>section{height:auto!important}.v5 .v3-player{flex:none!important;height:auto;min-height:180px!important;max-height:none!important}.v5 .v3-lessons{max-height:250px}.v5 .result-layout{grid-template-columns:1fr!important;flex:none}.v5 .result-layout>.v5-result-column{min-height:200px}.v5 .v5-pagehead{max-height:none;align-items:flex-start;flex-wrap:wrap}.v5 .v5-title h2{white-space:normal}.v5 .v4-profile-grid{grid-template-columns:1fr}.v5 .v5-rail{height:auto}.v5 #courseGrid{height:360px!important}.v5 .v4-tabpanel{overflow:visible}.v5 .v4-results-wrap,.v5 .v5-history-panel{max-height:360px;flex:none}.v5 .v5-course-preview{padding:16px}.v5 .exam-layout{display:flex!important;flex-direction:column}.v5 .exam-question-column{min-height:450px!important;flex-shrink:0}.v5 .question-nav-panel{height:auto!important;min-height:320px!important}.v5 #quizForm{max-height:480px;flex:none;overflow:auto}.v5 .v4-focusbar{gap:8px!important;padding:8px 12px!important}.v5 .v4-focusbar strong{font-size:var(--sg-type-detail)}.v5 .v5-info-button{display:none}.v5 .v5-top-progress{font-size:var(--sg-type-compact)}.v5 .filters{grid-template-columns:repeat(2,minmax(0,1fr))!important}.v5 .overview-grid{grid-template-columns:1fr!important}.v5 .tab-panel{overflow:visible;flex:none}.v5 .tab-panel .section{height:340px}.v5 .v2-admin-main>[data-admin-section=reports]:last-child{overflow:visible}.v5 .v5-head-actions{flex-wrap:wrap}.v5 .v5-shortcuts{margin-top:16px}.v5 .v4-results thead{display:table-header-group!important}.v5 .v4-results tr{display:table-row!important;padding:0}.v5 .v4-results td:before{display:none}.v5 .v4-results td{padding:8px;font-size:var(--sg-type-compact);overflow-wrap:anywhere}.v5 .v4-results th{font-size:var(--sg-type-compact);padding:8px}.v5 .v3-offline{left:12px;right:12px}}
+@media(max-width:1023px){body.v5 .v4-scroll{overflow-y:auto;height:100%}body.v5 main#main-content{height:auto;min-height:100%;overflow:visible}body.v5 :is(#courseView,.academy-main,#learningPortal,.learning-content,#learningExams,#resultView,#dashboardView,.v2-admin-main){height:auto;overflow:visible}body.v5 .v2-overview{height:auto;grid-template-columns:1fr;grid-template-rows:88px 90px auto auto}body.v5 .v2-tasks{grid-row:3;grid-column:1}body.v5 .v2-journey{grid-row:4;grid-column:1;height:320px}.v5 .v5-current-course{min-height:130px}.v5 .v3-course-grid{grid-template-columns:1fr!important;flex:none}.v5 .v3-course-grid>section{height:auto!important}.v5 .v3-player{flex:none!important;height:auto;min-height:180px!important;max-height:none!important}.v5 .v3-lessons{max-height:250px}.v5 .result-layout{grid-template-columns:1fr!important;flex:none}.v5 .result-layout>.v5-result-column{min-height:200px}.v5 .v5-pagehead{max-height:none;align-items:flex-start;flex-wrap:wrap}.v5 .v5-title h2{white-space:normal}.v5 .v4-profile-grid{grid-template-columns:1fr}.v5 .v5-rail{height:auto}.v5 #courseGrid{height:360px!important}.v5 .v4-tabpanel{overflow:visible}.v5 .v4-results-wrap,.v5 .v5-history-panel{max-height:360px;flex:none}.v5 .v5-course-preview{padding:16px}.v5 .exam-layout{display:flex!important;flex-direction:column}.v5 .exam-question-column{min-height:450px!important;flex-shrink:0}.v5 .question-nav-panel{height:auto!important;min-height:320px!important}.v5 #quizForm{max-height:480px;flex:none;overflow:auto}.v5 .v4-focusbar{gap:8px!important;padding:8px 12px!important}.v5 .v4-focusbar strong{font-size:var(--sg-type-detail)}.v5 .v5-info-button{display:none}.v5 .v5-top-progress{font-size:var(--sg-type-compact)}.v5 .filters{grid-template-columns:repeat(2,minmax(0,1fr))!important}.v5 .overview-grid{grid-template-columns:1fr!important}.v5 .tab-panel{overflow:visible;flex:none}.v5 .tab-panel .section{height:340px}.v5 .v2-admin-main>[data-admin-section=reports]:last-child{overflow:visible}.v5 .v5-head-actions{flex-wrap:wrap}.v5 .v5-shortcuts{margin-top:16px}.v5 .v4-results thead{display:table-header-group!important}.v5 .v4-results tr{display:table-row!important;padding:0}.v5 .v4-results td:before{display:none}.v5 .v4-results td{padding:8px;font-size:var(--sg-type-compact);overflow-wrap:anywhere}.v5 .v4-results th{font-size:var(--sg-type-compact);padding:8px}.v5 .v3-offline{left:12px;right:12px}}
 @media(max-width:720px){body.v5 .v4-shell{height:calc(100% - 64px)}body.v5 .v4-drawer .v4-sidebar{height:100%;display:flex}body.v5 .v4-focusbar img{width:72px}.v5 .v4-focusbar strong{max-width:100px}.v5 .v5-pagehead{gap:8px}.v5 .v5-title h2{font-size:21px}.v5 .v2-banner{padding:12px!important;column-gap:8px}.v5 .v2-banner h2{font-size:17px!important}.v5 .v2-banner p{font-size:var(--sg-type-compact)!important}.v5 .v2-banner button{font-size:var(--sg-type-compact)!important;padding:6px!important}.v5 .v5-course-preview{display:block}.v5 .v5-course-preview .v5-preview-copy{max-width:none}.v5 .v5-course-preview button{margin-top:12px}.v5 .v2-exam-tools{grid-template-columns:1fr 1fr!important}.v5 .v2-exam-tools label:first-child{grid-column:1/-1}.v5 .v5-exam-count{display:none}.v5 .v4-tabpanel .v5-rail-wrap{flex:none}.v5 .v5-head-actions{max-width:100%}.v5 .v5-sidehead{min-height:32px}}
 @media(prefers-reduced-motion:reduce){.v5 *{scroll-behavior:auto!important;transition:none!important}}
 body.v5 .score-ring::after{width:calc(100% - 24px);height:calc(100% - 24px)}body.v5 .v5-result-column .metric{padding:0;border:0;box-shadow:none}body.v5 .v5-result-column .metric-value{font-size:22px;margin-top:4px}body.v5 .v2-tasks{align-self:stretch;height:100%}body.v5 .v5-video-stage{flex:1;min-height:0;container-type:size;display:grid;place-items:center;background:#f3f6fa;border-radius:12px;overflow:hidden}body.v5 .v5-video-stage .v3-player{width:min(100cqw,177.7778cqh);height:auto;aspect-ratio:16/9;max-height:none!important;flex:none}body.v5 .v2-achievements{height:220px!important}body.v5 .v2-achievements .learning-card{gap:6px}body.v5 .v2-achievements .learning-card>*{flex-shrink:0}body.v5 .v2-achievements .v2-award-icons{height:30px}body.v5 #metricsGrid>.metric{padding:8px}body.v5 #metricsGrid .metric-value{line-height:1.2;margin:2px 0}body.v5 #metricsGrid .metric-note{line-height:1.2}body.v5 .catalog-tools{padding:12px;margin:0;gap:12px;flex-shrink:0}body.v5 .catalog-count{font-size:var(--sg-type-detail);margin:0}body.v5 .catalog-pages:not([hidden]){margin:0;flex-shrink:0;gap:12px}body.v5 .catalog-grid{height:246px!important;flex-shrink:0}body.v5 .v5-current-course{height:auto;min-height:0;flex:1}body.v5 .v2-journey .learning-row{gap:2px}body.v5 .v2-journey .learning-row>span:first-child{display:block}body.v5 .v2-journey .learning-row small{display:inline;font-size:var(--sg-type-compact)!important}body.v5 .v2-journey .learning-row>span:last-child{font-size:var(--sg-type-detail)}body.v5 #categoryList>div{margin-bottom:16px}body.v5 .v5-course-preview{padding:12px 16px}
@@ -3362,7 +3363,6 @@ body.v5 .v5-admin-dashboard :is(#learningAdmin,#schedulePanel){
   inline-size:100%;
   border-color:#57778926;
 }
-body.v5.admin-v2 main#main-content{max-width:none!important}
 body.v5 .v5-admin-dashboard .v5-admin-status:not([hidden]){
   max-inline-size:none;
   white-space:normal;
@@ -3677,6 +3677,12 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
 #bootView[aria-busy="true"] #bootMessage,
 #bootView[aria-busy="false"] .portal-load-track { display: none; }
 #bootMessage { max-width: 32rem; margin: 0; }
+body.v4 .v4-shell { position: relative; }
+.v4-sidebar { overflow-y: auto; }
+#portalContentLoader { display: none; position: absolute; inset: 0; grid-column: 2 / 3; grid-row: 1 / 2; place-items: center; z-index: 5; pointer-events: none; }
+body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoader { display: grid; }
+#portalContentLoader .portal-load-track { inline-size: min(420px, calc(100% - 48px)); }
+.v4-avatar:empty { display: none; }
 :is(#loginButton, #registrationSubmitButton)[aria-busy="true"]::before {
   content: "";
   display: inline-block;
@@ -3695,7 +3701,7 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
 }
 
 </style>
-<style>.portal-admin-return{margin-top:8px}</style><a class="v3-skip" href="#main-content">Bỏ qua tới nội dung chính</a>
+<a class="v3-skip" href="#main-content">Bỏ qua tới nội dung chính</a>
   <header class="header">
     <div class="header-inner">
       <div class="brand">
@@ -3860,15 +3866,8 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
 
     <section id="resultView" hidden aria-live="polite"></section>
   <section id="dashboardView" class="dashboard" hidden>
-      <div class="v2-admin-shell">
-      <div id="v2AdminNav" role="group" aria-label="Quản trị đào tạo" hidden>
-        <button type="button" data-admin-page="reports" aria-pressed="true">Báo cáo đào tạo</button>
-        <button type="button" data-admin-page="learning" hidden>Khóa học và video</button>
-        <button type="button" data-admin-page="exams">Lịch kiểm tra</button>
-      </div>
       <div class="v2-admin-main">
       <h2 id="v2AdminTitle">Báo cáo đào tạo</h2>
-      <div id="adminMeta" hidden><span id="adminIdentity"></span><button id="languageToggle" type="button" class="button secondary-button">EN</button></div>
       <p id="portalNavigationStatus" role="status"></p>
       <details id="learningAdmin" class="panel learning-admin" data-admin-section="learning" hidden>
         <summary>Quản lý khóa học, video và chứng nhận</summary>
@@ -3971,7 +3970,6 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
           </div>
           <div id="attemptTable"></div>
         </section>
-      </div>
       </div>
       </div>
       </div>
@@ -4175,6 +4173,7 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
       state.token = data.attemptToken;
       state.email = data.participant.email;
       state.participant = data.participant;
+      if(!window.portalAdmin?.isAuthenticated())window.setPortalAccount(data.participant);
       state.course = data.course;
       state.questions = data.questions;
       state.answers = {
@@ -4239,6 +4238,7 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
       document.getElementById('learnerPassword').value='';document.getElementById('learnerOtp').value='';
       state.email = data.participant.email;
       state.participant = data.participant;
+      if(!window.portalAdmin?.isAuthenticated())window.setPortalAccount(data.participant);
       state.courses = Array.isArray(data.courses) ? data.courses : [];
       if (typeof data.learningReady === 'boolean') {
         state.learningReady=data.learningReady;
@@ -4475,30 +4475,23 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
     }
 
     async function viewLatestResult(courseId) {
-      const epoch=state.authEpoch;
-      const data = await callApi("getLatestResult", {
-        email: state.email,
-        courseId,
-        deviceId: state.deviceId
-      });
-      if(epoch!==state.authEpoch)return;
-      state.course = data.course;
-      state.history = data.history || [];
-      renderResult(data);
+      await openResult("getLatestResult",{courseId});
     }
 
     async function viewAttemptResult(attemptToken) {
+      await openResult("getAttemptResult",{attemptToken,courseId:state.course?.id||""});
+    }
+
+    async function openResult(action, details) {
       const epoch=state.authEpoch;
-      const data = await callApi("getAttemptResult", {
-        email: state.email,
-        courseId: state.course ? state.course.id : "",
-        attemptToken,
-        deviceId: state.deviceId
-      });
-      if(epoch!==state.authEpoch)return;
-      state.course = data.course;
-      state.history = data.history || [];
-      renderResult(data);
+      const endLoading=Portal.contentLoading(courseView);
+      try{
+        const data=await callApi(action,{...details,email:state.email,deviceId:state.deviceId});
+        if(epoch!==state.authEpoch)return;
+        state.course=data.course;
+        state.history=data.history||[];
+        renderResult(data);
+      }finally{endLoading();}
     }
 
     async function saveAttemptProgress(force = false) {
@@ -5048,6 +5041,7 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
       state.authEpoch++;resetExamState(false);
       state.email = "";
       state.participant = null;
+      window.setPortalAccount(null);
       state.courses = [];
       courseView.hidden = true;
       loginView.hidden = false;
@@ -5065,7 +5059,7 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
       adminLearnerToken='';
       if(clearToken)Portal.session('');
       if(window.portalAdmin?.isAuthenticated() && !/^Phiên quản trị|^Quyền quản trị/.test(error.message)){
-        window.portalAdmin.restore();
+        window.portalAdmin.returnToAdminFeature();
         document.getElementById('portalNavigationStatus').textContent='Hãy chọn lại mục vừa mở để tải dữ liệu.';
         return;
       }
@@ -5198,15 +5192,11 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
       if (resultButton) {
         courseMessage.textContent = "";
         resultButton.disabled = true;
-        const previousText = resultButton.textContent;
-        resultButton.textContent = "Đang tải kết quả...";
         try {
           await viewLatestResult(resultButton.dataset.resultCourseId);
         } catch (error) {
           courseMessage.textContent = error.message;
-          resultButton.disabled = false;
-          resultButton.textContent = previousText;
-        }
+        } finally { resultButton.disabled=false; }
         return;
       }
 
@@ -5217,11 +5207,9 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
       state.startingAttempt=true;
       const controls=Array.from(courseGrid.querySelectorAll('button')).map(control=>({control,disabled:control.disabled}));
       controls.forEach(({control})=>control.disabled=true);
-      courseMessage.textContent = "Đang yêu cầu máy chủ tạo đề. Nếu chưa có xác nhận, hệ thống sẽ dừng chờ và cho phép kiểm tra lại cùng mã yêu cầu.";
+      courseMessage.textContent = "";
       const previousText = button.textContent;
-      button.textContent = "Đang tạo đề...";
-      const started=Date.now();
-      const loadingTimer=setInterval(()=>{button.textContent=`Đang chờ máy chủ · ${Math.floor((Date.now()-started)/1000)}s`;},1000);
+      const endLoading=Portal.contentLoading(courseView);
       try {
         await startAttempt(state.email, button.dataset.startCourseId);
       } catch (error) {
@@ -5229,7 +5217,7 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
         courseMessage.textContent = error.message;
         button.textContent = error.uncertain?"Kiểm tra lại yêu cầu":previousText;
       } finally {
-        clearInterval(loadingTimer);if(epoch!==state.authEpoch)return;state.startingAttempt=false;
+        endLoading();if(epoch!==state.authEpoch)return;state.startingAttempt=false;
         controls.forEach(({control,disabled})=>control.disabled=disabled);
         if(!button.textContent.includes('Kiểm tra lại'))button.textContent=previousText;
       }
@@ -5503,27 +5491,38 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
       window.alert('Hãy nộp bài trước khi chuyển sang quản trị.');
       return false;
     };
-    window.cancelLearnerNavigation = () => { state.authEpoch++; setLoginLoading(false); window.LearningPortal?.close(); document.getElementById('portalNavigationStatus').textContent=''; };
+    window.cancelLearnerNavigation = () => {
+      state.authEpoch++;
+      setLoginLoading(false);
+      window.LearningPortal?.close();
+      releaseAdminLearnerLoad?.();
+      document.getElementById('portalNavigationStatus').textContent='';
+    };
     let openingAdminLearner = false;
+    let releaseAdminLearnerLoad;
     window.openLearnerTab = async tab => {
       if(state.active)return false;
       const status=document.getElementById('portalNavigationStatus');
       if(window.portalAdmin?.isAuthenticated() && (!state.participant || !adminLearnerToken || Portal.session()!==adminLearnerToken)){
         if(openingAdminLearner)return false;
         openingAdminLearner=true;
-        status.textContent='Đang mở mục học viên…';
+        status.textContent='';
+        const epoch=state.authEpoch+1;
+        releaseAdminLearnerLoad=Portal.contentLoading(document.getElementById('dashboardView'));
         try {
           const opened=await authenticateParticipant('',false,tab);
           if(opened)status.textContent='';
           return opened;
         } catch(error) {
-          if(window.portalAdmin.isAuthenticated()){
+          if(state.authEpoch===epoch && window.portalAdmin.isAuthenticated()){
             status.textContent=error.message==='Yêu cầu không hợp lệ.'
               ? 'Cần cập nhật Apps Script V2 để mở mục học viên bằng tài khoản quản trị.'
               : error.message;
           }
           return false;
         } finally {
+          releaseAdminLearnerLoad();
+          releaseAdminLearnerLoad=undefined;
           openingAdminLearner=false;
         }
       }
@@ -5551,7 +5550,6 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
   <section id="learningCertificate" aria-label="Chứng nhận"></section>
   <script>(() => {
   const learner = document.getElementById('learningPortal');
-  const admin = null;
   const escape = value => String(value ?? '').replace(/[&<>"']/g, char => ({
     '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
   })[char]);
@@ -5579,6 +5577,7 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
     const status = learner.querySelector('[role=status]');
     const exams = document.getElementById('learningExams');
     let generation = 0;
+    let releaseContentLoad;
     let active = 'overview';
     let home;
     let selectedCourse = '';
@@ -5724,6 +5723,7 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
             Object.assign(state.participant, data);
             document.querySelector('.course-user-name').textContent = data.name;
             document.querySelector('.course-user-meta span').textContent = data.company;
+            if(!window.portalAdmin?.isAuthenticated())window.setPortalAccount(data);
           }
           home = {...home, profile:{...home.profile, ...data}};
         }, status);
@@ -5732,6 +5732,7 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
 
     async function select(tab, courseId = '') {
       const id = ++generation;
+      releaseContentLoad?.();
       active = tab; window.setActiveNav?.(tab);
       selectedCourse = courseId;
       exams.hidden = tab !== 'exams';
@@ -5741,7 +5742,8 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
       status.textContent = '';
       if (tab === 'exams') return;
       content.replaceChildren();
-      status.textContent = 'Đang tải…';
+      const endLoading=Portal.contentLoading(content);
+      releaseContentLoad=endLoading;
       try {
         const data = await request('learningHome');
         if (id !== generation || document.getElementById('courseView').hidden) return;
@@ -5750,7 +5752,7 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
         status.textContent = '';
       } catch (error) {
         if (id === generation) status.textContent = error.message;
-      }
+      } finally { endLoading(); }
     }
 
     learner.addEventListener('click', async event => {
@@ -5805,72 +5807,9 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
       const lesson=home?.courses.find(item=>item.id===learningId)?.lessons.find(item=>item.id===lessonId);
       if(lesson)lesson.completed=true;
     }
-    window.LearningPortal = { getHome: () => home,completeLesson,select, open:() => select('overview'), close:() => {generation++; home = null; content.replaceChildren(); status.textContent = '';}};
+    window.LearningPortal = { getHome: () => home,completeLesson,select, open:() => select('overview'), close:() => {generation++; releaseContentLoad?.(); home = null; content.replaceChildren(); status.textContent = '';}};
   }
 
-  if (admin) {
-    const content = admin.querySelector('.learning-content');
-    const status = admin.querySelector('[role=status]');
-    const request = (action, data = {}) => callApi(action, {...data, adminToken:sessionStorage.getItem(ADMIN_SESSION_KEY) || adminToken});
-    function render(data, selected = '') {
-      const course = data.courses.find(item => item.id === selected);
-      content.innerHTML = `<label for="learningCoursePicker">Khóa học</label>
-        <select id="learningCoursePicker"><option value="">Tạo khóa mới</option>${data.courses.map(item =>
-          `<option value="${escape(item.id)}" ${item.id === selected ? 'selected' : ''}>${escape(item.title)} · ${item.published ? 'Đã xuất bản' : 'Nháp'}</option>`).join('')}</select>
-        <form class="learning-form" id="learningCourseForm">
-          <label>Tên khóa học<input name="title" required maxlength="150" value="${escape(course?.title)}"></label>
-          <label>Mô tả<textarea name="description" rows="3" maxlength="2000">${escape(course?.description)}</textarea></label>
-          <label>Bài kiểm tra liên kết<select name="examId"><option value="">Không có</option>${data.exams.map(exam =>
-            `<option value="${escape(exam.id)}" ${course?.examId === exam.id ? 'selected' : ''}>${escape(exam.title)}</option>`).join('')}</select></label>
-          <label class="learning-check"><input name="award" type="checkbox" ${course?.award ? 'checked' : ''}> Cấp chứng nhận và huy hiệu khi thi đạt</label>
-          <label class="learning-check"><input name="published" type="checkbox" ${course?.published ? 'checked' : ''}> Xuất bản cho học viên</label>
-          <button class="button" type="submit">Lưu khóa học</button>
-        </form>
-        ${course ? `<h3>Tài liệu bài học</h3><p>Mỗi bài học dùng một tệp video, PDF hoặc PowerPoint. Chọn một trong hai cách bên dưới.</p>
-          ${course.lessons.map(lesson => `<div class="learning-row"><a href="https://drive.google.com/file/d/${encodeURIComponent(lesson.fileId)}/view" target="_blank" rel="noopener noreferrer">${escape(lesson.title)}</a>
-            <button type="button" class="button secondary" data-edit-lesson="${escape(lesson.id)}">Sửa</button></div>`).join('')}
-          <h4>Dùng tệp đã có trên Drive</h4>
-          <form class="learning-form" id="learningLessonForm"><input type="hidden" name="lessonId">
-            <label>Tên bài học<input name="title" required maxlength="150"></label>
-            <label>Liên kết hoặc mã tệp Drive<input name="file" required maxlength="400"></label>
-            <button class="button" type="submit">Lưu bài học từ liên kết</button>
-          </form>` : ''}`;
-      content.querySelector('select').onchange = event => render(data, event.target.value);
-      wireForm(content.querySelector('#learningCourseForm'), async values => {
-        const saved = await request('saveLearningContent', {...values, kind:'course', learningId:selected,
-          award:values.award === 'on', published:values.published === 'on'});
-        render(saved, selected || saved.courses.find(item => !data.courses.some(old => old.id === item.id))?.id);
-      }, status);
-      if (!course) return;
-      const lessonForm = content.querySelector('#learningLessonForm');
-      content.querySelectorAll('[data-edit-lesson]').forEach(button => button.onclick = () => {
-        const lesson = course.lessons.find(item => item.id === button.dataset.editLesson);
-        lessonForm.elements.lessonId.value = lesson.id;
-        lessonForm.elements.title.value = lesson.title;
-        lessonForm.elements.file.value = lesson.fileId;
-        lessonForm.elements.title.focus();
-      });
-      wireForm(lessonForm, async values => {
-        const file = values.file.trim();
-        const fileId = file.match(/^https:\/\/drive\.google\.com\/file\/d\/([\w-]+)(?:\/|\?|$)/)?.[1] || file;
-        const saved = await request('saveLearningContent', {kind:'lesson', learningId:selected,
-          lessonId:values.lessonId, title:values.title, fileId});
-        render(saved, selected);
-      }, status);
-    }
-    admin.addEventListener('toggle', async () => {
-      if (!admin.open) return;
-      const epoch = adminEpoch;
-      status.textContent = 'Đang tải…';
-      try {
-        const data = await request('adminLearningCatalog');
-        if (epoch !== adminEpoch || !admin.open) return;
-        render(data);
-        status.textContent = '';
-      }
-      catch (error) { status.textContent = error.message; }
-    });
-  }
 })();
 </script>
   <script>(() => {
@@ -5900,31 +5839,6 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
     windowFilter.addEventListener('change', update);
     sort.addEventListener('change', update);
     window.updateExamFilters = update;
-  }
-  const adminNav = null;
-  if (adminNav) {
-    const main = document.querySelector('.v2-admin-main');
-    function open(button) {
-      const target = button.dataset.adminPage;
-      adminNav.querySelectorAll('button').forEach(item => item.setAttribute('aria-pressed', String(item === button)));
-      main.querySelectorAll('[data-admin-section]').forEach(section => {
-        section.hidden = !section.dataset.adminSection.split(' ').includes(target) ||
-          (section.id === 'learningAdmin' && section.dataset.available !== 'true');
-      });
-      const panel = document.getElementById(target === 'learning' ? 'learningAdmin' : 'schedulePanel');
-      if (target !== 'reports' && panel && !panel.hidden) panel.open = true;
-      document.getElementById('v2AdminTitle').textContent = button.textContent.trim();
-    }
-    adminNav.addEventListener('click', event => {
-      const button = event.target.closest('[data-admin-page]');
-      if (button) open(button);
-    });
-    window.updateAdminWorkspace = ready => {
-      document.getElementById('learningAdmin').dataset.available = String(ready);
-      adminNav.querySelector('[data-admin-page=learning]').hidden = !ready;
-      open(adminNav.querySelector('button[aria-pressed=true]:not([hidden])') || adminNav.querySelector('button'));
-    };
-    open(adminNav.querySelector('button'));
   }
 })();
 </script>
@@ -5995,23 +5909,44 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
 })();
 
 </script><script>(() => {
- const admin=false,main=document.querySelector('main'),header=document.querySelector('body>.header'),logo=header.querySelector('img').src;
+ const main=document.querySelector('main'),header=document.querySelector('body>.header'),logo=header.querySelector('img').src;
  const shell=document.createElement('div');shell.className='v4-shell';
  const scroll=document.createElement('div');scroll.className='v4-scroll';
- const side=document.createElement('aside');side.className='v4-sidebar';side.setAttribute('aria-label',admin?'Quản trị đào tạo':'Cổng học viên');
- const icon=name=>name==='profile'?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/></svg>':portalIcon(name);
+ const side=document.createElement('aside');side.className='v4-sidebar';side.setAttribute('aria-label','Sungrow E-learning');
  side.innerHTML='<img class="v4-logo" src="'+logo+'" alt="Sungrow"><button class="v4-toggle" aria-label="Thu gọn hoặc mở rộng menu" aria-expanded="true"><img class="v5-toggle-brand" src="v5-assets/6080b980092c.svg" alt=""></button>';
- const nav=admin?document.getElementById('v2AdminNav'):document.createElement('nav');
- if(!admin){nav.setAttribute('aria-label','Điều hướng Sungrow E-learning');nav.innerHTML=[['overview','Tổng quan','progress'],['courses','Khóa học','course'],['exams','Bài kiểm tra','exam'],['awards','Kết quả & Thành tích','medal'],['profile','Hồ sơ','profile']].map(([id,label,i])=>'<button type="button" data-v4-tab="'+id+'" aria-label="'+label+'">'+icon(i)+'<span class="v4-label">'+label+'</span></button>').join('');}
- else nav.querySelectorAll('button').forEach(b=>{b.setAttribute('aria-label',b.textContent.trim());b.innerHTML=icon(b.dataset.adminPage==='learning'?'course':'exam')+'<span class="v4-label">'+b.textContent+'</span>';});
+ const nav=document.createElement('nav');nav.id='portalNav';nav.setAttribute('aria-label','Điều hướng Sungrow E-learning');
+ const items=[
+   ['overview','Tổng quan','progress'],['courses','Khóa học','course'],
+   ['exams','Bài kiểm tra','exam'],['awards','Kết quả & Thành tích','medal'],['profile','Hồ sơ','profile'],
+   ['reports','Báo cáo đào tạo','reports',true],['learning','Khóa học và video','courseEditor',true],
+   ['exams','Lịch kiểm tra','calendar',true]
+ ];
+ for(const [id,label,icon,requiresAdmin] of items){
+   const button=document.createElement('button');
+   button.type='button';
+   button.setAttribute('aria-label',label);
+   button.innerHTML=portalIcon(icon)+'<span class="v4-label">'+label+'</span>';
+   if(requiresAdmin){
+     button.dataset.adminPage=id;
+     button.dataset.selected=String(id==='reports');
+     button.hidden=true;
+   }else button.dataset.v4Tab=id;
+   nav.append(button);
+ }
  side.append(nav);
- const managementNav=document.getElementById('v2AdminNav');
- managementNav.querySelectorAll('button').forEach(button=>{const label=button.textContent.trim();button.setAttribute('aria-label',label);button.innerHTML=icon(button.dataset.adminPage==='learning'?'course':'exam')+'<span class="v4-label">'+label+'</span>';});
- nav.append(managementNav);
- const bottom=document.createElement('div');bottom.className='v4-bottom';bottom.innerHTML='<div class="v4-person"><span class="v4-avatar">N</span><span><strong class="v4-name">'+(admin?'Quản trị viên':'Học viên')+'</strong><small class="v4-company">Sungrow Academy</small></span></div>';
+ const bottom=document.createElement('div');bottom.className='v4-bottom';bottom.innerHTML='<div class="v4-person"><span class="v4-avatar" aria-hidden="true"></span><span><strong class="v4-name"></strong><small class="v4-company"></small></span></div>';
+ window.setPortalAccount=(account,detail='')=>{
+   const name=String(account?.name||account?.email||'').trim();
+   bottom.querySelector('.v4-name').textContent=name;
+   bottom.querySelector('.v4-avatar').textContent=name.split(/\s+/).at(-1).slice(0,1).toLocaleUpperCase('vi');
+   bottom.querySelector('.v4-company').textContent=detail||account?.company||'';
+   bottom.querySelector('.v4-person').title=[name,detail||account?.company].filter(Boolean).join(' · ');
+ };
  const logout=document.getElementById('logoutButton');logout.classList.add('button','secondary-button');bottom.append(logout);
- if(admin){const link=document.createElement('a');link.href='index.html';link.textContent='Cổng học viên';link.className='v4-label';bottom.prepend(link);bottom.append(document.getElementById('languageToggle'));bottom.append(document.getElementById('adminIdentity'));}
  side.append(bottom);shell.append(side,scroll);main.before(shell);scroll.append(main);
+ const loader=document.createElement('div');loader.id='portalContentLoader';
+ loader.innerHTML='<div class="portal-load-track"><progress aria-label="Đang tải nội dung"></progress></div>';
+ shell.append(loader);
  const mobile=document.createElement('div');mobile.className='v4-mobile';mobile.innerHTML='<img src="'+logo+'" alt="Sungrow"><button class="v4-menu" aria-label="Mở menu" aria-expanded="false">☰ Menu</button>';shell.before(mobile);
  const drawer=document.createElement('dialog');drawer.className='v4-drawer';drawer.setAttribute('aria-label','Điều hướng');document.body.append(drawer);
  const opener=mobile.querySelector('button');opener.onclick=()=>{drawer.append(side);const toggle=side.querySelector('.v4-toggle');toggle.setAttribute('aria-label','Đóng menu');toggle.title='Đóng menu';drawer.showModal();opener.setAttribute('aria-expanded','true');};
@@ -6022,22 +5957,39 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
  function collapse(){document.body.classList.toggle('v4-collapsed',compact);const toggle=side.querySelector('.v4-toggle');const label=compact?'Mở rộng menu':'Thu gọn menu';toggle.setAttribute('aria-expanded',String(!compact));toggle.setAttribute('aria-label',label);toggle.title=label;}
  side.querySelector('.v4-toggle').onclick=()=>{if(drawer.open){drawer.close();return;}compact=!compact;collapse();};collapse();
  let previousWidth=innerWidth;addEventListener('resize',()=>{if((previousWidth<1280)!==(innerWidth<1280)){compact=innerWidth<1280;collapse();}if(innerWidth>720&&drawer.open)drawer.close();previousWidth=innerWidth;});
- window.setActiveNav=tab=>{if(['results','pass','retry'].includes(tab))tab='awards';nav.querySelectorAll('[data-v4-tab]').forEach(b=>{if(b.dataset.v4Tab===tab)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});};
- nav.addEventListener('click',async e=>{const button=e.target.closest('[data-v4-tab]');if(!button)return;if(drawer.open)drawer.close();const tab=button.dataset.v4Tab;if(!await window.openLearnerTab(tab))return;setActiveNav(tab);scroll.scrollTop=0;const heading=main.querySelector('#learningExams:not([hidden]) h2')||content.querySelector('h2');if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true});}});
- function tabs(el,selected){el.setAttribute('role','tablist');el.setAttribute('aria-label','Résultats et réalisations'.replace('Résultats et réalisations','Kết quả và thành tích'));const buttons=[...el.querySelectorAll('button')];buttons.forEach((b,i)=>{b.setAttribute('role','tab');const yes=admin?b.classList.contains('active'):(i===selected);b.setAttribute('aria-selected',String(yes));b.tabIndex=yes?0:-1;});if(!el.dataset.keys){el.dataset.keys='true';el.addEventListener('keydown',e=>{if(!['ArrowRight','ArrowLeft','Home','End'].includes(e.key))return;e.preventDefault();let i=buttons.indexOf(document.activeElement);i=e.key==='Home'?0:e.key==='End'?buttons.length-1:(i+(e.key==='ArrowRight'?1:-1)+buttons.length)%buttons.length;buttons[i].click();setTimeout(()=>{const active=el.isConnected?buttons[i]:document.querySelector('.v3-tabs [aria-selected=true]');active?.focus();},0);});}}
- if(!admin){
+ window.setActiveNav=tab=>{
+   if(['results','pass','retry'].includes(tab))tab='awards';
+   const active=typeof tab==='string'?Array.from(nav.querySelectorAll('[data-v4-tab]')).find(button=>button.dataset.v4Tab===tab):tab;
+   for(const button of nav.querySelectorAll('button')){
+     if(button===active)button.setAttribute('aria-current','page');
+     else button.removeAttribute('aria-current');
+   }
+ };
+ let navigationSequence=0;
+ nav.addEventListener('click',async event=>{
+   const button=event.target.closest('button');
+   if(!button||button.hidden)return;
+   const route=++navigationSequence;
+   if(drawer.open)drawer.close();
+   scroll.scrollTop=0;
+   if(button.dataset.adminPage){window.portalAdmin.openFeature(button);return;}
+   const tab=button.dataset.v4Tab;
+   if(!await window.openLearnerTab(tab)||route!==navigationSequence)return;
+   setActiveNav(tab);
+   const heading=main.querySelector('#learningExams:not([hidden]) h2')||content.querySelector('h2');
+   if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true});}
+ });
+ function tabs(el,selected){el.setAttribute('role','tablist');el.setAttribute('aria-label','Kết quả và thành tích');const buttons=[...el.querySelectorAll('button')];buttons.forEach((b,i)=>{b.setAttribute('role','tab');const yes=i===selected;b.setAttribute('aria-selected',String(yes));b.tabIndex=yes?0:-1;});if(!el.dataset.keys){el.dataset.keys='true';el.addEventListener('keydown',e=>{if(!['ArrowRight','ArrowLeft','Home','End'].includes(e.key))return;e.preventDefault();let i=buttons.indexOf(document.activeElement);i=e.key==='Home'?0:e.key==='End'?buttons.length-1:(i+(e.key==='ArrowRight'?1:-1)+buttons.length)%buttons.length;buttons[i].click();setTimeout(()=>{const active=el.isConnected?buttons[i]:document.querySelector('.v3-tabs [aria-selected=true]');active?.focus();},0);});}}
  const bar=document.createElement('div');bar.className='v4-focusbar';bar.innerHTML='<img src="'+logo+'" alt="Sungrow"><strong>Bài kiểm tra</strong><span id="v4-clock" aria-label="Thời gian còn lại">60:00</span><button class="button" type="button">Nộp bài</button>';shell.before(bar);bar.querySelector('button').onclick=()=>document.getElementById('submitButton').click();
  new MutationObserver(()=>{document.getElementById('v4-clock').textContent=document.getElementById('timerText').textContent;}).observe(document.getElementById('timerText'),{childList:true});
- }
- const content=document.querySelector(admin?'.v2-admin-main':'#learningPortal .learning-content');
+ const content=document.querySelector('#learningPortal .learning-content');
  function enhance(){
- const login=(!document.getElementById('loginView').hidden||!document.getElementById('bootView').hidden) && !window.portalAdmin?.isAuthenticated(),exam=!admin&&!document.getElementById('examView').hidden;
+ const login=!document.getElementById('loginView').hidden||!document.getElementById('bootView').hidden,exam=!document.getElementById('examView').hidden;
  document.body.classList.toggle('v4',!login);document.body.classList.toggle('v4-focus',exam);shell.style.display=login?'contents':'';side.hidden=login;mobile.hidden=login;
  header.style.display='none';
- if(admin){setActiveNav(nav.querySelector('[aria-pressed=true]')?.dataset.adminPage||'reports');const t=document.querySelector('.tabs');if(t)tabs(t);return;}
  if(!document.getElementById('resultView').hidden)setActiveNav('awards');else if(exam)setActiveNav('exams');
  const overview=!document.getElementById('courseView').hidden&&!content.hidden?content.querySelector('.v2-overview'):null;
- if(overview&&!overview.dataset.v4){overview.dataset.v4='true';setActiveNav('overview');const profile=overview.querySelector('.v2-profile');bottom.querySelector('.v4-name').textContent=profile.querySelector('h3').textContent;bottom.querySelector('.v4-company').textContent=profile.querySelector('p').textContent;const metrics=profile.querySelector('.v2-metrics');metrics.querySelectorAll('div').forEach(d=>{const text=[...d.childNodes].filter(n=>n.nodeType===3).map(n=>n.textContent).join('').trim();[...d.childNodes].filter(n=>n.nodeType===3).forEach(n=>n.remove());const label=document.createElement('span');label.className='v4-stat-label';label.textContent=text;d.append(label);});overview.querySelector('.v2-overview-banner').after(metrics);profile.remove();}
+ if(overview&&!overview.dataset.v4){overview.dataset.v4='true';setActiveNav('overview');const profile=overview.querySelector('.v2-profile');const metrics=profile.querySelector('.v2-metrics');metrics.querySelectorAll('div').forEach(d=>{const text=[...d.childNodes].filter(n=>n.nodeType===3).map(n=>n.textContent).join('').trim();[...d.childNodes].filter(n=>n.nodeType===3).forEach(n=>n.remove());const label=document.createElement('span');label.className='v4-stat-label';label.textContent=text;d.append(label);});overview.querySelector('.v2-overview-banner').after(metrics);profile.remove();}
  const course=!document.getElementById('courseView').hidden&&!content.hidden?content.querySelector('.v3-course-grid'):null;
  const tablist=content.querySelector('.v3-tabs');if(tablist){const selected=content.querySelector('.v4-results-wrap')?0:1;tabs(tablist,selected);const heading=content.querySelector('h2');if(heading&&heading.textContent!=='Kết quả & Thành tích')heading.textContent='Kết quả & Thành tích';let panel=content.querySelector('.v4-tabpanel');if(!panel){panel=document.createElement('div');panel.className='v4-tabpanel';panel.id='v4-learning-tabpanel';panel.setAttribute('role','tabpanel');while(tablist.nextSibling)panel.append(tablist.nextSibling);tablist.after(panel);}tablist.querySelectorAll('button').forEach((b,i)=>{b.id='v4-learning-tab-'+i;b.setAttribute('aria-controls',panel.id);});panel.setAttribute('aria-labelledby','v4-learning-tab-'+selected);}
  const form=content.querySelector('.learning-form');if(form&&!content.querySelector('.v4-profile-grid')){const grid=document.createElement('div');grid.className='v4-profile-grid';form.before(grid);form.classList.add('card');grid.append(form);const stats=document.createElement('section');stats.className='card';stats.innerHTML='<h3>Thống kê học tập</h3><div class="v4-profile-stats"></div>';grid.append(stats);const home=LearningPortal.getHome();const lessons=home?.courses.flatMap(course=>course.lessons)||[];stats.querySelector('.v4-profile-stats').textContent=lessons.filter(lesson=>lesson.completed).length+'/'+lessons.length+' bài đã học · '+(home?.history.length||0)+' lượt thi';}
@@ -6048,7 +6000,6 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
  const heading=content.querySelector(':scope>h2');if(heading&&!content.querySelector(':scope>.v4-description')){const desc=document.createElement('p');desc.className='v4-description';desc.textContent=content.querySelector('.v3-tabs')?'Theo dõi kết quả đánh giá, chứng nhận và hành trình học tập':content.querySelector('.learning-form')?'Thông tin cá nhân và tiến độ học tập của bạn':content.querySelector('.v3-course-grid')?'':'';if(desc.textContent)heading.after(desc);}
  if(!result.hidden)setActiveNav('awards');
  }
- if(admin){const exports=document.querySelector('.export-actions');const menu=document.createElement('details');menu.className='v4-export';menu.innerHTML='<summary>Xuất dữ liệu</summary>';exports.before(menu);menu.append(exports);document.querySelector('.tabs').addEventListener('click',()=>setTimeout(enhance,0));document.getElementById('v2AdminTitle').tabIndex=-1;}
  let pending=false;const observer=new MutationObserver(()=>{if(pending)return;pending=true;requestAnimationFrame(()=>{pending=false;observer.disconnect();enhance();main.querySelectorAll('.panel,.learning-card,.catalog-card,.v2-task,.v2-journey').forEach(e=>e.classList.add('card'));observer.observe(main,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden']});});});observer.observe(main,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden']});enhance();
 })();
 
@@ -6056,13 +6007,11 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
 
 </script><script>(() => {
  const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
- const main=$('main'),admin=false;document.body.classList.add('v5');
+ const main=$('main');document.body.classList.add('v5');
  main.tabIndex=-1;
  const lock='<svg class="v5-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/></svg>';
  const side=$('.v4-sidebar'),head=document.createElement('div');
  const sideNav=$('nav',side);
- // Drop legacy admin chrome so both roles use the same sidebar surface.
- sideNav.classList.remove('v2-admin-nav');
  sideNav.classList.add('v5-side-nav');
  const logoToggle=$('.v4-toggle',side),wordmark=$('.v4-logo',side);
  head.className='v5-sidehead';
@@ -6070,18 +6019,6 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
  logoToggle.prepend(wordmark);
  side.prepend(head);
  head.append(logoToggle);
- if(!admin && window.portalViewingLearner){
-   const addAdminSwitch=container=>{
-     const button=document.createElement('button');
-     button.type='button';
-     button.className='button secondary-button portal-admin-return';
-     button.textContent='Về quản trị';
-     button.addEventListener('click',()=>{if(!state.active)window.openPortalWorkspace('admin');});
-     container.append(button);
-   };
-   addAdminSwitch(side);
-   addAdminSwitch(document.getElementById('loginView'));
- }
  const logoutButton=$('.v4-bottom #logoutButton',side);
  if(logoutButton){
    const logoutLabel=logoutButton.textContent.trim()||'Đăng xuất';
@@ -6093,7 +6030,6 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
  function notify(message){toast.textContent=message;toast.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.hidden=true,3000);}
  function trap(dialog){dialog.addEventListener('keydown',e=>{if(e.key!=='Tab')return;const items=$$('button,a[href],input,select,textarea,[tabindex="0"]',dialog).filter(b=>!b.disabled&&b.getClientRects().length);if(e.shiftKey&&document.activeElement===items[0]){e.preventDefault();items.at(-1).focus();}else if(!e.shiftKey&&document.activeElement===items.at(-1)){e.preventDefault();items[0].focus();}});}
  function popup(title,body,trigger){const d=document.createElement('dialog');d.className='v5-panel-scroll';d.setAttribute('aria-label',title);d.innerHTML='<h2>'+title+'</h2>'+body+'<button class="button" data-close>Đóng</button>';document.body.append(d);$('[data-close]',d).onclick=()=>d.close();d.onclose=()=>{d.remove();trigger?.focus();};trap(d);d.showModal();return d;}
- if(admin){const bottom=$('.v4-bottom'),person=$('.v4-person',bottom),trigger=document.createElement('button');trigger.className='v5-user-trigger';trigger.type='button';trigger.setAttribute('aria-haspopup','dialog');trigger.setAttribute('aria-expanded','false');person.before(trigger);trigger.append(person);const menu=document.createElement('dialog');menu.className='v5-user-menu v5-panel-scroll';menu.setAttribute('aria-label','Tài khoản quản trị');menu.innerHTML='<h3>Tài khoản quản trị</h3><div class="v5-user-links"></div><button class="button secondary-button" data-close>Đóng</button>';const links=$('.v5-user-links',menu);[$('a[href="index.html"]',bottom),$('#languageToggle'),$('#adminIdentity')].forEach(e=>{if(e)links.append(e);});document.body.append(menu);trigger.onclick=()=>{menu.showModal();trigger.setAttribute('aria-expanded','true');};$('[data-close]',menu).onclick=()=>menu.close();menu.onclose=()=>{trigger.setAttribute('aria-expanded','false');trigger.focus();};trap(menu);}
  const rails=new Set();
  function rail(el,label){if(!el||el.classList.contains('v5-rail'))return;el.classList.add('v5-rail');el.setAttribute('role','region');el.setAttribute('aria-label',label);el.tabIndex=0;const wrap=document.createElement('div');wrap.className='v5-rail-wrap';el.before(wrap);const tools=document.createElement('div');tools.className='v5-rail-tools';tools.innerHTML='<button type="button" aria-label="Cuộn sang trái">‹</button><button type="button" aria-label="Cuộn sang phải">›</button>';wrap.append(tools,el);const [prev,next]=tools.children;
  const move=direction=>el.scrollBy({left:direction*Math.max(240,el.clientWidth*.7),behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
@@ -6104,7 +6040,7 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
  el.addEventListener('focusin',e=>{if(e.target!==el){const r=e.target.getBoundingClientRect(),box=el.getBoundingClientRect();if(r.left<box.left)el.scrollLeft-=box.left-r.left+8;else if(r.right>box.right)el.scrollLeft+=r.right-box.right+8;}});
  rails.add(update);new ResizeObserver(update).observe(el);update();
  }
- if(!admin){
+ {
    window.showV5Certificate=(sheet,award)=>{
      const dialog=document.createElement('dialog');
      dialog.className='sg-certificate-dialog';
@@ -6144,7 +6080,7 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
  function pagehead(root,heading,breadcrumb){if(!root||!heading)return null;let h=$(':scope>.v5-pagehead',root);if(h)return h;h=document.createElement('div');h.className='v5-pagehead';h.innerHTML='<div class="v5-title"></div><div class="v5-head-actions"></div>';root.prepend(h);const title=$('.v5-title',h);if(breadcrumb)title.append(breadcrumb);title.append(heading);return h;}
  function back(root,action,label='Quay lại'){let crumb=$('.v4-crumb',root);if(!crumb){crumb=document.createElement('p');crumb.className='v4-crumb';root.prepend(crumb);}if(!$('.v5-back',crumb)){crumb.replaceChildren();const b=document.createElement('button');b.className='v5-back';b.textContent='← '+label;b.onclick=action;crumb.append(b);}return crumb;}
  function fullCard(el,selector){if(!el||el.dataset.v5Card)return;el.dataset.v5Card='true';el.classList.add('v5-clickable');el.addEventListener('click',e=>{if(e.target.closest('button,a,input,select'))return;const button=$(selector,el);if(button&&!button.disabled)button.click();});}
- if(!admin){const bar=$('.v4-focusbar'),old=bar.querySelector('button'),submit=$('#submitButton');old.replaceWith(submit);submit.addEventListener('click',()=>{},false);const prog=document.createElement('span');prog.className='v5-top-progress';prog.setAttribute('aria-label','Tiến độ trả lời');bar.insertBefore(prog,$('#v4-clock'));const sync=()=>{const t=$('#answeredCount').textContent.replace(' đã chọn','');if(prog.textContent!==t)prog.textContent=t;};new MutationObserver(sync).observe($('#answeredCount'),{childList:true});sync();const info=document.createElement('button');info.className='v5-info-button';info.textContent='Thông tin';info.onclick=()=>showCandidateInfo(info);bar.insertBefore(info,prog);
+ {const bar=$('.v4-focusbar'),old=bar.querySelector('button'),submit=$('#submitButton');old.replaceWith(submit);submit.addEventListener('click',()=>{},false);const prog=document.createElement('span');prog.className='v5-top-progress';prog.setAttribute('aria-label','Tiến độ trả lời');bar.insertBefore(prog,$('#v4-clock'));const sync=()=>{const t=$('#answeredCount').textContent.replace(' đã chọn','');if(prog.textContent!==t)prog.textContent=t;};new MutationObserver(sync).observe($('#answeredCount'),{childList:true});sync();const info=document.createElement('button');info.className='v5-info-button';info.textContent='Thông tin';info.onclick=()=>showCandidateInfo(info);bar.insertBefore(info,prog);
  const brand=document.createElement('div');brand.className='sg-exam-brand v5-title';
  const examHeading=document.createElement('h2');
  examHeading.textContent=$('strong',bar).textContent;
@@ -6165,7 +6101,7 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
  window.v5IsExam=()=>!$('#examView').hidden;
  const originalRender=renderResult;renderResult=function(data){delete $('#resultView').dataset.v4Done;return originalRender(data);};
  const oldRequest=Portal.request;Portal.request=async(...args)=>{const result=await oldRequest(...args);if(result?.ok&&args[1]==='completeLearningLesson')notify('Đã hoàn thành khóa học');if(result?.ok&&args[1]==='submitAttempt')notify('Đã nộp bài kiểm tra');return result;};
- }else window.v5IsExam=()=>false;
+ }
  function showCandidateInfo(trigger){
    const dialog=popup('Thông tin người làm bài','',trigger);
    dialog.classList.add('v5-candidate-dialog');
@@ -6464,7 +6400,7 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
    const courseTitle=$('.v2-banner > p',overview);
    const resume=$('.v2-banner > [data-learning-course]',overview);
    if(!courseTitle || !resume)return;
-   current.innerHTML='<div class="v5-current-course-head"><div><h3>Khóa đang học</h3></div></div><progress max="1" aria-label="Tiến độ khóa đang học"></progress><small>Đang tải tiến độ</small>';
+   current.innerHTML='<div class="v5-current-course-head"><div><h3>Khóa đang học</h3></div></div><progress max="1" aria-label="Tiến độ khóa đang học"></progress><small></small>';
    const currentHead=$('.v5-current-course-head',current);
    currentHead.firstElementChild.append(courseTitle);
    currentHead.append(resume);
@@ -6706,16 +6642,13 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
      status.classList.add('v5-admin-status');
      $('.v5-title',header).append(status);
    }
-   const active=$('#v2AdminNav [aria-pressed=true]')?.dataset.adminPage||'reports';
+   const active=$('#portalNav [data-admin-page][data-selected=true]')?.dataset.adminPage||'reports';
    root.dataset.adminView=active;
    const activePanel=active==='learning'?$('#learningAdmin'):active==='exams'?$('#schedulePanel'):null;
    if(activePanel){
      activePanel.open=true;
      const summary=$(':scope>summary',activePanel);
      summary.hidden=true;
-     activePanel.prepend(header);
-   }else if(header.parentElement!==root){
-     root.prepend(header);
    }
    const showReports=active==='reports';
    if(actions.hidden===showReports)actions.hidden=!showReports;
@@ -6782,14 +6715,12 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
 
 
 </script>
-  <style>#v2AdminNav{display:grid;gap:inherit;margin-block-start:6px;padding-block-start:10px;border-block-start:1px solid var(--sg-line,#c8d4dc)}#v2AdminNav[hidden],#adminMeta[hidden]{display:none!important}.v4-sidebar:has(#v2AdminNav:not([hidden])){gap:10px;overflow-y:auto}#adminMeta{font-size:.85rem;gap:8px;align-items:center;display:flex}#dashboardView #languageToggle{margin-inline-start:auto}</style><script>
+  <style>#portalNav button[hidden]{display:none!important}</style><script>
 (()=>{
 
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby6OYUZKkLfkh2FdENb6P24ccaVbE7EiAhnyIerYy-0fB_QTVfRPnJ_3eCzJG-zrowwIw/exec";
     const ADMIN_SESSION_KEY = "sungrow_admin_session_v1";
-    const ADMIN_LANGUAGE_KEY = "sungrow_admin_language_v1";
     const TRANSLATIONS = {
-      vi: {
         browserTitle: "Quản trị | Sungrow E-learning", pageTitle: "QUẢN TRỊ KẾT QUẢ ĐÁNH GIÁ",
         logout: "Đăng xuất", adminAccount: "Tài khoản quản trị", adminLogin: "Đăng nhập quản trị",
         loginIntro: "Sử dụng email đã được kích hoạt và mật khẩu trong sheet Admins.", adminEmail: "Email quản trị",
@@ -6802,7 +6733,6 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
         emailRanking: "Xếp hạng theo email", uniqueEmailNote: "Mỗi email chỉ được tính một người",
         attemptHistory: "Lịch sử các lượt thi", rowLimitNote: "Tối đa 1.000 dòng theo bộ lọc",
         allCourses: "Tất cả khóa học", allCompanies: "Tất cả công ty", closed: "đã đóng", administrator: "Quản trị viên",
-        authenticating: "Đang xác thực...", loading: "Đang tải...", aggregating: "Đang tổng hợp dữ liệu từ Google Sheet...",
         noResponse: "Không nhận được phản hồi từ Google Apps Script.", requestFailed: "Yêu cầu không được xử lý.",
         browserBlocked: "Trình duyệt hoặc mạng đang chặn Google Apps Script.", loggedOut: "Đã đăng xuất khỏi trang quản trị.",
         updatedStatus: "Cập nhật lúc {time}. Xếp hạng và thống kê đã được tính lại từ dữ liệu hiện tại.",
@@ -6815,36 +6745,7 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
         person: "Người", passed: "Đạt", averageScore: "Điểm TB", fullName: "Họ tên", score: "Điểm", result: "Kết quả",
         rank: "Hạng", attempts: "Số lượt", duration: "Thời gian", submittedAt: "Ngày nộp", attempt: "Lượt",
         termination: "Kết thúc", tabLeaves: "Rời tab", minutesShort: "ph", secondsShort: "giây"
-      },
-      en: {
-        browserTitle: "Admin | Sungrow E-learning", pageTitle: "ASSESSMENT RESULTS ADMINISTRATION",
-        logout: "Log out", adminAccount: "Administrator account", adminLogin: "Administrator login",
-        loginIntro: "Use an activated email address and the password stored in the Admins sheet.", adminEmail: "Administrator email",
-        password: "Password", passwordPlaceholder: "Enter administrator password", adminLoginButton: "Log in",
-        course: "Course", company: "Company", searchEmail: "Search by email", fromDate: "From", toDate: "To",
-        update: "Refresh", clearFilters: "Clear filters", notLoaded: "Data has not been loaded.",
-        exportParticipants: "Export participant list CSV", exportRanking: "Export ranking CSV", exportHistory: "Export attempt history CSV",
-        overview: "Overview", ranking: "Ranking", examHistory: "Attempt history", categoryAccuracy: "Accuracy by section",
-        bestAttemptNote: "Calculated from each email's best attempt", companyQuality: "Performance by company",
-        emailRanking: "Ranking by email", uniqueEmailNote: "Each email is counted as one participant",
-        attemptHistory: "Attempt history", rowLimitNote: "Up to 1,000 rows for the current filters",
-        allCourses: "All courses", allCompanies: "All companies", closed: "closed", administrator: "Administrator",
-        authenticating: "Authenticating...", loading: "Loading...", aggregating: "Aggregating data from Google Sheets...",
-        noResponse: "No response was received from Google Apps Script.", requestFailed: "The request could not be processed.",
-        browserBlocked: "The browser or network is blocking Google Apps Script.", loggedOut: "You have logged out of the administration page.",
-        updatedStatus: "Updated at {time}. Rankings and statistics were recalculated from the current data.",
-        registeredEmails: "Registered emails", registeredNote: "Based on the email/company filters", participants: "Participants",
-        uniquePersonNote: "Each email counts as one person", completedAttempts: "Completed attempts", activeAttempts: "{count} in progress",
-        participationRate: "Participation rate", participationNote: "Participants / registered emails", passRate: "Pass rate",
-        passedPeople: "{count} participants passed", averageBestScore: "Average best score", averageByEmail: "Average by email",
-        noCategoryData: "No section data is available.", noMatchingData: "No matching data.", unknown: "Unspecified",
-        noName: "Name unavailable", noCompanyMembers: "No course participants match the current filters.",
-        person: "Participants", passed: "Passed", averageScore: "Avg. score", fullName: "Full name", score: "Score", result: "Result",
-        rank: "Rank", attempts: "Attempts", duration: "Duration", submittedAt: "Submitted at", attempt: "Attempt",
-        termination: "Termination", tabLeaves: "Tab leaves", minutesShort: "min", secondsShort: "sec"
-      }
     };
-    let currentLanguage = localStorage.getItem(ADMIN_LANGUAGE_KEY) === "en" ? "en" : "vi";
     let adminToken = sessionStorage.getItem(ADMIN_SESSION_KEY) || "";
     let dashboardData = null;
     let refreshTimer = null;
@@ -6853,10 +6754,9 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
     let adminEpoch=0,dashboardRequestEpoch=0;
 
     const dashboardView = document.getElementById("dashboardView");
-    const adminMeta = document.getElementById("adminMeta");
-    const adminIdentity = document.getElementById("adminIdentity");
     const logoutButton = document.getElementById("logoutButton");
-    const adminNav = document.getElementById("v2AdminNav");
+    const nav = document.getElementById("portalNav");
+    const adminItems = () => nav.querySelectorAll('[data-admin-page]');
     let adminVerified = false;
     let adminSelected = false;
     const courseFilter = document.getElementById("courseFilter");
@@ -6867,51 +6767,22 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
     const applyFilterButton = document.getElementById("applyFilterButton");
     const resetFilterButton = document.getElementById("resetFilterButton");
     const dashboardStatus = document.getElementById("dashboardStatus");
-    const languageToggle = document.getElementById("languageToggle");
 
     function t(key, variables = {}) {
-      const template = TRANSLATIONS[currentLanguage][key] || TRANSLATIONS.vi[key] || key;
+      const template = TRANSLATIONS[key] || key;
       return Object.keys(variables).reduce(
         (text, name) => text.replace(new RegExp(`\\{${name}\\}`, "g"), String(variables[name])),
         template
       );
     }
 
-    function applyLanguage() {
-      document.documentElement.lang = currentLanguage;
-      if (adminSelected) document.title = t("browserTitle");
+    function initializeReportLabels() {
       dashboardView.querySelectorAll("[data-i18n]").forEach((element) => {
         element.textContent = t(element.dataset.i18n);
       });
       dashboardView.querySelectorAll("[data-i18n-placeholder]").forEach((element) => {
         element.placeholder = t(element.dataset.i18nPlaceholder);
       });
-      languageToggle.textContent = currentLanguage === "vi" ? "EN" : "VI";
-      languageToggle.setAttribute("aria-label", currentLanguage === "vi" ? "Switch to English" : "Chuyển sang tiếng Việt");
-      if (dashboardData) {
-        renderFilterOptions(dashboardData.options || {});
-        renderDashboard(dashboardData);
-      }
-    }
-
-    function localizeServerMessage(message) {
-      const source = String(message || "");
-      if (currentLanguage !== "en") return source;
-      const exactMessages = {
-        "Email quản trị không hợp lệ.": "The administrator email address is invalid.",
-        "Email này không có quyền quản trị hoặc đã bị khóa.": "This email does not have administrator access or has been disabled.",
-        "Mật khẩu phải có từ 8 đến 128 ký tự.": "The password must contain 8 to 128 characters.",
-        "Tài khoản quản trị chưa được đặt mật khẩu trong sheet Admins.": "No password has been configured for this administrator in the Admins sheet.",
-        "Mật khẩu không chính xác. Tài khoản đã bị khóa tạm thời 15 phút.": "The password is incorrect. The account has been temporarily locked for 15 minutes.",
-        "Phiên quản trị không hợp lệ.": "The administrator session is invalid.",
-        "Phiên quản trị đã hết hạn. Vui lòng đăng nhập lại.": "The administrator session has expired. Please log in again."
-      };
-      if (exactMessages[source]) return exactMessages[source];
-      let match = source.match(/^Tài khoản tạm khóa do nhập sai nhiều lần\. Vui lòng thử lại sau (\d+) phút\.$/);
-      if (match) return `The account is temporarily locked after multiple failed attempts. Please try again in ${match[1]} minutes.`;
-      match = source.match(/^Mật khẩu không chính xác\. Bạn còn (\d+) lần thử\.$/);
-      if (match) return `The password is incorrect. You have ${match[1]} attempts remaining.`;
-      return source;
     }
 
     function escapeHtml(value) {
@@ -6938,18 +6809,18 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
     async function requestAdmin(action,payload){
       const epoch=adminEpoch;
       try{return await Portal.request(APPS_SCRIPT_URL,action,payload);}catch(error){
-        if(epoch===adminEpoch&&['getAdminDashboard','listCourseWindows','updateCourseWindow','unlinkParticipantDevice','adminLearningCatalog','saveLearningContent','adminExamEditor','adminSaveExam','adminBeginLessonUpload','adminUploadLessonChunk','adminOpenLearner'].includes(action)&&Portal.isAuthError(error))showLogin(localizeServerMessage(error.message));
+        if(epoch===adminEpoch&&['getAdminDashboard','listCourseWindows','updateCourseWindow','unlinkParticipantDevice','adminLearningCatalog','saveLearningContent','adminExamEditor','adminSaveExam','adminBeginLessonUpload','adminUploadLessonChunk','adminOpenLearner'].includes(action)&&Portal.isAuthError(error))showLogin(error.message);
         throw error;
       }
     }
 
     function showDashboard(admin) {
       adminVerified = true;
-      adminNav.hidden = false;
-      if (adminSelected) showAdminPanel();
+      window.setPortalAccount(admin,'Quản trị viên');
+      const catalogAvailable=document.getElementById('learningAdmin').dataset.available;
+      for(const item of adminItems())item.hidden=item.dataset.adminPage==='learning'&&catalogAvailable!=='true';
       if (document.getElementById('learningAdmin').dataset.available === undefined)
         window.updateAdminWorkspace?.(true);
-      const nav = document.getElementById('v2AdminNav');
       if (!nav.dataset.authoringChecked) {
         nav.dataset.authoringChecked = 'true';
         const epoch = adminEpoch;
@@ -6959,21 +6830,15 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
             AdminAuthoring.installExamEditor(nav, document.querySelector('main'), request);
         }).catch(() => { delete nav.dataset.authoringChecked; });
       }
-      adminMeta.hidden = !adminSelected;
       window.refreshCourseWindows?.();
-      adminIdentity.textContent = admin ? `${admin.name} · ${admin.email}` : t("administrator");
       clearInterval(refreshTimer);
       refreshTimer = setInterval(() => loadDashboard(true), 5 * 60 * 1000);
     }
 
     function showAdminPanel() {
+      adminSelected = true;
       Portal.showView('dashboardView');
-      window.setActiveNav?.('');
-      document.body.classList.add('admin-v2');
-      document.title = t("browserTitle");
-      const name=document.querySelector('.v4-sidebar .v4-name');
-      if(name) name.textContent='Quản trị viên';
-      adminNav.querySelector('[aria-pressed=true]')?.setAttribute('aria-current','page');
+      window.setActiveNav(nav.querySelector('[data-admin-page][data-selected=true]'));
     }
 
     function showLogin(message) {
@@ -6984,32 +6849,26 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
       adminEpoch++;
       dashboardData = null;
       dashboardLoading = false;
-      adminNav.hidden = true;
-      adminMeta.hidden = true;
+      for(const item of adminItems())item.hidden=true;
       dashboardView.hidden = true;
       sessionStorage.removeItem(ADMIN_SESSION_KEY);
       clearInterval(refreshTimer);
-      document.body.classList.remove('admin-v2');
-      document.title = 'Sungrow E-learning';
+      window.setPortalAccount(state.participant);
       if(adminLearnerToken){
         handleParticipantAuthLoss(new Error(message||'Phiên quản trị đã hết hạn. Vui lòng đăng nhập lại.'));
-      }else if (wasSelected) initialize();
+      }else if (wasSelected || !document.getElementById('bootView').hidden) initialize();
     }
 
     function showLearner() {
       adminSelected = false;
-      adminMeta.hidden = true;
-      adminNav.querySelectorAll('[aria-current]').forEach(item=>item.removeAttribute('aria-current'));
-      document.body.classList.remove('admin-v2');
-      document.title = 'Sungrow E-learning';
     }
 
     async function openAdmin(token,show=true) {
       if (!token) return false;
       adminToken = token;
-      adminSelected = show;
-      if (adminVerified && dashboardData && show) showAdminPanel();
-      else await loadDashboard(false,show);
+      if(show)Portal.loading();
+      if(!adminVerified)await loadDashboard(false,show);
+      if(show && adminVerified && !await window.openLearnerTab('overview') && adminVerified)showAdminPanel();
       return true;
     }
 
@@ -7018,6 +6877,7 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
       isShowing:() => adminSelected,
       signIn:openAdmin,
       showLearner,
+      returnToAdminFeature:showAdminPanel,
       clearSession:showLogin,
       openLearnerSession:deviceId=>requestAdmin('adminOpenLearner',{adminToken,deviceId}),
       isAuthenticated:() => adminVerified
@@ -7029,12 +6889,11 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
       if (silent && Date.now() - lastDashboardLoadAt < 30000) return;
       dashboardLoading = true;
       const epoch=adminEpoch;dashboardRequestEpoch=epoch;
-      if(restoring)Portal.loading('Đang xác thực phiên và tải dữ liệu quản trị…');
+      const reports=dashboardView.querySelector('[data-admin-section=reports]');
+      const endLoading=!silent&&!restoring ? Portal.contentLoading(reports) : null;
       if (!silent) {
         applyFilterButton.disabled = true;
-        applyFilterButton.textContent = t("loading");
       }
-      dashboardStatus.textContent = t("aggregating");
       try {
         const data = await callApi("getAdminDashboard", {
           adminToken,
@@ -7048,12 +6907,13 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
       } catch (error) {
         if(epoch!==adminEpoch)return;
         if (Portal.isAuthError(error)) {
-          showLogin(localizeServerMessage(error.message));
+          showLogin(error.message);
           return;
         }
-        if(!dashboardData && adminSelected)Portal.recovery(localizeServerMessage(error.message),()=>loadDashboard(false,true));
-        else dashboardStatus.textContent = localizeServerMessage(error.message);
+        if(!dashboardData && restoring)Portal.recovery(error.message,()=>openAdmin(adminToken));
+        else dashboardStatus.textContent = error.message;
       } finally {
+        endLoading?.();
         if(dashboardRequestEpoch===epoch){dashboardLoading = false;applyFilterButton.disabled = false;applyFilterButton.textContent = t("update");}
       }
     }
@@ -7107,7 +6967,7 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
       renderCompanyTable(data.companies || [], data.rankings || []);
       renderRankingTable(data.rankings || []);
       renderAttemptTable(data.attempts || []);
-      const locale = currentLanguage === "en" ? "en-US" : "vi-VN";
+      const locale = "vi-VN";
       dashboardStatus.textContent = t("updatedStatus", { time: new Date(data.generatedAt).toLocaleString(locale) });
     }
 
@@ -7238,9 +7098,7 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
 
     function exportRanking() {
       if (!dashboardData) return;
-      const headers = currentLanguage === "en"
-        ? ["Rank", "Full name", "Email", "Company", "Course ID", "Course title", "Score", "Total", "Percent", "Result", "Attempts", "Duration (seconds)", "Submitted at"]
-        : ["Hạng", "Họ và tên", "Email", "Công ty", "Mã khóa học", "Tên khóa học", "Điểm", "Tổng điểm", "Tỷ lệ (%)", "Kết quả", "Số lượt", "Thời gian (giây)", "Ngày nộp"];
+      const headers = ["Hạng", "Họ và tên", "Email", "Công ty", "Mã khóa học", "Tên khóa học", "Điểm", "Tổng điểm", "Tỷ lệ (%)", "Kết quả", "Số lượt", "Thời gian (giây)", "Ngày nộp"];
       const rows = (dashboardData.rankings || []).map((row) => [
         row.rank, row.name, row.email, row.company, row.courseId, row.courseTitle,
         row.score, row.total, row.percent, row.result, row.attempts,
@@ -7255,9 +7113,7 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
 
     function exportParticipants() {
       if (!dashboardData) return;
-      const headers = currentLanguage === "en"
-        ? ["No.", "Full name", "Email", "Company", "Course", "Attempts", "Best score", "Percent", "Result", "Rank", "Best attempt submitted at"]
-        : ["STT", "Họ và tên", "Email", "Công ty", "Khóa học", "Số lượt đã làm", "Điểm tốt nhất", "Tỷ lệ (%)", "Kết quả", "Xếp hạng", "Ngày nộp bài tốt nhất"];
+      const headers = ["STT", "Họ và tên", "Email", "Công ty", "Khóa học", "Số lượt đã làm", "Điểm tốt nhất", "Tỷ lệ (%)", "Kết quả", "Xếp hạng", "Ngày nộp bài tốt nhất"];
       const rows = (dashboardData.rankings || [])
         .slice()
         .sort((left, right) => {
@@ -7286,9 +7142,7 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
 
     function exportAttempts() {
       if (!dashboardData) return;
-      const headers = currentLanguage === "en"
-        ? ["Submitted at", "Full name", "Email", "Company", "Course ID", "Course title", "Attempt", "Score", "Total", "Percent", "Result", "Duration (seconds)", "Termination", "Tab leaves"]
-        : ["Ngày nộp", "Họ và tên", "Email", "Công ty", "Mã khóa học", "Tên khóa học", "Lượt", "Điểm", "Tổng điểm", "Tỷ lệ (%)", "Kết quả", "Thời gian (giây)", "Kết thúc", "Rời tab"];
+      const headers = ["Ngày nộp", "Họ và tên", "Email", "Công ty", "Mã khóa học", "Tên khóa học", "Lượt", "Điểm", "Tổng điểm", "Tỷ lệ (%)", "Kết quả", "Thời gian (giây)", "Kết thúc", "Rời tab"];
       const rows = (dashboardData.attempts || []).map((row) => [
         row.submittedAt, row.name, row.email, row.company, row.courseId,
         row.courseTitle, row.attemptNumber, row.score, row.total, row.percent,
@@ -7313,11 +7167,6 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
       } finally { logoutButton.disabled = false; }
     },true);
 
-    languageToggle.addEventListener("click", () => {
-      currentLanguage = currentLanguage === "vi" ? "en" : "vi";
-      localStorage.setItem(ADMIN_LANGUAGE_KEY, currentLanguage);
-      applyLanguage();
-    });
     applyFilterButton.addEventListener("click", () => loadDashboard());
     resetFilterButton.addEventListener("click", () => {
       courseFilter.value = "";
@@ -7351,7 +7200,7 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
       if (!document.hidden && adminToken) loadDashboard(true);
     });
 
-    applyLanguage();
+    initializeReportLabels();
 
 
 (() => {
@@ -7364,11 +7213,12 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
   window.refreshCourseWindows=async(force=false)=>{
     if(!adminToken||loading||(!force&&Date.now()-loadedAt<60000))return;
     loading=true;
+    const endLoading=Portal.contentLoading(document.getElementById('schedulePanel'));
     const requestedToken=adminToken;
     try{const previous=select.value;const data=await callApi('listCourseWindows',{adminToken:requestedToken});if(adminToken!==requestedToken)return;courses=data.courses||[];
       select.replaceChildren(...courses.map(c=>{const option=document.createElement('option');option.value=c.id;option.textContent=c.title;return option;}));
       if(courses.some(c=>c.id===previous))select.value=previous;loadedAt=Date.now();fill();
-    }catch(e){message.textContent=e.message;}finally{loading=false;}
+    }catch(e){message.textContent=e.message;}finally{endLoading();loading=false;}
   };
   select.addEventListener('change',fill);
   document.getElementById('schedulePanel').addEventListener('toggle',()=>window.refreshCourseWindows(true));
@@ -7390,7 +7240,6 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
 })();
 
 (() => {
-  const learner = null;
   const admin = document.getElementById('learningAdmin');
   const escape = value => String(value ?? '').replace(/[&<>"']/g, char => ({
     '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
@@ -7411,191 +7260,6 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
         button.disabled = false;
       }
     };
-  }
-
-  if (learner) {
-    const navigation = document.getElementById('academyNavigation');
-    const content = learner.querySelector('.learning-content');
-    const status = learner.querySelector('[role=status]');
-    const exams = document.getElementById('learningExams');
-    let generation = 0;
-    let active = 'overview';
-    let home;
-    let selectedCourse = '';
-    const request = (action, data = {}) => callApi(action, {...data, deviceId:state.deviceId});
-    const history = items => items.length ? items.map(item => `
-      <button class="learning-row" type="button" data-result="${escape(item.id)}">
-        <span><strong>${escape(item.title)}</strong><small>${escape(item.submittedAt)}</small></span>
-        <span>${escape(item.score)}/${escape(item.total)} · ${item.result === 'PASS' ? 'Đạt' : 'Chưa đạt'}</span>
-      </button>`).join('') : '<p>Chưa có kết quả đã nộp.</p>';
-
-    function render() {
-      if (active === 'overview') {
-        const completed = home.courses.flatMap(course => course.lessons).filter(lesson => lesson.completed).length;
-        const upcoming = state.courses.filter(course => course.windowStatus === 'UPCOMING' || course.canStart)
-          .sort((a,b) => (Date.parse(a.canStart ? a.closesAt : a.opensAt) || Infinity) -
-            (Date.parse(b.canStart ? b.closesAt : b.opensAt) || Infinity)).slice(0, 3);
-        const activeCourses = home.courses.filter(course => course.lessons.some(lesson => !lesson.completed)).slice(0, 3);
-        content.innerHTML = `<div class="v2-overview">
-          <aside class="v2-profile" aria-label="Hồ sơ học viên">
-            <div class="v2-avatar" aria-hidden="true">${escape(home.profile.name?.trim().slice(0,1).toLocaleUpperCase('vi') || 'S')}</div>
-            <h3>${escape(home.profile.name)}</h3><p>${escape(home.profile.company)}</p>
-            <div class="v2-metrics">
-              <div>${portalIcon('medal')}<strong>${home.awards.length}</strong>Huy hiệu</div>
-              <div>${portalIcon('certificate')}<strong>${home.awards.length}</strong>Chứng nhận</div>
-              <div>${portalIcon('progress')}<strong>${completed}</strong>Bài đã học</div>
-              <div>${portalIcon('exam')}<strong>${home.history.length}</strong>Lượt thi</div>
-            </div>
-            <button type="button" class="button secondary-button" data-learning-tab="profile">Xem hồ sơ</button>
-          </aside>
-          <div class="v2-overview-banner">
-            <div class="v2-banner"><span class="v2-eyebrow">Sungrow E-learning</span>
-              <h2>Xin chào, ${escape(home.profile.name)}</h2>
-              ${activeCourses.length ? `<p>${escape(activeCourses[0].title)}</p>
-                <button class="button" type="button" data-learning-course="${escape(activeCourses[0].id)}">Tiếp tục học</button>` : ''}
-            </div>
-            <nav class="v2-shortcuts" aria-label="Truy cập nhanh">
-              <button type="button" data-learning-tab="courses">${portalIcon('course', true)} Khóa học</button>
-              <button type="button" data-learning-tab="exams">${portalIcon('exam', true)} Bài kiểm tra</button>
-              <button type="button" data-learning-tab="awards">${portalIcon('medal', true)} Thành tích</button>
-            </nav>
-          </div>
-          <section class="v2-tasks">
-            <h3>Việc cần làm</h3>
-            <div class="v2-task-grid">
-            ${activeCourses.map(course => `<button type="button" class="v2-task" data-learning-course="${escape(course.id)}">
-              <span class="v2-chip">Khóa học</span><strong>${escape(course.title)}</strong><small>${course.lessons.filter(lesson => lesson.completed).length}/${course.lessons.length} bài đã hoàn thành</small></button>`).join('')}
-            ${upcoming.map(course => `<button type="button" class="v2-task" data-learning-exam="${escape(course.id)}">
-              <span class="v2-chip">Bài kiểm tra</span><strong>${escape(course.title)}</strong>
-              <small>${course.canStart ? 'Hạn nộp' : 'Mở lúc'} · ${escape((course.canStart ? course.closesAt : course.opensAt) ? new Date(course.canStart ? course.closesAt : course.opensAt).toLocaleString('vi-VN',{timeZone:'Asia/Ho_Chi_Minh'}) : 'Không giới hạn')}</small></button>`).join('')}
-            ${activeCourses.length || upcoming.length ? '' : '<p>Chưa có bài học hoặc bài kiểm tra cần làm.</p>'}
-            </div>
-          </section>
-          <aside class="v2-journey" aria-label="Hành trình học tập">
-            <h3>Hành trình học tập</h3>${history(home.history.slice(0, 4))}
-            <button type="button" class="button secondary-button" data-learning-tab="awards">Xem thành tích</button>
-          </aside>
-        </div>`;
-      }
-      if (active === 'courses') {
-        const current = home.courses.find(course => course.id === selectedCourse);
-        if (!current) {
-          content.innerHTML = '<h2>Thư viện khóa học</h2><div class="v2-task-grid">' +
-            home.courses.map(course => `<button class="v2-task" type="button" data-learning-course="${escape(course.id)}">
-              <strong>${escape(course.title)}</strong><small>${course.lessons.filter(lesson => lesson.completed).length}/${course.lessons.length} bài đã hoàn thành</small></button>`).join('') +
-            (home.courses.length ? '' : '<p>Chưa có khóa học được xuất bản.</p>') + '</div>';
-          return;
-        }
-        content.innerHTML = '<button type="button" class="button secondary-button" data-learning-tab="courses">Về thư viện khóa học</button>' + [current].map(course => {
-          const completed = course.lessons.filter(lesson => lesson.completed).length;
-          return `<article class="learning-card"><h3>${escape(course.title)}</h3><p>${escape(course.description)}</p>
-            <p>${completed}/${course.lessons.length} bài học hoàn thành</p>${course.lessons.map(lesson =>
-              `<div class="learning-row"><span><strong>${escape(lesson.title)}</strong>
-                <a href="https://drive.google.com/file/d/${encodeURIComponent(lesson.fileId)}/view" target="_blank" rel="noopener noreferrer">Xem video trên Drive</a></span>
-                <button type="button" class="button secondary-button" data-course="${escape(course.id)}" data-lesson="${escape(lesson.id)}"
-                  ${lesson.completed ? 'disabled' : ''}>${lesson.completed ? 'Đã hoàn thành' : 'Đánh dấu hoàn thành'}</button></div>`).join('')}
-            ${course.examId ? `<button type="button" class="button secondary-button" data-learning-exam="${escape(course.examId)}">Xem bài kiểm tra</button>` : ''}</article>`;
-        }).join('');
-      }
-      if (active === 'awards') {
-        content.innerHTML = '<h2>Thành tích</h2><h3>Chứng nhận và huy hiệu</h3><div class="v2-achievements">' +
-          (home.awards.length ? home.awards.map(award => `<article class="learning-card">
-            <div class="v2-award-icons">${portalIcon('medal')}${portalIcon('certificate')}</div>
-            <span class="learning-badge">Huy hiệu hoàn thành</span><h3>${escape(award.title)}</h3>
-            <p>Ngày đạt ${escape(award.awardedAt)} · Mã chứng nhận ${escape(award.id)}</p>
-            <button type="button" class="button secondary-button" data-certificate="${escape(award.id)}">In mẫu chứng nhận</button>
-            </article>`).join('') : '<p>Chưa có chứng nhận.</p>') + '</div><h3>Lịch sử thi</h3>' + history(home.history);
-      }
-      if (active === 'profile') {
-        content.innerHTML = `<h2>Hồ sơ cá nhân</h2><form class="learning-form">
-          <label>Email<input value="${escape(home.profile.email)}" readonly></label>
-          <label>Họ và tên<input name="name" autocomplete="name" maxlength="120" required value="${escape(home.profile.name)}"></label>
-          <label>Công ty<input name="company" autocomplete="organization" maxlength="150" required value="${escape(home.profile.company)}"></label>
-          <button type="submit" class="button">Lưu hồ sơ</button></form>`;
-        wireForm(content.querySelector('form'), async data => {
-          const current = home;
-          await request('updateLearningProfile', data);
-          if (current !== home || !state.participant) return;
-          if (state.participant?.email === home.profile.email) {
-            Object.assign(state.participant, data);
-            document.querySelector('.course-user-name').textContent = data.name;
-            document.querySelector('.course-user-meta span').textContent = data.company;
-          }
-          home = {...home, profile:{...home.profile, ...data}};
-        }, status);
-      }
-    }
-
-    async function select(tab, courseId = '') {
-      const id = ++generation;
-      active = tab;
-      selectedCourse = courseId;
-      exams.hidden = tab !== 'exams';
-      content.hidden = tab === 'exams';
-      navigation.querySelectorAll('[data-learning-tab]').forEach(button =>
-        button.setAttribute('aria-pressed', String(button.dataset.learningTab === tab)));
-      status.textContent = '';
-      if (tab === 'exams') return;
-      content.replaceChildren();
-      status.textContent = 'Đang tải…';
-      try {
-        const data = await request('learningHome');
-        if (id !== generation || document.getElementById('courseView').hidden) return;
-        home = data;
-        render();
-        status.textContent = '';
-      } catch (error) {
-        if (id === generation) status.textContent = error.message;
-      }
-    }
-
-    learner.addEventListener('click', async event => {
-      const button = event.target.closest('button');
-      if (!button) return;
-      if (button.dataset.learningTab) return select(button.dataset.learningTab);
-      if (button.dataset.learningCourse) return select('courses', button.dataset.learningCourse);
-      if (button.dataset.learningExam) {
-        await select('exams');
-        const search = document.getElementById('examSearch');
-        search.value = state.courses.find(course => course.id === button.dataset.learningExam)?.title || '';
-        document.getElementById('examWindowFilter').value = '';
-        window.updateExamFilters();
-        return;
-      }
-      if (button.dataset.result) return viewAttemptResult(button.dataset.result);
-      if (button.dataset.certificate) {
-        const printArea = document.getElementById('learningCertificate');
-        const logo = document.querySelector('.brand img').src;
-        printArea.innerHTML = `<article class="certificate-sheet">
-          <header><img src="${escape(logo)}" alt="Sungrow"><span>No. <i></i></span></header>
-          <h1>CERTIFICATE</h1>
-          <div class="certificate-fields">
-            <p>This certifies that <i></i></p>
-            <p>has successfully completed the training course <i></i></p>
-            <p>Training dates <i></i></p>
-            <p>For <i></i></p>
-          </div>
-          <footer>Sungrow Power Supply Co. Ltd<br>Engineering and Technical Service Center<br>Date <i></i></footer>
-        </article>`;
-        document.body.classList.add('printing-certificate');
-        try { window.print(); } finally { document.body.classList.remove('printing-certificate'); printArea.replaceChildren(); }
-      }
-      if (button.dataset.lesson) {
-        button.disabled = true;
-        try {
-          await request('completeLearningLesson', {learningId:button.dataset.course, lessonId:button.dataset.lesson});
-          if (active === 'courses' && selectedCourse === button.dataset.course) await select('courses', selectedCourse);
-        } catch (error) {
-          status.textContent = error.message;
-          button.disabled = false;
-        }
-      }
-    });
-    navigation.addEventListener('click', event => {
-      const button=event.target.closest('[data-learning-tab]');
-      if(button) select(button.dataset.learningTab);
-    });
-    window.LearningPortal = { getHome: () => home,open:() => select('overview'), close:() => {generation++; home = null; content.replaceChildren(); status.textContent = '';}};
   }
 
   if (admin) {
@@ -7655,86 +7319,52 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
       }, status);
     }
     admin.addEventListener('toggle', async () => {
-      if (!admin.open) return;
+      if (!admin.open||!adminVerified) return;
       const epoch = adminEpoch;
-      status.textContent = 'Đang tải…';
+      status.textContent = '';
+      const endLoading=Portal.contentLoading(admin);
       try {
         const data = await request('adminLearningCatalog');
         if (epoch !== adminEpoch || !admin.open) return;
         render(data);
         status.textContent = '';
       }
-      catch (error) { status.textContent = error.message; }
+      catch (error) { if(epoch===adminEpoch)status.textContent = error.message; }
+      finally { endLoading(); }
     });
   }
 })();
 
 (() => {
-  const search = null;
-  if (search) {
-    const windowFilter = document.getElementById('examWindowFilter');
-    const sort = document.getElementById('examSort');
-    const grid = document.getElementById('courseGrid');
-    function update() {
-      const query = search.value.trim().toLocaleLowerCase('vi');
-      const cards = [...grid.querySelectorAll('.course-card')];
-      cards.sort((a,b) => {
-        if (sort.value === 'start') return (Date.parse(a.dataset.opens) || Infinity) - (Date.parse(b.dataset.opens) || Infinity);
-        if (sort.value === 'end') return (Date.parse(a.dataset.closes) || Infinity) - (Date.parse(b.dataset.closes) || Infinity);
-        return Number(a.dataset.position)-Number(b.dataset.position);
-      });
-      let visible = 0;
-      cards.forEach(card => {
-        card.hidden = !card.textContent.toLocaleLowerCase('vi').includes(query) ||
-          (windowFilter.value !== '' && windowFilter.value !== card.dataset.window);
-        if (!card.hidden) visible++;
-        grid.append(card);
-      });
-      document.getElementById('examNoMatches').hidden = !cards.length || visible > 0;
+
+  const content = dashboardView.querySelector('.v2-admin-main');
+  function selectAdminFeature(button) {
+    const target = button.dataset.adminPage;
+    for(const item of adminItems())item.dataset.selected=String(item===button);
+    for(const section of content.querySelectorAll('[data-admin-section]')){
+      section.hidden=!section.dataset.adminSection.split(' ').includes(target) ||
+        (section.id==='learningAdmin'&&section.dataset.available!=='true');
+      if(section instanceof HTMLDetailsElement)section.open=!section.hidden;
     }
-    search.addEventListener('input', update);
-    windowFilter.addEventListener('change', update);
-    sort.addEventListener('change', update);
-    window.updateExamFilters = update;
+    document.getElementById('v2AdminTitle').textContent=button.textContent.trim();
   }
-  const adminNav = document.getElementById('v2AdminNav');
-  if (adminNav) {
-    const main = document.querySelector('.v2-admin-main');
-    function open(button) {
-      const target = button.dataset.adminPage;
-      adminNav.querySelectorAll('button').forEach(item => item.setAttribute('aria-pressed', String(item === button)));
-      main.querySelectorAll('[data-admin-section]').forEach(section => {
-        section.hidden = !section.dataset.adminSection.split(' ').includes(target) ||
-          (section.id === 'learningAdmin' && section.dataset.available !== 'true');
-        if(section.hidden && section instanceof HTMLDetailsElement) section.open = false;
-      });
-      const panel = document.getElementById(target === 'learning' ? 'learningAdmin' : 'schedulePanel');
-      if (target !== 'reports' && panel && !panel.hidden) panel.open = true;
-      document.getElementById('v2AdminTitle').textContent = button.textContent.trim();
-    }
-    adminNav.addEventListener('click', event => {
-      const button = event.target.closest('[data-admin-page]');
-      if (!button || !adminVerified) return;
-      if (!window.canOpenAdminWorkspace()) return;
-      window.cancelLearnerNavigation();
-      document.querySelector('.v4-drawer[open]')?.close();
-      adminSelected = true;
-      showAdminPanel();
-      open(button);
-      adminNav.querySelectorAll('[aria-current]').forEach(item=>item.removeAttribute('aria-current'));
-      button.setAttribute('aria-current','page');
-      document.querySelector('.v4-scroll')?.scrollTo({top:0});
-      const title=document.getElementById('v2AdminTitle');
-      title.tabIndex=-1;
-      title.focus({preventScroll:true});
-    });
-    window.updateAdminWorkspace = ready => {
-      document.getElementById('learningAdmin').dataset.available = String(ready);
-      adminNav.querySelector('[data-admin-page=learning]').hidden = !ready;
-      open(adminNav.querySelector('button[aria-pressed=true]:not([hidden])') || adminNav.querySelector('button'));
-    };
-    open(adminNav.querySelector('button'));
-  }
+  window.portalAdmin.openFeature=button=>{
+    if(!adminVerified||button.hidden||!window.canOpenAdminWorkspace())return;
+    window.cancelLearnerNavigation();
+    selectAdminFeature(button);
+    showAdminPanel();
+    const title=document.getElementById('v2AdminTitle');
+    title.tabIndex=-1;
+    title.focus({preventScroll:true});
+  };
+  window.updateAdminWorkspace=ready=>{
+    document.getElementById('learningAdmin').dataset.available=String(ready);
+    nav.querySelector('[data-admin-page=learning]').hidden=!adminVerified||!ready;
+    selectAdminFeature(nav.querySelector('[data-admin-page][data-selected=true]:not([hidden])') ||
+      nav.querySelector('[data-admin-page=reports]'));
+  };
+  selectAdminFeature(nav.querySelector('[data-admin-page=reports]'));
+
 })();
 
 })();

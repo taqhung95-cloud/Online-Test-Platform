@@ -60,8 +60,8 @@
     const button = document.createElement('button');
     button.type = 'button';
     button.dataset.adminPage = 'exam-authoring';
-    button.setAttribute('aria-pressed', 'false');
-    button.innerHTML = portalIcon('exam') + '<span class="v4-label">Quản lý bài thi</span>';
+    button.dataset.selected = 'false';
+    button.innerHTML = portalIcon('examEditor') + '<span class="v4-label">Quản lý bài thi</span>';
     button.setAttribute('aria-label', 'Quản lý bài thi');
     const panel = document.createElement('section');
     panel.dataset.adminSection = 'exam-authoring';
@@ -134,7 +134,8 @@
     async function load(id) {
       if (busy) return;
       const nonce = ++generation;
-      status.textContent = 'Đang tải…';
+      status.textContent = '';
+      const endLoading = Portal.contentLoading(panel);
       form.hidden = true;
       try {
         const data = await request('adminExamEditor', {courseId:id});
@@ -142,6 +143,7 @@
         show(data);
         loaded = true;
       } catch (error) { if (nonce === generation) status.textContent = error.message; }
+      finally { endLoading(); }
     }
     picker.addEventListener('change', () => load(picker.value));
     button.addEventListener('click', () => { if (!loaded) load(''); });

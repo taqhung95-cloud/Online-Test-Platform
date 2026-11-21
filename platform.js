@@ -4,6 +4,22 @@ window.Portal = (() => {
   let token=sessionStorage.getItem(sessionKey)||localStorage.getItem(sessionKey)||'';
   let revision=0;
   const logoutKey='sungrow_learner_logout_v1';
+  const contentLoads = new WeakMap();
+  function contentLoading(scope){
+    contentLoads.set(scope,(contentLoads.get(scope)||0)+1);
+    scope.setAttribute('data-portal-loading','');
+    scope.setAttribute('aria-busy','true');
+    let released=false;
+    return ()=>{
+      if(released)return;
+      released=true;
+      const count=contentLoads.get(scope)-1;
+      if(count){contentLoads.set(scope,count);return;}
+      contentLoads.delete(scope);
+      scope.removeAttribute('data-portal-loading');
+      scope.removeAttribute('aria-busy');
+    };
+  }
   const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
   function session(value,remember=false){if(value!==undefined){revision++;token=value||'';localStorage.removeItem(sessionKey);if(token){sessionStorage.setItem(sessionKey,token);if(remember)localStorage.setItem(sessionKey,token);}else{sessionStorage.removeItem(sessionKey);localStorage.setItem(logoutKey,crypto.randomUUID());}}return token;}
   function showView(id){for(const name of ['bootView','loginView','courseView','examView','resultView','dashboardView']){const el=document.getElementById(name);if(el)el.hidden=name!==id;}}
@@ -65,5 +81,5 @@ window.Portal = (() => {
       document.dispatchEvent(new CustomEvent('portal:logout',{detail:{message:'Phiên đã đăng xuất hoặc thay đổi ở tab khác. Vui lòng đăng nhập lại.'}}));
     }
   });
-  return {request,session,showView,loading,recovery,isAuthError};
+  return {request,session,showView,loading,contentLoading,recovery,isAuthError};
 })();
