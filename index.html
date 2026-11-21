@@ -2937,7 +2937,7 @@ body.v5 .v5-document-stage img{
   object-fit:contain;
 }
 body.v5 .v3-course-grid.v5-single-course{
-  grid-template-columns:minmax(0,1fr) clamp(17rem,25%,21rem);
+  grid-template-columns:minmax(0,1fr) clamp(18rem,26%,23rem);
 }
 body.v5 .v5-course-header .v5-title{
   display:flex;
@@ -2955,23 +2955,29 @@ body.v5 .v5-course-header .v5-title{
   font-weight:600;
 }
 body.v5 .v5-single-course>section.v5-course-viewer{
-  height:auto;
+  block-size:auto;
   min-block-size:0;
-  max-block-size:100%;
-  align-self:start;
+  align-self:stretch;
   padding:8px;
 }
-body.v5 .v5-course-viewer :is(.v5-video-stage,.v5-document-stage){
-  flex:0 1 auto;
-  aspect-ratio:16/9;
-  max-block-size:68dvh;
+body.v5 .v5-single-course .v5-video-stage{
+  flex:1 1 auto;
+  block-size:auto;
+  aspect-ratio:auto;
   border-radius:14px;
-  overflow:hidden;
 }
 body.v5 .v5-single-course>section.v5-course-info{
-  height:auto;
+  block-size:auto;
   align-self:start;
-  gap:14px;
+  gap:12px;
+}
+.v5-course-info > *{flex-shrink:0}
+@media(min-width:1024px){
+  body.v5 .v3-course-grid.v5-single-course{grid-template-rows:minmax(0,1fr)}
+  body.v5 .v5-single-course>section.v5-course-info{max-block-size:100%;overflow-y:auto}
+}
+@media(max-width:1023px){
+  body.v5 .v5-single-course .v5-video-stage{flex:none;block-size:clamp(14rem,50dvh,29rem)}
 }
 .v5-course-about{color:var(--sg-muted)}
 .v5-course-state{
@@ -3614,12 +3620,16 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
 }
 </style>
 <style>body>.header{display:none!important}body:has(#bootView:not([hidden])) main{display:grid;place-items:center;min-height:100dvh;width:100%;max-width:none}#bootView{margin:auto}.v5-course-viewer .v5-video-stage{position:relative;min-inline-size:0}.v5-course-viewer .v5-drive-preview{position:absolute;inset:0;display:block;inline-size:100%;block-size:100%;border:0}
-.v5-lesson-list{display:grid;gap:8px;margin:0;padding:0;list-style:none;max-block-size:42dvh;overflow-y:auto}
-.v5-lesson-list li{display:grid;grid-template-columns:minmax(0,1fr) 44px;align-items:stretch;gap:4px}
-.v5-lesson-choice{display:grid;gap:3px;min-block-size:44px;padding:8px 10px;text-align:start;font:inherit;color:inherit;background:var(--sg-glass-base,#fff);border:1px solid var(--sg-line,#ccd8e6);border-radius:10px;cursor:pointer;overflow-wrap:anywhere}
+.v5-course-actions h4{margin:0;font-size:var(--sg-type-detail,0.9rem)}
+.v5-lesson-list{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.v5-lesson-list li{display:grid;grid-template-columns:minmax(0,1fr) 44px;align-items:stretch;border:1px solid var(--sg-line);border-radius:10px;background:var(--sg-glass-base)}
+.v5-lesson-list li:has(.v5-lesson-choice[aria-current=true]){border-color:var(--sg-action);background:#ffefe0}
+.v5-lesson-choice{display:grid;align-content:center;gap:3px;min-block-size:52px;padding:8px 4px 8px 10px;text-align:start;font:inherit;color:inherit;background:transparent;border:0;border-radius:9px;cursor:pointer;overflow-wrap:anywhere}
 .v5-lesson-choice span{font-size:var(--sg-type-compact,.8rem);color:var(--sg-muted,#465a6e)}
-.v5-lesson-choice[aria-current=true]{border-color:var(--sg-action,#9c420d);background:#ffefe0}
+.v5-lesson-choice strong{font-size:var(--sg-type-detail,0.9rem);line-height:1.4;font-weight:600}
+.v5-lesson-choice:focus-visible{outline-offset:-3px}
 .v5-lesson-check{display:grid;place-items:center;min-block-size:44px}
+.v5-lesson-check:focus-within{outline:2px solid var(--sg-action);outline-offset:-3px;border-radius:9px}
 .v5-lesson-check input{inline-size:20px;block-size:20px;margin:0;accent-color:var(--sg-action,#9c420d)}
 .v5-lesson-status{margin:4px 0 0}
 .v5-lesson-status:empty{display:none}
@@ -6528,7 +6538,12 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
      list.append(item);
      if(index===0)showLesson();
    });
-   if(rows.length){stage.append(player);actions.append(list,status);}
+   if(rows.length){
+     const lessonsHeading=document.createElement('h4');
+     lessonsHeading.textContent='Bài học';
+     stage.append(player);
+     actions.append(lessonsHeading,list,status);
+   }
    else stage.textContent='Chưa có bài học.';
    const exam=$('[data-learning-exam]',generic);
    if(exam)course.lastElementChild.append(exam);
