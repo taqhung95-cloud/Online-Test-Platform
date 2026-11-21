@@ -3859,11 +3859,11 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
     <section id="resultView" hidden aria-live="polite"></section>
   <section id="dashboardView" class="dashboard" hidden>
       <div class="v2-admin-shell">
-      <nav id="v2AdminNav" aria-label="Quản trị đào tạo" hidden>
+      <div id="v2AdminNav" role="group" aria-label="Quản trị đào tạo" hidden>
         <button type="button" data-admin-page="reports" aria-pressed="true">Báo cáo đào tạo</button>
         <button type="button" data-admin-page="learning" hidden>Khóa học và video</button>
         <button type="button" data-admin-page="exams">Lịch kiểm tra</button>
-      </nav>
+      </div>
       <div class="v2-admin-main">
       <h2 id="v2AdminTitle">Báo cáo đào tạo</h2>
       <div id="adminMeta" hidden><span id="adminIdentity"></span><button id="languageToggle" type="button" class="button secondary-button">EN</button></div>
@@ -4204,9 +4204,10 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
     }
 
     let requestedLearnerTab = '';
-    async function authenticateParticipant(email,restore=false) {
+    let adminLearnerToken = '';
+    async function authenticateParticipant(email,restore=false,adminTab='') {
       const epoch=++state.authEpoch;
-      const data = await callApi(restore?"listCourses":"loginParticipant", restore?{deviceId:state.deviceId}:{
+      const data = adminTab ? await window.portalAdmin.openLearnerSession(state.deviceId) : await callApi(restore?"listCourses":"loginParticipant", restore?{deviceId:state.deviceId}:{
         email,
         password: document.getElementById("learnerPassword").value,
         remember: document.getElementById("rememberLogin").checked,
@@ -4215,6 +4216,14 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
         deviceId: state.deviceId
       });
       if(epoch!==state.authEpoch)return false;
+      if(adminTab){
+        if(!data.adminLearnerToken||!data.participant)throw new Error('Máy chủ chưa xác nhận quyền mở mục học viên.');
+        window.LearningPortal?.close();
+        adminLearnerToken=data.adminLearnerToken;
+        Portal.session(adminLearnerToken);
+        requestedLearnerTab=adminTab;
+        window.portalAdmin.showLearner();
+      }
       if(data.requiresPasswordChange){
         showLoginForm();
         document.getElementById('learnerPassword').value='';
@@ -4252,6 +4261,7 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
         const tab=requestedLearnerTab || 'overview';
         requestedLearnerTab='';
         await window.LearningPortal.select(tab);
+        if(epoch!==state.authEpoch)return false;
         window.setActiveNav?.(tab);
       }
       return true;
@@ -5030,6 +5040,8 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
       const previousEmail = state.email;
       callApi("logoutParticipant",{deviceId:state.deviceId}).catch(()=>{});
       Portal.session("");
+      adminLearnerToken='';
+      document.getElementById('portalNavigationStatus').textContent='';
       state.authEpoch++;resetExamState(false);
       state.email = "";
       state.participant = null;
@@ -5047,7 +5059,15 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
       window.LearningPortal?.close();
       if(state.active)saveSession();
       state.authEpoch++;resetExamState(false);state.participant=null;state.courses=[];
-      if(clearToken)Portal.session('');loginForm.reset();document.getElementById('deviceVerification').hidden=true;
+      adminLearnerToken='';
+      if(clearToken)Portal.session('');
+      if(window.portalAdmin?.isAuthenticated() && !/^Phiên quản trị|^Quyền quản trị/.test(error.message)){
+        window.portalAdmin.restore();
+        document.getElementById('portalNavigationStatus').textContent='Hãy chọn lại mục vừa mở để tải dữ liệu.';
+        return;
+      }
+      if(window.portalAdmin?.isAuthenticated())window.portalAdmin.clearSession();
+      loginForm.reset();document.getElementById('deviceVerification').hidden=true;
       document.getElementById('passwordSetupForm').reset();showLoginForm();setLoginLoading(false);loginMessage.textContent=error.message;
     }
     document.addEventListener('portal:logout',event=>handleParticipantAuthLoss(new Error(event.detail.message),false));
@@ -5480,18 +5500,39 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
       window.alert('Hãy nộp bài trước khi chuyển sang quản trị.');
       return false;
     };
-    window.cancelLearnerNavigation = () => { state.authEpoch++; setLoginLoading(false); window.LearningPortal?.close(); };
+    window.cancelLearnerNavigation = () => { state.authEpoch++; setLoginLoading(false); window.LearningPortal?.close(); document.getElementById('portalNavigationStatus').textContent=''; };
+    let openingAdminLearner = false;
     window.openLearnerTab = async tab => {
+      if(state.active)return false;
+      const status=document.getElementById('portalNavigationStatus');
+      if(window.portalAdmin?.isAuthenticated() && (!state.participant || !adminLearnerToken || Portal.session()!==adminLearnerToken)){
+        if(openingAdminLearner)return false;
+        openingAdminLearner=true;
+        status.textContent='Đang mở mục học viên…';
+        try {
+          const opened=await authenticateParticipant('',false,tab);
+          if(opened)status.textContent='';
+          return opened;
+        } catch(error) {
+          if(window.portalAdmin.isAuthenticated()){
+            status.textContent=error.message==='Yêu cầu không hợp lệ.'
+              ? 'Cần cập nhật Apps Script V2 để mở mục học viên bằng tài khoản quản trị.'
+              : error.message;
+          }
+          return false;
+        } finally {
+          openingAdminLearner=false;
+        }
+      }
+      status.textContent='';
       window.portalAdmin?.showLearner();
       if (!state.participant || !Portal.session()) {
         requestedLearnerTab=tab;
         await initialize();
         if (!state.participant || !Portal.session()) {
-          if (!loginView.hidden) loginMessage.textContent='Đăng nhập tài khoản học viên để sử dụng mục này.';
           return false;
         }
       }
-      if (state.active) return false;
       if (courseView.hidden) renderCourseSelection();
       await LearningPortal.select(tab);
       return true;
@@ -5953,17 +5994,18 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
 </script><script>(() => {
  const admin=false,main=document.querySelector('main'),header=document.querySelector('body>.header'),logo=header.querySelector('img').src;
  const shell=document.createElement('div');shell.className='v4-shell';
+ const navigationStatus=document.createElement('p');navigationStatus.id='portalNavigationStatus';navigationStatus.setAttribute('role','status');main.prepend(navigationStatus);
  const scroll=document.createElement('div');scroll.className='v4-scroll';
  const side=document.createElement('aside');side.className='v4-sidebar';side.setAttribute('aria-label',admin?'Quản trị đào tạo':'Cổng học viên');
  const icon=name=>name==='profile'?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/></svg>':portalIcon(name);
  side.innerHTML='<img class="v4-logo" src="'+logo+'" alt="Sungrow"><button class="v4-toggle" aria-label="Thu gọn hoặc mở rộng menu" aria-expanded="true"><img class="v5-toggle-brand" src="v5-assets/6080b980092c.svg" alt=""></button>';
  const nav=admin?document.getElementById('v2AdminNav'):document.createElement('nav');
- if(!admin){nav.setAttribute('aria-label','Cổng học viên');nav.innerHTML=[['overview','Tổng quan','progress'],['courses','Khóa học','course'],['exams','Bài kiểm tra','exam'],['awards','Kết quả & Thành tích','medal'],['profile','Hồ sơ','profile']].map(([id,label,i])=>'<button type="button" data-v4-tab="'+id+'" aria-label="'+label+'">'+icon(i)+'<span class="v4-label">'+label+'</span></button>').join('');}
+ if(!admin){nav.setAttribute('aria-label','Điều hướng Sungrow E-learning');nav.innerHTML=[['overview','Tổng quan','progress'],['courses','Khóa học','course'],['exams','Bài kiểm tra','exam'],['awards','Kết quả & Thành tích','medal'],['profile','Hồ sơ','profile']].map(([id,label,i])=>'<button type="button" data-v4-tab="'+id+'" aria-label="'+label+'">'+icon(i)+'<span class="v4-label">'+label+'</span></button>').join('');}
  else nav.querySelectorAll('button').forEach(b=>{b.setAttribute('aria-label',b.textContent.trim());b.innerHTML=icon(b.dataset.adminPage==='learning'?'course':'exam')+'<span class="v4-label">'+b.textContent+'</span>';});
  side.append(nav);
  const managementNav=document.getElementById('v2AdminNav');
  managementNav.querySelectorAll('button').forEach(button=>{const label=button.textContent.trim();button.setAttribute('aria-label',label);button.innerHTML=icon(button.dataset.adminPage==='learning'?'course':'exam')+'<span class="v4-label">'+label+'</span>';});
- side.append(managementNav);
+ nav.append(managementNav);
  const bottom=document.createElement('div');bottom.className='v4-bottom';bottom.innerHTML='<div class="v4-person"><span class="v4-avatar">N</span><span><strong class="v4-name">'+(admin?'Quản trị viên':'Học viên')+'</strong><small class="v4-company">Sungrow Academy</small></span></div>';
  const logout=document.getElementById('logoutButton');logout.classList.add('button','secondary-button');bottom.append(logout);
  if(admin){const link=document.createElement('a');link.href='index.html';link.textContent='Cổng học viên';link.className='v4-label';bottom.prepend(link);bottom.append(document.getElementById('languageToggle'));bottom.append(document.getElementById('adminIdentity'));}
@@ -5978,7 +6020,7 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
  function collapse(){document.body.classList.toggle('v4-collapsed',compact);const toggle=side.querySelector('.v4-toggle');const label=compact?'Mở rộng menu':'Thu gọn menu';toggle.setAttribute('aria-expanded',String(!compact));toggle.setAttribute('aria-label',label);toggle.title=label;}
  side.querySelector('.v4-toggle').onclick=()=>{if(drawer.open){drawer.close();return;}compact=!compact;collapse();};collapse();
  let previousWidth=innerWidth;addEventListener('resize',()=>{if((previousWidth<1280)!==(innerWidth<1280)){compact=innerWidth<1280;collapse();}if(innerWidth>720&&drawer.open)drawer.close();previousWidth=innerWidth;});
- window.setActiveNav=tab=>{if(['results','pass','retry'].includes(tab))tab='awards';nav.querySelectorAll('button').forEach(b=>{const active=(b.dataset.v4Tab||b.dataset.adminPage)===tab;if(active)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});};
+ window.setActiveNav=tab=>{if(['results','pass','retry'].includes(tab))tab='awards';nav.querySelectorAll('[data-v4-tab]').forEach(b=>{if(b.dataset.v4Tab===tab)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});};
  nav.addEventListener('click',async e=>{const button=e.target.closest('[data-v4-tab]');if(!button)return;if(drawer.open)drawer.close();const tab=button.dataset.v4Tab;if(!await window.openLearnerTab(tab))return;setActiveNav(tab);scroll.scrollTop=0;const heading=main.querySelector('#learningExams:not([hidden]) h2')||content.querySelector('h2');if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true});}});
  function tabs(el,selected){el.setAttribute('role','tablist');el.setAttribute('aria-label','Résultats et réalisations'.replace('Résultats et réalisations','Kết quả và thành tích'));const buttons=[...el.querySelectorAll('button')];buttons.forEach((b,i)=>{b.setAttribute('role','tab');const yes=admin?b.classList.contains('active'):(i===selected);b.setAttribute('aria-selected',String(yes));b.tabIndex=yes?0:-1;});if(!el.dataset.keys){el.dataset.keys='true';el.addEventListener('keydown',e=>{if(!['ArrowRight','ArrowLeft','Home','End'].includes(e.key))return;e.preventDefault();let i=buttons.indexOf(document.activeElement);i=e.key==='Home'?0:e.key==='End'?buttons.length-1:(i+(e.key==='ArrowRight'?1:-1)+buttons.length)%buttons.length;buttons[i].click();setTimeout(()=>{const active=el.isConnected?buttons[i]:document.querySelector('.v3-tabs [aria-selected=true]');active?.focus();},0);});}}
  if(!admin){
@@ -6738,7 +6780,7 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
 
 
 </script>
-  <style>#v2AdminNav{margin-block-start:6px;padding-block-start:10px;border-block-start:1px solid var(--sg-line,#c8d4dc)}#v2AdminNav[hidden],#adminMeta[hidden]{display:none!important}.v4-sidebar:has(#v2AdminNav:not([hidden])){gap:10px;overflow-y:auto}#adminMeta{font-size:.85rem;gap:8px;align-items:center;display:flex}#dashboardView #languageToggle{margin-inline-start:auto}</style><script>
+  <style>#v2AdminNav{display:grid;gap:inherit;margin-block-start:6px;padding-block-start:10px;border-block-start:1px solid var(--sg-line,#c8d4dc)}#v2AdminNav[hidden],#adminMeta[hidden]{display:none!important}.v4-sidebar:has(#v2AdminNav:not([hidden])){gap:10px;overflow-y:auto}#adminMeta{font-size:.85rem;gap:8px;align-items:center;display:flex}#dashboardView #languageToggle{margin-inline-start:auto}</style><script>
 (()=>{
 
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby6OYUZKkLfkh2FdENb6P24ccaVbE7EiAhnyIerYy-0fB_QTVfRPnJ_3eCzJG-zrowwIw/exec";
@@ -6894,7 +6936,7 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
     async function requestAdmin(action,payload){
       const epoch=adminEpoch;
       try{return await Portal.request(APPS_SCRIPT_URL,action,payload);}catch(error){
-        if(epoch===adminEpoch&&['getAdminDashboard','listCourseWindows','updateCourseWindow','unlinkParticipantDevice','adminLearningCatalog','saveLearningContent','adminExamEditor','adminSaveExam','adminBeginLessonUpload','adminUploadLessonChunk'].includes(action)&&Portal.isAuthError(error))showLogin(localizeServerMessage(error.message));
+        if(epoch===adminEpoch&&['getAdminDashboard','listCourseWindows','updateCourseWindow','unlinkParticipantDevice','adminLearningCatalog','saveLearningContent','adminExamEditor','adminSaveExam','adminBeginLessonUpload','adminUploadLessonChunk','adminOpenLearner'].includes(action)&&Portal.isAuthError(error))showLogin(localizeServerMessage(error.message));
         throw error;
       }
     }
@@ -6932,7 +6974,7 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
       adminNav.querySelector('[aria-pressed=true]')?.setAttribute('aria-current','page');
     }
 
-    function showLogin() {
+    function showLogin(message) {
       const wasSelected = adminSelected;
       adminSelected = false;
       adminVerified = false;
@@ -6947,7 +6989,9 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
       clearInterval(refreshTimer);
       document.body.classList.remove('admin-v2');
       document.title = 'Sungrow E-learning';
-      if (wasSelected) initialize();
+      if(adminLearnerToken){
+        handleParticipantAuthLoss(new Error(message||'Phiên quản trị đã hết hạn. Vui lòng đăng nhập lại.'));
+      }else if (wasSelected) initialize();
     }
 
     function showLearner() {
@@ -6972,6 +7016,8 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
       isShowing:() => adminSelected,
       signIn:openAdmin,
       showLearner,
+      clearSession:showLogin,
+      openLearnerSession:deviceId=>requestAdmin('adminOpenLearner',{adminToken,deviceId}),
       isAuthenticated:() => adminVerified
     };
 
