@@ -61,8 +61,8 @@
     button.type = 'button';
     button.dataset.adminPage = 'exam-authoring';
     button.setAttribute('aria-pressed', 'false');
-    button.innerHTML = portalIcon('exam') + '<span class="v4-label">Bài kiểm tra</span>';
-    button.setAttribute('aria-label', 'Bài kiểm tra');
+    button.innerHTML = portalIcon('exam') + '<span class="v4-label">Quản lý bài thi</span>';
+    button.setAttribute('aria-label', 'Quản lý bài thi');
     const panel = document.createElement('section');
     panel.dataset.adminSection = 'exam-authoring';
     panel.className = 'panel';
