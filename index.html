@@ -7,6 +7,7 @@
   <title>Sungrow E-learning</title>
   <link rel="icon" href="sungrow-edu-favicon.ico" type="image/x-icon" sizes="16x16">
   <link rel="preload" href="v5-assets/deb3edc82cb2.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="mobile.css?v=20261122-mobile">
   <script src="platform.js?v=20261121-private-media"></script>
   <script src="admin-authoring.js?v=7"></script>
 </head>
@@ -6115,8 +6116,9 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
  const loader=document.createElement('div');loader.id='portalContentLoader';
  loader.innerHTML='<div class="portal-load-track"><progress aria-label="Đang tải nội dung"></progress></div>';
  shell.append(loader);
- const mobile=document.createElement('div');mobile.className='v4-mobile';mobile.innerHTML='<img src="'+logo+'" alt="Sungrow"><button class="v4-menu" aria-label="Mở menu" aria-expanded="false">☰ Menu</button>';shell.before(mobile);
- const drawer=document.createElement('dialog');drawer.className='v4-drawer';drawer.setAttribute('aria-label','Điều hướng');document.body.append(drawer);
+ const mobile=document.createElement('div');mobile.className='v4-mobile';mobile.innerHTML='<img src="'+logo+'" alt="Sungrow"><button type="button" class="v4-menu" aria-controls="mobilePortalDrawer" aria-expanded="false"><span aria-hidden="true">☰</span> Danh mục</button>';shell.before(mobile);
+ const drawer=document.createElement('dialog');drawer.id='mobilePortalDrawer';drawer.className='v4-drawer';drawer.setAttribute('aria-label','Điều hướng');document.body.append(drawer);
+ const mobileNavigation=matchMedia('(max-width: 720px), (max-width: 1023px) and (pointer: coarse)');
  const opener=mobile.querySelector('button');opener.onclick=()=>{drawer.append(side);const toggle=side.querySelector('.v4-toggle');toggle.setAttribute('aria-label','Đóng menu');toggle.title='Đóng menu';drawer.showModal();opener.setAttribute('aria-expanded','true');};
  drawer.addEventListener('close',()=>{shell.prepend(side);collapse();opener.setAttribute('aria-expanded','false');opener.focus();});
  drawer.addEventListener('click',e=>{if(e.target===drawer)drawer.close();});
@@ -6124,7 +6126,8 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
  let compact=innerWidth<1280;
  function collapse(){document.body.classList.toggle('v4-collapsed',compact);const toggle=side.querySelector('.v4-toggle');const label=compact?'Mở rộng menu':'Thu gọn menu';toggle.setAttribute('aria-expanded',String(!compact));toggle.setAttribute('aria-label',label);toggle.title=label;}
  side.querySelector('.v4-toggle').onclick=()=>{if(drawer.open){drawer.close();return;}compact=!compact;collapse();};collapse();
- let previousWidth=innerWidth;addEventListener('resize',()=>{if((previousWidth<1280)!==(innerWidth<1280)){compact=innerWidth<1280;collapse();}if(innerWidth>720&&drawer.open)drawer.close();previousWidth=innerWidth;});
+ mobileNavigation.addEventListener('change',()=>{if(!mobileNavigation.matches&&drawer.open)drawer.close();});
+ let previousWidth=innerWidth;addEventListener('resize',()=>{if((previousWidth<1280)!==(innerWidth<1280)){compact=innerWidth<1280;collapse();}previousWidth=innerWidth;});
  window.setActiveNav=tab=>{
    if(['results','pass','retry'].includes(tab))tab='awards';
    const active=typeof tab==='string'?Array.from(nav.querySelectorAll('[data-v4-tab]')).find(button=>button.dataset.v4Tab===tab):tab;
@@ -7319,7 +7322,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
       if (!rows.length) return `<div class="empty">${escapeHtml(t("noMatchingData"))}</div>`;
       const className = String(tableClass || "").replace(/[^a-z0-9_-]/gi, "");
       const wrapClass = className ? `table-wrap ${className}-wrap` : "table-wrap";
-      return `<div class="${wrapClass}"><table class="${className}"><thead><tr>${headers.map((header) => `<th>${escapeHtml(header)}</th>`).join("")}</tr></thead><tbody>${rows.join("")}</tbody></table></div>`;
+      return `<div class="${wrapClass}" tabindex="0" role="region" aria-label="Bảng báo cáo đào tạo"><table class="${className}"><thead><tr>${headers.map((header) => `<th scope="col">${escapeHtml(header)}</th>`).join("")}</tr></thead><tbody>${rows.join("")}</tbody></table></div>`;
     }
 
     function renderCompanyTable(rows, rankings) {
