@@ -7,7 +7,7 @@
   <title>Sungrow E-learning</title>
   <link rel="icon" href="sungrow-edu-favicon.ico" type="image/x-icon" sizes="16x16">
   <link rel="preload" href="v5-assets/deb3edc82cb2.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="mobile.css?v=20261122-mobile">
+  <link rel="stylesheet" href="mobile.css?v=20261122-reflow">
   <script src="platform.js?v=20261121-private-media"></script>
   <script src="admin-authoring.js?v=7"></script>
 </head>
@@ -1987,7 +1987,7 @@ body.learner-v2 #loginView:has(#passwordSetupForm:not([hidden])){max-width:440px
 #loginView .account-form fieldset{border:0;border-top:1px solid #d8e0ed;margin:0;padding:5px 0 0;min-inline-size:0}
 #loginView .account-form legend{padding:0 8px 0 0;font-size:var(--sg-type-detail);font-weight:700;color:#182235}
 #loginView .account-form label{display:block;margin:7px 0 4px;font-size:var(--sg-type-detail)}
-#loginView .account-form input{margin:0;min-width:0;height:42px;font-size:16px}
+#loginView .account-form input,#loginView .account-form select{margin:0;min-width:0;height:44px;font-size:16px}
 #loginView .account-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 #loginView .account-send{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:stretch;gap:8px}
 #loginView .account-send .button{margin:0;padding:0 10px;min-height:42px;font-size:var(--sg-type-detail)}
@@ -3871,7 +3871,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
           <label class="remember-option"><input id="confirmTransfer" type="checkbox"> Chuyển sang thiết bị này và thu hồi phiên cũ</label>
           </div>
           <button id="loginButton" class="button" type="submit">Đăng nhập</button>
-          <button id="registrationToggleButton" class="registration-link" type="button">Chưa đăng ký? Đăng ký tham gia</button>
+          <button id="registrationToggleButton" class="registration-link" type="button">Gửi yêu cầu cấp tài khoản</button>
           <button id="passwordSetupToggle" class="registration-link" type="button">Quên mật khẩu</button>
           <p id="loginMessage" class="login-message" role="alert"></p>
         </form>
@@ -3899,12 +3899,20 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
 
 <form id="registrationForm" class="registration-form account-form" aria-labelledby="registrationTitle" novalidate hidden>
   <button id="registrationBackButton" class="account-back" type="button">← Về đăng nhập</button>
-  <h2 id="registrationTitle">Tạo tài khoản</h2>
-  <p class="account-intro">Đăng ký bằng email để tham gia chương trình đào tạo Sungrow.</p>
+  <h2 id="registrationTitle">Yêu cầu cấp tài khoản</h2>
+  <p class="account-intro">Dành cho đại lý ủy quyền và trung tâm dịch vụ của Sungrow. Sau khi xác thực email, hãy chờ Sungrow duyệt yêu cầu để được cấp quyền truy cập.</p>
   <fieldset><legend>Thông tin cá nhân</legend>
     <div class="account-grid">
       <div><label for="registrationName">Họ và tên</label><input id="registrationName" name="name" autocomplete="name" required></div>
-      <div><label for="registrationCompany">Tên công ty</label><input id="registrationCompany" name="organization" autocomplete="organization" required></div>
+      <div><label for="registrationCompany">Tên đơn vị</label><input id="registrationCompany" name="organization" autocomplete="organization" required></div>
+    </div>
+    <div>
+      <label for="registrationPartnerType">Loại đối tác</label>
+      <select id="registrationPartnerType" name="partnerType" required>
+        <option value="" disabled selected>Chọn loại đối tác</option>
+        <option value="dealer">Đại lý ủy quyền</option>
+        <option value="service_center">Trung tâm dịch vụ</option>
+      </select>
     </div>
   </fieldset>
   <fieldset><legend>Xác thực email</legend>
@@ -3920,7 +3928,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
     </div>
   </fieldset>
   <p id="registrationMessage" class="login-message registration-message" role="alert"></p>
-  <button id="registrationSubmitButton" class="button account-submit" type="submit" disabled>Tạo tài khoản</button>
+  <button id="registrationSubmitButton" class="button account-submit" type="submit" disabled>Gửi yêu cầu</button>
 </form>
 
       <div class="security-note">Mỗi tài khoản được thi tối đa 2 lần cho từng khóa học. Bài phải được nộp trước giờ đóng khóa học. Khi rời tab hoặc chuyển ứng dụng quá 60 giây, bài thi sẽ tự kết thúc; hệ thống ghi nhận số lần rời bài. Tải lại trang khi đang thi sẽ kết thúc và tính lượt thi sau khi xác nhận.</div>
@@ -4123,7 +4131,6 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
     const TAB_WARNING_THRESHOLD = 10;
     const INACTIVITY_TRIGGER_SECONDS = 5 * 60;
     const INACTIVITY_GRACE_SECONDS = 60;
-    let registrationRedirectTimer = null;
     let registrationOtpSent = false;
     let confirmedPageReload = false;
     let registrationLoading = false;
@@ -4182,6 +4189,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
     const registrationForm = document.getElementById("registrationForm");
     const registrationName = document.getElementById("registrationName");
     const registrationCompany = document.getElementById("registrationCompany");
+    const registrationPartnerType = document.getElementById("registrationPartnerType");
     const registrationEmail = document.getElementById("registrationEmail");
     const registrationOtp = document.getElementById("registrationOtp");
     const registrationOtpButton = document.getElementById("registrationOtpButton");
@@ -4684,8 +4692,6 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
     }
 
     function showRegistrationForm() {
-      clearInterval(registrationRedirectTimer);
-      registrationRedirectTimer = null;
       resetRegistrationOtp();
       loginContent.hidden = true;
       registrationForm.hidden = false;
@@ -4697,13 +4703,12 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
     function showLoginForm() {
       Portal.showView('loginView');
       document.getElementById('passwordSetupForm').hidden=true;
-      clearInterval(registrationRedirectTimer);
-      registrationRedirectTimer = null;
       resetRegistrationOtp();
       courseView.hidden = true;
       loginView.hidden = false;
       registrationForm.hidden = true;
       loginContent.hidden = false;
+      loginMessage.classList.remove("success");
       loginMessage.textContent = "";
       emailInput.focus();
     }
@@ -4714,7 +4719,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
       registrationBackButton.disabled = isLoading;
       registrationOtpButton.disabled = isLoading || otpCooldownRemaining > 0;
       registrationSubmitButton.setAttribute('aria-busy', String(isLoading));
-      registrationSubmitButton.textContent = isLoading ? "Đang xác thực..." : "Đăng ký";
+      registrationSubmitButton.textContent = isLoading ? "Đang xác thực..." : "Gửi yêu cầu";
       if (isLoading) {
         registrationOtpButton.textContent = "Đang xử lý...";
       } else {
@@ -4757,7 +4762,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
     }
 
     async function sendRegistrationOtp() {
-      const fields = [registrationName, registrationCompany, registrationEmail];
+      const fields = [registrationName, registrationCompany, registrationPartnerType, registrationEmail];
       const invalidField = fields.find((field) => !field.checkValidity());
       if (invalidField) {
         invalidField.reportValidity();
@@ -4772,6 +4777,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
         const data = await callApi("sendRegistrationOtp", {
           name: registrationName.value.trim(),
           company: registrationCompany.value.trim(),
+          partnerType: registrationPartnerType.value,
           email: registrationEmail.value.trim()
           ,deviceId: state.deviceId
         });
@@ -4802,33 +4808,16 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
       const data = await callApi("registerParticipant", {
         name: registrationName.value.trim(),
         company: registrationCompany.value.trim(),
+        partnerType: registrationPartnerType.value,
         email: registeredEmail,
         otp: registrationOtp.value.trim(),deviceId:state.deviceId,
         password:document.getElementById('registrationPassword').value,passwordSalt:passwordSalt()
       });
-      registrationMessage.classList.add("success");
       registrationForm.reset();
-      resetRegistrationOtp();
-
-      let secondsLeft = 5;
-      const updateRedirectMessage = () => {
-        registrationMessage.textContent =
-          `${data.message} Tự động chuyển về trang đăng nhập sau ${secondsLeft} giây.`;
-      };
-      updateRedirectMessage();
-      clearInterval(registrationRedirectTimer);
-      registrationRedirectTimer = window.setInterval(() => {
-        secondsLeft -= 1;
-        if (secondsLeft <= 0) {
-          clearInterval(registrationRedirectTimer);
-          registrationRedirectTimer = null;
-          setRegistrationLoading(false);
-          emailInput.value = registeredEmail;
-          showLoginForm();
-          return;
-        }
-        updateRedirectMessage();
-      }, 1000);
+      emailInput.value = registeredEmail;
+      showLoginForm();
+      loginMessage.classList.add("success");
+      loginMessage.textContent = data.message;
     }
 
     async function submitExam(autoSubmitted, terminationReason, skipConfirmation = false) {
@@ -5231,6 +5220,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
     loginForm.addEventListener("submit", async (event) => {
       event.preventDefault();
       if(loginButton.disabled)return;
+      loginMessage.classList.remove("success");
       loginMessage.textContent = "";
       if (!emailInput.checkValidity()) {
         emailInput.reportValidity();
@@ -5379,6 +5369,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
       const fields = [
         registrationName,
         registrationCompany,
+        registrationPartnerType,
         registrationEmail,
         registrationOtp,document.getElementById('registrationPassword'),document.getElementById('registrationConfirm')
       ];
@@ -5402,9 +5393,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
       } catch (error) {
         registrationMessage.textContent = error.message;
       } finally {
-        if (!registrationRedirectTimer) {
-          setRegistrationLoading(false);
-        }
+        setRegistrationLoading(false);
       }
     });
 
@@ -6118,7 +6107,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
  shell.append(loader);
  const mobile=document.createElement('div');mobile.className='v4-mobile';mobile.innerHTML='<img src="'+logo+'" alt="Sungrow"><button type="button" class="v4-menu" aria-controls="mobilePortalDrawer" aria-expanded="false"><span aria-hidden="true">☰</span> Danh mục</button>';shell.before(mobile);
  const drawer=document.createElement('dialog');drawer.id='mobilePortalDrawer';drawer.className='v4-drawer';drawer.setAttribute('aria-label','Điều hướng');document.body.append(drawer);
- const mobileNavigation=matchMedia('(max-width: 720px), (max-width: 1023px) and (pointer: coarse)');
+ const mobileNavigation=matchMedia('(max-width: 68rem), (max-width: 75rem) and (pointer: coarse)');
  const opener=mobile.querySelector('button');opener.onclick=()=>{drawer.append(side);const toggle=side.querySelector('.v4-toggle');toggle.setAttribute('aria-label','Đóng menu');toggle.title='Đóng menu';drawer.showModal();opener.setAttribute('aria-expanded','true');};
  drawer.addEventListener('close',()=>{shell.prepend(side);collapse();opener.setAttribute('aria-expanded','false');opener.focus();});
  drawer.addEventListener('click',e=>{if(e.target===drawer)drawer.close();});

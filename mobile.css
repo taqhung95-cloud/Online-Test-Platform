@@ -1,4 +1,4 @@
-@media (max-width: 720px), (max-width: 1023px) and (pointer: coarse) {
+@media (max-width: 68rem), (max-width: 75rem) and (pointer: coarse) {
   body.v5 {
     --mobile-gutter: clamp(.65rem, 3.4vw, 1.1rem);
     --mobile-gap: .75rem;
@@ -45,6 +45,9 @@
   body.v5.v4 main#main-content {
     box-sizing: border-box;
     min-inline-size: 0;
+    block-size: auto;
+    min-block-size: 100%;
+    overflow: visible;
     padding: var(--mobile-gap) var(--mobile-gutter) calc(var(--mobile-gap) + env(safe-area-inset-bottom, 0px)) !important;
   }
 
@@ -81,6 +84,8 @@
   body.v5.v4 :is(#courseView, .academy-main, #learningPortal, .learning-content, #learningExams, #resultView, #dashboardView, .v2-admin-main) {
     min-inline-size: 0;
     max-inline-size: 100%;
+    block-size: auto;
+    overflow: visible;
     gap: var(--mobile-gap);
   }
 
@@ -132,7 +137,7 @@
 
   body.v5.v4 .v2-overview .v2-metrics > div { padding: .65rem; overflow-wrap: anywhere; }
   body.v5.v4 .v2-overview .v2-tasks { block-size: auto; }
-  body.v5.v4 .v2-overview .v2-journey { block-size: auto; }
+  body.v5.v4 .v2-overview .v2-journey { block-size: auto; max-block-size: none; grid-column: 1; grid-row: 4; }
   body.v5.v4 .v2-overview .v2-task-grid,
   body.v5.v4 .v2-overview .v5-journey-list {
     block-size: auto !important;
@@ -141,10 +146,13 @@
     padding-inline-end: 0;
   }
 
-  body.v5.v4 .v5-library-panel .catalog-tools,
+  body.v5.v4 .v5-library-panel .catalog-tools {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   body.v5.v4 .v5-library-panel .catalog-grid,
   body.v5.v4 #learningExams .v5-exam-panel #courseGrid.sg-exam-grid {
-    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)) !important;
     max-block-size: none;
   }
 
@@ -178,7 +186,7 @@
   .v5-lesson-navigation:has([data-next-lesson][hidden]) [data-previous-lesson] { grid-column: 1/-1; }
 
   body.v5.v4.v4-focus .v4-mobile { display: none; }
-  body.v5.v4.v4-focus .v4-shell { block-size: 100dvh; }
+  body.v5.v4.v4-focus .v4-shell { display: block; block-size: 100dvh; }
   body.v5.v4.v4-focus #examView { height: auto; gap: .65rem; }
   body.v5.v4.v4-focus #examView .sg-exam-head {
     position: sticky;
@@ -208,7 +216,18 @@
     white-space: nowrap;
   }
 
+  body.v5.v4.v4-focus .exam-layout {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+  }
   body.v5.v4.v4-focus .exam-question-column { height: auto; min-height: 0 !important; }
+  body.v5.v4.v4-focus .question-nav-panel {
+    grid-column: 1;
+    grid-row: 2;
+    block-size: auto;
+    min-block-size: 0 !important;
+  }
   body.v5.v4.v4-focus #quizForm,
   body.v5.v4.v4-focus #questionNavGrid {
     max-block-size: none;
@@ -247,6 +266,32 @@
     white-space: normal;
   }
 
-  body.v5.v4 .v4-export:not([open]) > .export-actions { display: none; }
   body.v5.v4 dialog:not(.v4-drawer) { max-inline-size: calc(100% - 1.25rem); max-block-size: calc(100dvh - 1.25rem); }
+
+  @media (min-width: 44rem) {
+    body.v5.v4 .v2-overview .v2-metrics.v5-rail {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    body.v5.v4 .v3-course-grid.v5-single-course {
+      grid-template-columns: minmax(0, 1fr) clamp(14rem, 30%, 18rem) !important;
+      grid-template-rows: auto;
+    }
+    body.v5.v4 .v5-single-course .v5-media-toolbar { display: flex; }
+    body.v5.v4.v4-focus #examView .sg-exam-head { flex-wrap: nowrap; }
+    body.v5.v4 .sg-exam-head .sg-exam-brand { inline-size: auto; }
+    body.v5.v4 .sg-exam-head .sg-exam-actions { inline-size: auto; }
+    body.v5.v4.v4-focus #examView .exam-layout { grid-template-columns: minmax(0, 1fr) clamp(13rem, 27%, 17rem); }
+    body.v5.v4.v4-focus #examView .question-nav-panel { grid-column: 2; grid-row: 1; }
+  }
+
+  @media (orientation: landscape) and (max-height: 44rem) {
+    body.v5.v4 .v5-single-course .v5-video-stage {
+      inline-size: 100%;
+      block-size: auto;
+      max-block-size: min(55dvh, max(8rem, calc(100dvh - 13.5rem)));
+    }
+    body.v5.v4 .v5-media:fullscreen .v5-video-stage { max-block-size: none; }
+  }
 }
+
+body.v5.v4 .v4-export:not([open]) > .export-actions { display: none; }
