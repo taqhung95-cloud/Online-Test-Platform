@@ -8,8 +8,16 @@
   <link rel="icon" href="sungrow-edu-favicon.ico" type="image/x-icon" sizes="16x16">
   <link rel="preload" href="v5-assets/deb3edc82cb2.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="mobile.css?v=20261122-viewer-controls">
-  <script src="platform.js?v=20261121-private-media"></script>
+  <script src="platform.js?v=20261122-enrollments"></script>
   <script src="admin-authoring.js?v=7"></script>
+  <script src="enrollment-review.js?v=20261122"></script>
+  <style>
+    .enrollment-review-list{list-style:none;margin:0;padding:0}
+    .enrollment-review-row{flex-wrap:wrap;overflow-wrap:anywhere}
+    .enrollment-review-row p,.enrollment-review-row time{margin:4px 0}
+    .enrollment-review-row small{display:block}
+    .enrollment-review-actions{display:flex;flex-wrap:wrap;gap:8px}
+  </style>
 </head>
 <body class="learner-v2">
   <noscript>Cần bật JavaScript để sử dụng Sungrow E-learning.</noscript>
@@ -1987,7 +1995,8 @@ body.learner-v2 #loginView:has(#passwordSetupForm:not([hidden])){max-width:440px
 #loginView .account-form fieldset{border:0;border-top:1px solid #d8e0ed;margin:0;padding:5px 0 0;min-inline-size:0}
 #loginView .account-form legend{padding:0 8px 0 0;font-size:var(--sg-type-detail);font-weight:700;color:#182235}
 #loginView .account-form label{display:block;margin:7px 0 4px;font-size:var(--sg-type-detail)}
-#loginView .account-form input,#loginView .account-form select{margin:0;min-width:0;height:44px;font-size:16px}
+#loginView .account-form input{margin:0;min-width:0;height:42px;font-size:16px}
+#loginView .account-form select{margin:0;min-width:0;min-height:48px;font-size:16px}
 #loginView .account-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 #loginView .account-send{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:stretch;gap:8px}
 #loginView .account-send .button{margin:0;padding:0 10px;min-height:42px;font-size:var(--sg-type-detail)}
@@ -4028,6 +4037,11 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
         <p class="learning-status" role="status"></p>
         <div class="learning-content"></div>
       </details>
+      <section id="enrollmentReview" class="panel" data-admin-section="enrollments" aria-labelledby="v2AdminTitle" hidden>
+        <button type="button" class="button secondary-button" data-refresh-enrollments>Tải lại yêu cầu</button>
+        <p role="status"></p>
+        <ul class="enrollment-review-list" data-enrollment-requests></ul>
+      </section>
       <div data-admin-section="reports">
       <section class="panel toolbar">
         <div class="filters">
@@ -4289,7 +4303,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
         if(action==='submitAttempt'&&epoch===state.authEpoch)window.LearningPortal?.invalidate();
         return data;
       }catch(error){
-        if(epoch===state.authEpoch&&['listCourses','startAttempt','resumeAttempt','saveAttemptProgress','submitAttempt','getLatestResult','getAttemptResult','reportAttention','learningHome','updateLearningProfile','completeLearningLesson','getLearningPlayback'].includes(action)&&Portal.isAuthError(error))handleParticipantAuthLoss(error);
+        if(epoch===state.authEpoch&&['listCourses','startAttempt','resumeAttempt','saveAttemptProgress','submitAttempt','getLatestResult','getAttemptResult','reportAttention','learningHome','updateLearningProfile','completeLearningLesson','getLearningPlayback','requestLearningEnrollment'].includes(action)&&Portal.isAuthError(error))handleParticipantAuthLoss(error);
         throw error;
       }
     }
@@ -4468,7 +4482,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
             return `
               <article class="course-card${canStart ? "" : " unavailable"}" data-window="${escapeHtml(course.windowStatus)}" data-opens="${escapeHtml(course.opensAt || '')}" data-closes="${escapeHtml(course.closesAt || '')}" data-position="${position}">
                 <div class="exam-card-heading"><h3>${escapeHtml(course.title)}</h3>
-                  <span class="exam-state" data-state="${escapeHtml(course.windowStatus)}">${escapeHtml(labels[course.windowStatus] || "Chưa mở")}</span>
+                  <span class="exam-state" data-state="${course.learningLocked ? "DISABLED" : escapeHtml(course.windowStatus)}">${course.learningLocked ? "Cần duyệt khóa học" : escapeHtml(labels[course.windowStatus] || "Chưa mở")}</span>
                 </div>
                 <p class="v2-exam-meta">${escapeHtml(course.questionCount)} câu · ${escapeHtml(course.durationMinutes)} phút · Đạt từ ${escapeHtml(course.passPercent)}% · Còn ${escapeHtml(remaining)}/${escapeHtml(course.maxAttempts)} lượt</p>
                 <div class="course-window" data-state="${escapeHtml(course.windowStatus)}">
@@ -4481,7 +4495,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
                     type="button"
                     data-start-course-id="${escapeHtml(course.id)}"
                     ${canStart ? "" : "disabled"}
-                  >${canStart ? "Bắt đầu kiểm tra" : course.windowStatus !== "OPEN" ? escapeHtml(labels[course.windowStatus] || "Chưa mở") : "Đã hết 2 lượt"}</button>
+                  >${canStart ? "Bắt đầu kiểm tra" : course.learningLocked ? "Cần duyệt khóa học" : course.windowStatus !== "OPEN" ? escapeHtml(labels[course.windowStatus] || "Chưa mở") : "Đã hết 2 lượt"}</button>
                   ${hasResult ? `
                     <button
                       class="button secondary-button"
@@ -5796,7 +5810,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
     function render() {
       if (active === 'overview') {
         const completed = home.courses.flatMap(course => course.lessons).filter(lesson => lesson.completed).length;
-        const upcoming = state.courses.filter(course => course.windowStatus === 'UPCOMING' || course.canStart)
+        const upcoming = state.courses.filter(course => !course.learningLocked && (course.windowStatus === 'UPCOMING' || course.canStart))
           .sort((a,b) => (Date.parse(a.canStart ? a.closesAt : a.opensAt) || Infinity) -
             (Date.parse(b.canStart ? b.closesAt : b.opensAt) || Infinity)).slice(0, 3);
         const activeCourses = home.courses.filter(course => course.lessons.some(lesson => !lesson.completed));
@@ -5842,18 +5856,23 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
         </div>`;
       }
       if (active === 'courses') {
-        const current = home.courses.find(course => course.id === selectedCourse);
+        const current = home.courses.find(course => course.id === selectedCourse && course.enrollmentStatus === 'APPROVED');
         if (!current) {
           const courses = home.courses.map(course => {
             const done = course.lessons.filter(lesson => lesson.completed).length;
             const total = course.lessons.length;
-            return {...course, done, total, status: done && done === total ? 'done' : done ? 'active' : 'new'};
+            const status = {NONE:'available',PENDING:'pending',REJECTED:'rejected'}[course.enrollmentStatus]
+              || (done && done === total ? 'done' : done ? 'active' : 'new');
+            return {...course, done, total, status};
           });
-          catalog('Thư viện khóa học', courses, 'Tiến độ', '<option value="new">Chưa học</option><option value="active">Đang học</option><option value="done">Hoàn thành</option>', course => `
-            <article class="catalog-card"><div class="catalog-card-top">${portalIcon('course')}<span class="v2-chip">${{new:'Chưa học',active:'Đang học',done:'Hoàn thành'}[course.status]}</span></div>
+          catalog('Thư viện khóa học', courses, 'Trạng thái', '<option value="available">Có thể yêu cầu</option><option value="pending">Chờ duyệt</option><option value="rejected">Không được duyệt</option><option value="new">Chưa học</option><option value="active">Đang học</option><option value="done">Hoàn thành</option>', course => `
+            <article class="catalog-card"><div class="catalog-card-top">${portalIcon('course')}<span class="v2-chip">${{available:'Chưa đăng ký',pending:'Chờ duyệt',rejected:'Không được duyệt',new:'Chưa học',active:'Đang học',done:'Hoàn thành'}[course.status]}</span></div>
               <h3>${escape(course.title)}</h3><p>${escape(course.description)}</p>
-              <div class="catalog-card-end"><span>${course.total ? `${course.done}/${course.total} bài hoàn thành` : 'Chưa có bài học'}</span>
-              <button class="button secondary-button" type="button" data-learning-course="${escape(course.id)}">Mở khóa học</button></div>
+              <div class="catalog-card-end">
+                ${course.enrollmentStatus === 'APPROVED' ? `<span>${course.total ? `${course.done}/${course.total} bài hoàn thành` : 'Chưa có bài học'}</span>
+                  <button class="button secondary-button" type="button" data-learning-course="${escape(course.id)}">Vào học</button>`
+                  : course.enrollmentStatus === 'NONE' ? `<button class="button secondary-button" type="button" data-request-learning="${escape(course.id)}" aria-label="Yêu cầu tham gia ${escape(course.title)}">Yêu cầu tham gia</button>` : ''}
+              </div>
             </article>`);
           return;
         }
@@ -5920,8 +5939,18 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
       navigation.querySelectorAll('[data-learning-tab]').forEach(button =>
         button.setAttribute('aria-pressed', String(button.dataset.learningTab === tab)));
       status.textContent = '';
-      if (tab === 'exams') return;
-      if(home&&Date.now()<homeExpiresAt){render();return;}
+      if (tab === 'exams') {
+        try {
+          const data = await request('listCourses');
+          if (id !== generation || document.getElementById('courseView').hidden) return;
+          state.courses = data.courses;
+          renderCourseSelection();
+        } catch (error) {
+          if (id === generation) status.textContent = error.message;
+        }
+        return;
+      }
+      if(tab !== 'courses' && home && Date.now()<homeExpiresAt){render();return;}
       content.replaceChildren();
       const endLoading=Portal.contentLoading(content);
       releaseContentLoad=endLoading;
@@ -5939,6 +5968,27 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
       const button = event.target.closest('button');
       if (!button) return;
       if (button.dataset.learningTab) return select(button.dataset.learningTab);
+      if (button.dataset.requestLearning) {
+        const currentGeneration = generation;
+        const learningId = button.dataset.requestLearning;
+        button.disabled = true;
+        status.textContent = 'Đang gửi yêu cầu…';
+        try {
+          const result = await request('requestLearningEnrollment', {learningId});
+          invalidate();
+          if (currentGeneration !== generation) return;
+          await select('courses');
+          if (generation !== currentGeneration + 1) return;
+          content.querySelector('#catalogSearch')?.focus({preventScroll:true});
+          status.textContent = {PENDING:'Đã gửi yêu cầu. Hãy chờ Sungrow duyệt.',APPROVED:'Bạn đã được duyệt học khóa này.',
+            REJECTED:'Yêu cầu học khóa này đã bị từ chối.'}[result.status] || 'Đã ghi nhận yêu cầu.';
+        } catch (error) {
+          if (currentGeneration === generation) status.textContent = error.message;
+        } finally {
+          button.disabled = false;
+        }
+        return;
+      }
       if (button.dataset.learningCourse) return select('courses', button.dataset.learningCourse);
       if (button.dataset.learningExam) {
         await select('exams');
@@ -6104,7 +6154,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
    ['overview','Tổng quan','progress'],['courses','Khóa học','course'],
    ['exams','Bài kiểm tra','exam'],['awards','Kết quả & Thành tích','medal'],['profile','Hồ sơ','profile'],
    ['reports','Báo cáo đào tạo','reports',true],['learning','Khóa học và video','courseEditor',true],
-   ['exams','Lịch kiểm tra','calendar',true]
+   ['enrollments','Duyệt khóa học','course',true],['exams','Lịch kiểm tra','calendar',true]
  ];
  for(const [id,label,icon,requiresAdmin] of items){
    const button=document.createElement('button');
@@ -6900,7 +6950,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
      const filter=$('#catalogFilter',tools);
      search.placeholder='Nhập tên khóa học';
      search.setAttribute('aria-label','Tìm khóa học theo tên');
-     filter.setAttribute('aria-label','Lọc theo tiến độ học');
+     filter.setAttribute('aria-label','Lọc theo trạng thái khóa học');
      filter.options[0].textContent='Tất cả trạng thái';
      for(const label of $$('label',tools)){
        for(const node of [...label.childNodes]){
@@ -7033,7 +7083,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
    for(const [id,label] of [
      ['categoryList','Tỷ lệ chính xác theo phần'],['companyTable','Chất lượng theo công ty'],
      ['rankingTable','Bảng xếp hạng'],['attemptTable','Lịch sử thi'],
-     ['learningAdmin','Quản lý khóa học và video'],['schedulePanel','Lịch kiểm tra']
+     ['learningAdmin','Quản lý khóa học và video'],['schedulePanel','Lịch kiểm tra'],['enrollmentReview','Yêu cầu tham gia khóa học']
    ])scrollPanel($('#'+id),label);
    const device=$('#unlinkDeviceButton',root);
    if(device&&!device.closest('.v5-admin-device')){
@@ -7183,6 +7233,10 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
       };
     }
 
+    const enrollmentReview = LearningEnrollmentReview.mount(document.getElementById('enrollmentReview'),
+      (action, values) => requestAdmin(action,{...values,adminToken}), () => adminEpoch);
+    window.refreshLearningEnrollments = enrollmentReview.refresh;
+
     async function requestAdmin(action,payload){
       const epoch=adminEpoch;
       try{
@@ -7191,7 +7245,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
           window.LearningPortal?.invalidate();
         return data;
       }catch(error){
-        if(epoch===adminEpoch&&['getAdminDashboard','listCourseWindows','updateCourseWindow','unlinkParticipantDevice','adminLearningCatalog','saveLearningContent','adminExamEditor','adminSaveExam','adminBeginLessonUpload','adminUploadLessonChunk','adminOpenLearner'].includes(action)&&Portal.isAuthError(error))showLogin(error.message);
+        if(epoch===adminEpoch&&['getAdminDashboard','listCourseWindows','updateCourseWindow','unlinkParticipantDevice','adminLearningEnrollments','reviewLearningEnrollment','adminLearningCatalog','saveLearningContent','adminExamEditor','adminSaveExam','adminBeginLessonUpload','adminUploadLessonChunk','adminOpenLearner'].includes(action)&&Portal.isAuthError(error))showLogin(error.message);
         throw error;
       }
     }
@@ -7229,6 +7283,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
     }
 
     function showLogin(message) {
+      enrollmentReview.clear();
       const wasSelected = adminSelected;
       adminSelected = false;
       adminVerified = false;
@@ -7773,6 +7828,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
     window.cancelLearnerNavigation();
     selectAdminFeature(button);
     showAdminPanel();
+    if(button.dataset.adminPage==='enrollments')window.refreshLearningEnrollments();
     const title=document.getElementById('v2AdminTitle');
     title.tabIndex=-1;
     title.focus({preventScroll:true});

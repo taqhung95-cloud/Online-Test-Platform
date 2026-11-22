@@ -77,7 +77,7 @@ window.Portal = (() => {
   const isLogin=(action,payload)=>action==='loginParticipant'||action==='loginAdmin'&&payload.portalLogin===true;
   function retryableRequest(action,payload){
     return isLogin(action,payload)||action==='startAttempt'&&!!payload.startRequestId||
-      ['resumeAttempt','listCourses','learningHome','getLearningPlayback','completeLearningLesson','getLatestResult','getAttemptResult','submitAttempt','saveAttemptProgress'].includes(action);
+      ['resumeAttempt','listCourses','learningHome','getLearningPlayback','completeLearningLesson','requestLearningEnrollment','getLatestResult','getAttemptResult','submitAttempt','saveAttemptProgress'].includes(action);
   }
   async function request(endpoint,action,payload={},onReceipt){
     const stable=JSON.parse(JSON.stringify({...payload,sessionToken:payload.sessionToken||token}));
