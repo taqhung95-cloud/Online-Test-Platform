@@ -1988,6 +1988,7 @@ body.learner-v2 #loginView:has(.account-form:not([hidden])) {
   width:min(560px,100%);padding:clamp(18px,2.2vw,30px);background:var(--sg-glass-popover);
 }
 body.learner-v2 #loginView:has(#passwordSetupForm:not([hidden])){max-width:440px}
+body.learner-v2 #loginView #loginMessage{font-size:.8125rem;line-height:1.45}
 #loginView .account-form{display:grid;gap:12px}
 #loginView .account-form[hidden],#loginView .account-form .login-message:empty{display:none}
 #loginView .account-form h2{margin:0;line-height:1.25;text-align:left;font-size:24px}
@@ -2896,6 +2897,24 @@ body.v5 .v5-library-panel .catalog-card-end{
   justify-content:space-between;
   padding-block-start:0;
 }
+body.v5.v4 .v5-library-panel .catalog-card:has([data-request-learning]){
+  grid-template-rows:auto auto minmax(min-content,1fr) auto;
+}
+body.v5 .v5-library-panel .catalog-card-end:has([data-request-learning]){
+  justify-content:flex-end;
+  padding-block-start:8px;
+  border-block-start:1px solid var(--sg-line);
+}
+body.v5 .v5-library-panel .catalog-card-end [data-request-learning]{
+  min-block-size:44px;
+  border-color:#d4a380;
+  background:#fff0e2;
+  color:#813400;
+}
+body.v5 .v5-library-panel .catalog-card-end [data-request-learning]:not(:disabled):hover{
+  border-color:var(--sg-action);
+  background:#ffe4cd;
+}
 body.v5 .v5-library-panel .catalog-grid::-webkit-scrollbar{width:11px}
 body.v5 .v5-library-panel .catalog-grid::-webkit-scrollbar-track{background:#57778926;border-radius:999px}
 body.v5 .v5-library-panel .catalog-grid::-webkit-scrollbar-thumb{background:#6a8d9f;border:2px solid #e7f2f9;border-radius:999px}
@@ -3392,10 +3411,58 @@ body.v5 .v5-admin-dashboard .v5-empty{
 body.v5 .v5-admin-dashboard{
   --admin-panel-padding:clamp(14px,1.7vw,24px);
   --admin-form-gap:14px;
+  --sg-control-height:44px;
 }
 body.v5 .v5-admin-dashboard>.v5-pagehead,
-body.v5 .v5-admin-dashboard :is(.toolbar,.tab-panel .section,#learningAdmin,#schedulePanel){
+body.v5 .v5-admin-dashboard :is(.toolbar,.tab-panel .section,.panel[data-admin-section]){
   padding:var(--admin-panel-padding);
+}
+body.v5 .v5-admin-dashboard>.v5-pagehead h2{font-size:clamp(1.25rem,1.1rem + .6vw,1.5rem);line-height:1.25}
+body.v5 .v5-admin-dashboard :is(.panel,.section) :is(h3,h4){
+  font-size:1rem;
+  line-height:1.35;
+  font-weight:650;
+}
+body.v5 .v5-admin-dashboard :is(.panel,.section) label{
+  margin:0;
+  min-inline-size:0;
+  color:var(--sg-muted);
+  font-size:.875rem;
+  font-weight:600;
+  line-height:1.4;
+}
+body.v5 .v5-admin-dashboard label:has(> :is(input:not([type=checkbox],[type=radio]),select,textarea)),
+body.v5 .v5-admin-dashboard .filters>div:has(> label){
+  display:grid;
+  align-content:start;
+  gap:6px;
+}
+body.v5.v4 .v5-admin-dashboard :is(input:not([type=checkbox],[type=radio],[type=hidden],[type=file]),select,textarea){
+  box-sizing:border-box;
+  inline-size:100%;
+  min-inline-size:0;
+  max-inline-size:100%;
+  min-block-size:44px;
+  margin:0;
+  padding:8px 12px;
+  border:1px solid var(--sg-line);
+  border-radius:var(--sg-control-radius);
+  background:var(--sg-input);
+  color:var(--sg-ink);
+  font-family:inherit;
+  font-size:1rem;
+  font-weight:400;
+  line-height:1.4;
+}
+body.v5 .v5-admin-dashboard textarea{min-block-size:5.5rem;resize:vertical}
+body.v5 .v5-admin-dashboard :is(#scheduleSave,.filter-actions button,form>button[type=submit],[data-refresh-enrollments]){
+  min-block-size:44px;
+}
+body.v5 .v5-admin-dashboard .v5-admin-panel-actions{
+  display:flex;
+  justify-content:flex-end;
+  flex-wrap:wrap;
+  gap:8px;
 }
 body.v5 .v5-admin-dashboard :is(#learningAdmin,#schedulePanel){
   flex:0 1 auto;
@@ -3409,7 +3476,7 @@ body.v5 .v5-admin-dashboard .v5-admin-status:not([hidden]){
   white-space:normal;
 }
 body.v5 .v5-admin-dashboard .filters>div{min-inline-size:0}
-body.v5 .v5-admin-dashboard .filters label.sg-sr{margin:0}
+body.v5 .v5-admin-dashboard .filters{align-items:end}
 body.v5 .v5-admin-dashboard .tabs{
   align-self:flex-start;
   inline-size:max-content;
@@ -3446,9 +3513,16 @@ body.v5 .v5-admin-dashboard #learningAdmin .learning-content{
   gap:10px;
   padding-block-start:12px;
 }
-body.v5 .v5-admin-dashboard #learningCoursePicker{
+body.v5 .v5-admin-dashboard .v5-admin-picker{
   inline-size:min(100%,28rem);
   align-self:start;
+}
+body.v5 .v5-admin-dashboard [data-admin-section=exam-authoring]>label{
+  inline-size:min(100%,28rem);
+}
+body.v5 .v5-admin-dashboard [data-admin-section=exam-authoring] form>button[type=submit]{
+  grid-column:1/-1;
+  justify-self:end;
 }
 body.v5 .v5-admin-dashboard :is(#learningCourseForm,#scheduleForm){
   display:grid;
@@ -3487,6 +3561,12 @@ body.v5 .v5-admin-dashboard #scheduleForm{
 }
 body.v5 .v5-admin-dashboard #scheduleForm label{min-inline-size:0}
 body.v5 .v5-admin-dashboard #scheduleSave{grid-column:1/-1;justify-self:end}
+body.v5 .v5-admin-dashboard #schedulePanel{container:schedule / inline-size}
+@container schedule (min-width:48rem){
+  body.v5 .v5-admin-dashboard #scheduleForm{grid-template-columns:minmax(0,1.3fr) repeat(2,minmax(0,1fr)) auto}
+  body.v5 .v5-admin-dashboard #scheduleForm label:first-child,
+  body.v5 .v5-admin-dashboard #scheduleSave{grid-column:auto}
+}
 body.v5 .v5-admin-dashboard #scheduleMessage{margin:10px 0 0}
 body.v5 .v5-admin-dashboard :is(#learningAdmin,#schedulePanel)>.v5-pagehead{
   padding:0;
@@ -3586,12 +3666,15 @@ body.v5 .v5-admin-dashboard #unlinkDeviceButton{
   color:var(--sg-action);
   border-color:var(--sg-line);
 }
-@media(max-width:900px){
+@container schedule (width < 48rem){
   body.v5 .v5-admin-dashboard #scheduleForm{grid-template-columns:repeat(2,minmax(0,1fr))}
   body.v5 .v5-admin-dashboard #scheduleForm label:first-child{grid-column:1/-1}
 }
+@container schedule (max-width:32rem){
+  body.v5 .v5-admin-dashboard #scheduleForm{grid-template-columns:minmax(0,1fr)}
+}
 @media(max-width:580px){
-  body.v5 .v5-admin-dashboard :is(#learningCourseForm,#scheduleForm){
+  body.v5 .v5-admin-dashboard #learningCourseForm{
     grid-template-columns:minmax(0,1fr);
   }
   body.v5 .v5-admin-dashboard #learningCourseForm label:has([name=examId]),
@@ -4038,7 +4121,9 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
         <div class="learning-content"></div>
       </details>
       <section id="enrollmentReview" class="panel" data-admin-section="enrollments" aria-labelledby="v2AdminTitle" hidden>
-        <button type="button" class="button secondary-button" data-refresh-enrollments>Tải lại yêu cầu</button>
+        <div class="v5-admin-panel-actions">
+          <button type="button" class="button secondary-button" data-refresh-enrollments>Tải lại yêu cầu</button>
+        </div>
         <p role="status"></p>
         <ul class="enrollment-review-list" data-enrollment-requests></ul>
       </section>
@@ -5235,7 +5320,9 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
       }
       if(window.portalAdmin?.isAuthenticated())window.portalAdmin.clearSession();
       loginForm.reset();document.getElementById('deviceVerification').hidden=true;
-      document.getElementById('passwordSetupForm').reset();showLoginForm();setLoginLoading(false);loginMessage.textContent=error.message;
+      document.getElementById('passwordSetupForm').reset();showLoginForm();setLoginLoading(false);
+      loginMessage.textContent=error.message==='Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.'
+        ? 'Phiên hết hạn. Đăng nhập lại.' : error.message;
     }
     document.addEventListener('portal:logout',event=>handleParticipantAuthLoss(new Error(event.detail.message),false));
 
@@ -5868,11 +5955,11 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
           catalog('Thư viện khóa học', courses, 'Trạng thái', '<option value="available">Có thể yêu cầu</option><option value="pending">Chờ duyệt</option><option value="rejected">Không được duyệt</option><option value="new">Chưa học</option><option value="active">Đang học</option><option value="done">Hoàn thành</option>', course => `
             <article class="catalog-card"><div class="catalog-card-top">${portalIcon('course')}<span class="v2-chip">${{available:'Chưa đăng ký',pending:'Chờ duyệt',rejected:'Không được duyệt',new:'Chưa học',active:'Đang học',done:'Hoàn thành'}[course.status]}</span></div>
               <h3>${escape(course.title)}</h3><p>${escape(course.description)}</p>
-              <div class="catalog-card-end">
+              <footer class="catalog-card-end">
                 ${course.enrollmentStatus === 'APPROVED' ? `<span>${course.total ? `${course.done}/${course.total} bài hoàn thành` : 'Chưa có bài học'}</span>
                   <button class="button secondary-button" type="button" data-learning-course="${escape(course.id)}">Vào học</button>`
                   : course.enrollmentStatus === 'NONE' ? `<button class="button secondary-button" type="button" data-request-learning="${escape(course.id)}" aria-label="Yêu cầu tham gia ${escape(course.title)}">Yêu cầu tham gia</button>` : ''}
-              </div>
+              </footer>
             </article>`);
           return;
         }
@@ -7038,11 +7125,6 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
      status.title=statusText;
      status.textContent='Cập nhật '+compactStatus[1].replace(/^(\d{2}:\d{2}):\d{2}/,'$1');
    }
-   for(const label of $$('.filters label',root)){
-     const control=label.control;
-     if(control)control.title=label.textContent.trim();
-     label.classList.add('sg-sr');
-   }
    for(const [id,description] of [['fromDate','Từ ngày'],['toDate','Đến ngày']]){
      const input=$('#'+id,root);
      if(input)input.setAttribute('title',description);
@@ -7721,9 +7803,9 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
     function render(data, selected = '') {
       const course = data.courses.find(item => item.id === selected);
       const createKey = !course && data.authoringReady ? crypto.randomUUID() : "";
-      content.innerHTML = `<label for="learningCoursePicker">Khóa học</label>
+      content.innerHTML = `<label class="v5-admin-picker">Chọn khóa học
         <select id="learningCoursePicker"><option value="">Tạo khóa mới</option>${data.courses.map(item =>
-          `<option value="${escape(item.id)}" ${item.id === selected ? 'selected' : ''}>${escape(item.title)} · ${item.published ? 'Đã xuất bản' : 'Nháp'}</option>`).join('')}</select>
+          `<option value="${escape(item.id)}" ${item.id === selected ? 'selected' : ''}>${escape(item.title)} · ${item.published ? 'Đã xuất bản' : 'Nháp'}</option>`).join('')}</select></label>
         <form class="learning-form" id="learningCourseForm">
           <label>Tên khóa học<input name="title" required maxlength="150" value="${escape(course?.title)}"></label>
           <label>Mô tả<textarea name="description" rows="3" maxlength="2000">${escape(course?.description)}</textarea></label>
