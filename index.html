@@ -5799,7 +5799,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
         const upcoming = state.courses.filter(course => course.windowStatus === 'UPCOMING' || course.canStart)
           .sort((a,b) => (Date.parse(a.canStart ? a.closesAt : a.opensAt) || Infinity) -
             (Date.parse(b.canStart ? b.closesAt : b.opensAt) || Infinity)).slice(0, 3);
-        const activeCourses = home.courses.filter(course => course.lessons.some(lesson => !lesson.completed)).slice(0, 3);
+        const activeCourses = home.courses.filter(course => course.lessons.some(lesson => !lesson.completed));
         content.innerHTML = `<div class="v2-overview">
           <aside class="v2-profile" aria-label="Hồ sơ học viên">
             <div class="v2-avatar" aria-hidden="true">${escape(home.profile.name?.trim().slice(0,1).toLocaleUpperCase('vi') || 'S')}</div>
