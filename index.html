@@ -2729,6 +2729,7 @@ body.v5 .v5-task-group .v2-task-grid{
   grid-auto-rows:max-content;
   padding-inline-end:6px;
 }
+body.v5 .v2-task-grid>.v2-task-empty{grid-column:1/-1;margin:0}
 body.v5 :is(.v5-task-group .v2-task-grid,.v2-journey .v5-journey-list)::-webkit-scrollbar{width:10px}
 body.v5 :is(.v5-task-group .v2-task-grid,.v2-journey .v5-journey-list)::-webkit-scrollbar-track{
   background:#57778915;
@@ -2897,23 +2898,12 @@ body.v5 .v5-library-panel .catalog-card-end{
   justify-content:space-between;
   padding-block-start:0;
 }
-body.v5.v4 .v5-library-panel .catalog-card:has([data-request-learning]){
+body.v5.v4 .v5-library-panel .catalog-card:not(:has(progress)){
   grid-template-rows:auto auto minmax(min-content,1fr) auto;
 }
-body.v5 .v5-library-panel .catalog-card-end:has([data-request-learning]){
-  justify-content:flex-end;
-  padding-block-start:8px;
-  border-block-start:1px solid var(--sg-line);
-}
-body.v5 .v5-library-panel .catalog-card-end [data-request-learning]{
-  min-block-size:44px;
-  border-color:#d4a380;
-  background:#fff0e2;
-  color:#813400;
-}
-body.v5 .v5-library-panel .catalog-card-end [data-request-learning]:not(:disabled):hover{
-  border-color:var(--sg-action);
-  background:#ffe4cd;
+body.v5 .v5-library-panel .catalog-card-end .button{margin-inline-start:auto}
+@media (max-width:720px), (pointer:coarse){
+  body.v5 .v5-library-panel .catalog-card-end .button{min-block-size:44px}
 }
 body.v5 .v5-library-panel .catalog-grid::-webkit-scrollbar{width:11px}
 body.v5 .v5-library-panel .catalog-grid::-webkit-scrollbar-track{background:#57778926;border-radius:999px}
@@ -3517,12 +3507,80 @@ body.v5 .v5-admin-dashboard .v5-admin-picker{
   inline-size:min(100%,28rem);
   align-self:start;
 }
+body.v5 .v5-admin-dashboard [data-admin-section=exam-authoring]{
+  container:exam-editor / inline-size;
+  min-block-size:0;
+  overflow-y:auto;
+}
 body.v5 .v5-admin-dashboard [data-admin-section=exam-authoring]>label{
   inline-size:min(100%,28rem);
 }
-body.v5 .v5-admin-dashboard [data-admin-section=exam-authoring] form>button[type=submit]{
+body.v5 .v5-admin-dashboard [data-admin-section=exam-authoring]>[role=status]:empty{display:none}
+body.v5 .v5-admin-dashboard [data-admin-section=exam-authoring]>form{
+  grid-template-columns:minmax(0,1fr);
+  align-items:start;
+  gap:var(--admin-form-gap);
+  margin-block-start:var(--admin-form-gap);
+  padding-block:0;
+}
+body.v5 .v5-admin-dashboard [data-admin-section=exam-authoring]>form>label:has([name=active]){
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-block-size:44px;
+}
+body.v5 .v5-admin-dashboard [data-admin-section=exam-authoring]>form>details{
+  border:1px solid var(--sg-line);
+  border-radius:var(--sg-control-radius);
+  background:var(--sg-glass-base);
+}
+body.v5 .v5-admin-dashboard [data-admin-section=exam-authoring] summary{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  min-block-size:44px;
+  padding:8px 12px;
+  border-radius:calc(var(--sg-control-radius) - 1px);
+  list-style:none;
+  color:var(--sg-action);
+  font-weight:600;
+  cursor:pointer;
+}
+body.v5 .v5-admin-dashboard [data-admin-section=exam-authoring] summary::-webkit-details-marker{display:none}
+body.v5 .v5-admin-dashboard [data-admin-section=exam-authoring] summary::after{
+  content:"";
+  inline-size:7px;
+  block-size:7px;
+  margin-inline-end:4px;
+  border:solid currentColor;
+  border-width:0 2px 2px 0;
+  rotate:45deg;
+}
+body.v5 .v5-admin-dashboard [data-admin-section=exam-authoring] details[open]>summary::after{rotate:225deg}
+body.v5 .v5-admin-dashboard [data-admin-section=exam-authoring] summary:hover{background:#fff0e2}
+body.v5 .v5-admin-dashboard [data-admin-section=exam-authoring] summary:focus-visible{outline:2px solid var(--sg-action);outline-offset:-3px}
+body.v5 .v5-admin-dashboard [data-admin-section=exam-authoring] [data-question-fields]{
+  padding:12px;
+  border-block-start:1px solid var(--sg-line);
+}
+body.v5 .v5-admin-dashboard [data-admin-section=exam-authoring]>form>button[type=submit]{
   grid-column:1/-1;
   justify-self:end;
+}
+@container exam-editor (min-width:40rem){
+  body.v5 .v5-admin-dashboard [data-admin-section=exam-authoring]>form{grid-template-columns:repeat(3,minmax(0,1fr))}
+  body.v5 .v5-admin-dashboard [data-admin-section=exam-authoring]>form>label:has([name=title]){grid-column:span 2}
+  body.v5 .v5-admin-dashboard [data-admin-section=exam-authoring]>form>:is(details,p,label:has([name=description],[name=active],[name=csvFile],[name=csv])){grid-column:1/-1}
+  body.v5 .v5-admin-dashboard [data-admin-section=exam-authoring] [data-question-fields]{grid-template-columns:repeat(2,minmax(0,1fr))}
+  body.v5 .v5-admin-dashboard [data-question-fields] label:has(textarea){grid-column:1/-1}
+}
+@media (max-width:68rem), (max-width:75rem) and (pointer:coarse){
+  body.v5 .v5-admin-dashboard [data-admin-section=exam-authoring].v5-panel-scroll{
+    overflow:visible!important;
+    overscroll-behavior:auto;
+    scrollbar-gutter:auto;
+  }
 }
 body.v5 .v5-admin-dashboard :is(#learningCourseForm,#scheduleForm){
   display:grid;
@@ -3575,22 +3633,22 @@ body.v5 .v5-admin-dashboard :is(#learningAdmin,#schedulePanel)>.v5-pagehead{
   background:transparent;
 }
 body.v5 .v5-admin-dashboard #learningAdmin .learning-content{padding-block-start:0}
-body.v5 #learningAdmin.v5-panel-scroll{
-  --lesson-scroll-thumb:#627f92;
-  --lesson-scroll-track:transparent;
+body.v5 :is(#learningAdmin,[data-admin-section=exam-authoring]).v5-panel-scroll{
+  --admin-scroll-thumb:#627f92;
+  --admin-scroll-track:transparent;
   scrollbar-width:thin;
-  scrollbar-color:var(--lesson-scroll-thumb) var(--lesson-scroll-track);
+  scrollbar-color:var(--admin-scroll-thumb) var(--admin-scroll-track);
   scrollbar-gutter:stable;
 }
 @supports not (scrollbar-color:auto){
-  body.v5 #learningAdmin.v5-panel-scroll{scrollbar-width:auto}
-  body.v5 #learningAdmin.v5-panel-scroll::-webkit-scrollbar{width:8px}
-  body.v5 #learningAdmin.v5-panel-scroll::-webkit-scrollbar-thumb{background:var(--lesson-scroll-thumb);border-radius:999px}
-  body.v5 #learningAdmin.v5-panel-scroll::-webkit-scrollbar-track{background:var(--lesson-scroll-track)}
-  body.v5 #learningAdmin.v5-panel-scroll::-webkit-scrollbar-button{display:none}
+  body.v5 :is(#learningAdmin,[data-admin-section=exam-authoring]).v5-panel-scroll{scrollbar-width:auto}
+  body.v5 :is(#learningAdmin,[data-admin-section=exam-authoring]).v5-panel-scroll::-webkit-scrollbar{width:8px}
+  body.v5 :is(#learningAdmin,[data-admin-section=exam-authoring]).v5-panel-scroll::-webkit-scrollbar-thumb{background:var(--admin-scroll-thumb);border-radius:999px}
+  body.v5 :is(#learningAdmin,[data-admin-section=exam-authoring]).v5-panel-scroll::-webkit-scrollbar-track{background:var(--admin-scroll-track)}
+  body.v5 :is(#learningAdmin,[data-admin-section=exam-authoring]).v5-panel-scroll::-webkit-scrollbar-button{display:none}
 }
 @media (forced-colors:active){
-  body.v5 #learningAdmin.v5-panel-scroll{scrollbar-color:auto}
+  body.v5 :is(#learningAdmin,[data-admin-section=exam-authoring]).v5-panel-scroll{scrollbar-color:auto}
 }
 .lesson-materials{
   display:grid;
@@ -5933,7 +5991,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
             ${upcoming.map(course => `<button type="button" class="v2-task" data-learning-exam="${escape(course.id)}">
               <span class="v2-chip">Bài kiểm tra</span><strong>${escape(course.title)}</strong>
               <small>${course.canStart ? 'Hạn nộp' : 'Mở lúc'} · ${escape((course.canStart ? course.closesAt : course.opensAt) ? new Date(course.canStart ? course.closesAt : course.opensAt).toLocaleString('vi-VN',{timeZone:'Asia/Ho_Chi_Minh'}) : 'Không giới hạn')}</small></button>`).join('')}
-            ${activeCourses.length || upcoming.length ? '' : '<p>Chưa có bài học hoặc bài kiểm tra cần làm.</p>'}
+            ${activeCourses.length || upcoming.length ? '' : '<p class="v2-task-empty">Chưa có bài học hoặc bài kiểm tra cần làm.</p>'}
             </div>
           </section>
           <aside class="v2-journey" aria-label="Hành trình học tập">
@@ -5958,7 +6016,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
               <footer class="catalog-card-end">
                 ${course.enrollmentStatus === 'APPROVED' ? `<span>${course.total ? `${course.done}/${course.total} bài hoàn thành` : 'Chưa có bài học'}</span>
                   <button class="button secondary-button" type="button" data-learning-course="${escape(course.id)}">Vào học</button>`
-                  : course.enrollmentStatus === 'NONE' ? `<button class="button secondary-button" type="button" data-request-learning="${escape(course.id)}" aria-label="Yêu cầu tham gia ${escape(course.title)}">Yêu cầu tham gia</button>` : ''}
+                  : course.enrollmentStatus === 'NONE' ? `<button class="button secondary-button" type="button" data-request-learning="${escape(course.id)}" aria-label="Xin tham gia ${escape(course.title)}">Xin tham gia</button>` : ''}
               </footer>
             </article>`);
           return;
@@ -7167,6 +7225,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
      ['rankingTable','Bảng xếp hạng'],['attemptTable','Lịch sử thi'],
      ['learningAdmin','Quản lý khóa học và video'],['schedulePanel','Lịch kiểm tra'],['enrollmentReview','Yêu cầu tham gia khóa học']
    ])scrollPanel($('#'+id),label);
+   scrollPanel($('[data-admin-section=exam-authoring]',root),'Thiết lập bài kiểm tra');
    const device=$('#unlinkDeviceButton',root);
    if(device&&!device.closest('.v5-admin-device')){
      const deviceSection=document.createElement('section');
