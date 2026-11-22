@@ -7719,7 +7719,20 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
       });
       wireForm(lessonForm, async values => {
         const file = values.file.trim();
-        const fileId = file.match(/^https:\/\/drive\.google\.com\/file\/d\/([\w-]+)(?:\/|\?|$)/)?.[1] || file;
+        const fileIdPattern = /^[\w-]{10,150}$/;
+        let fileId = file;
+        if (!fileIdPattern.test(file)) {
+          let link;
+          try { link = new URL(file); } catch {}
+          if (link?.origin === 'https://drive.google.com') {
+            fileId = link.pathname.match(/^\/file\/d\/([\w-]+)(?:\/|$)/)?.[1];
+          } else if (link?.origin === 'https://docs.google.com') {
+            fileId = link.pathname.match(/^\/presentation\/d\/([\w-]+)(?:\/|$)/)?.[1];
+          }
+        }
+        if (!fileId || !fileIdPattern.test(fileId)) {
+          throw new Error('Dán liên kết của tệp trên Google Drive, liên kết Google Slides hoặc mã tệp hợp lệ.');
+        }
         const saved = await request('saveLearningContent', {kind:'lesson', learningId:selected,
           lessonId:values.lessonId, title:values.title, fileId});
         render(saved, selected);
