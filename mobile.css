@@ -178,9 +178,6 @@
   body.v5.v4 .v5-single-course > section { min-inline-size: 0; min-block-size: 0; }
   body.v5.v4 .v5-single-course .v5-video-stage { aspect-ratio: 16/9; }
   body.v5.v4 .v5-media:fullscreen .v5-video-stage { aspect-ratio: auto; }
-  body.v5.v4 .v5-media-toolbar { display: grid; grid-template-columns: minmax(0, 1fr) auto; }
-  body.v5.v4 .v5-media-toolbar [data-pdf-toolbar] { grid-column: 1/-1; grid-row: 2; }
-  body.v5.v4 .v5-media-toolbar [data-fullscreen] { grid-column: 2; grid-row: 1; }
   .v5-lesson-check { min-inline-size: 44px; }
   .v5-lesson-navigation:has([data-previous-lesson][hidden]) [data-next-lesson] { grid-column: 1/-1; }
   .v5-lesson-navigation:has([data-next-lesson][hidden]) [data-previous-lesson] { grid-column: 1/-1; }
@@ -276,7 +273,6 @@
       grid-template-columns: minmax(0, 1fr) clamp(14rem, 30%, 18rem) !important;
       grid-template-rows: auto;
     }
-    body.v5.v4 .v5-single-course .v5-media-toolbar { display: flex; }
     body.v5.v4.v4-focus #examView .sg-exam-head { flex-wrap: nowrap; }
     body.v5.v4 .sg-exam-head .sg-exam-brand { inline-size: auto; }
     body.v5.v4 .sg-exam-head .sg-exam-actions { inline-size: auto; }

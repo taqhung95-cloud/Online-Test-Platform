@@ -3,7 +3,7 @@ import { AnnotationMode, GlobalWorkerOptions, getDocument } from './vendor/pdfjs
 const assets = new URL('./vendor/pdfjs-6.5.438/', import.meta.url);
 GlobalWorkerOptions.workerSrc = new URL('pdf.worker.min.mjs', assets).href;
 
-export async function showLessonPdf({url, view, toolbar, label, signal, onError}) {
+export async function showLessonPdf({url, view, toolbar, keyboardTarget, label, signal, onError}) {
   if (signal.aborted) return;
   const loading = getDocument({
     url,
@@ -32,7 +32,6 @@ export async function showLessonPdf({url, view, toolbar, label, signal, onError}
     loading.destroy().catch(()=>{});
     toolbar.hidden = true;
     toolbar.replaceChildren();
-    toolbar.removeAttribute('focusgroup');
     toolbar.removeAttribute('role');
     toolbar.removeAttribute('aria-label');
   }
@@ -62,9 +61,14 @@ export async function showLessonPdf({url, view, toolbar, label, signal, onError}
   const next = button('›','Trang sau',()=>changePage(1));
   const smaller = button('−','Thu nhỏ',()=>changeZoom(-.25));
   const larger = button('+','Phóng to',()=>changeZoom(.25));
+  previous.setAttribute('aria-keyshortcuts','ArrowLeft ArrowUp');
+  next.setAttribute('aria-keyshortcuts','ArrowRight ArrowDown');
+  smaller.setAttribute('aria-keyshortcuts','Control+-');
+  larger.setAttribute('aria-keyshortcuts','Control+= Control++');
   const pageCount = document.createElement('span');
   pageCount.setAttribute('role','status');
   const zoomLevel = document.createElement('span');
+  zoomLevel.className = 'v5-pdf-zoom-level';
   zoomLevel.setAttribute('role','status');
 
   function updateControls() {
@@ -136,27 +140,24 @@ export async function showLessonPdf({url, view, toolbar, label, signal, onError}
     await renderPage();
     if (disposed) return;
 
-    toolbar.setAttribute('role','toolbar');
+    toolbar.setAttribute('role','group');
     toolbar.setAttribute('aria-label','Điều khiển tài liệu');
-    toolbar.setAttribute('focusgroup','toolbar wrap');
     toolbar.replaceChildren(group('Chuyển trang',previous,pageCount,next),group('Tỷ lệ xem',smaller,zoomLevel,larger));
-    const buttons = [previous,next,smaller,larger];
-    if (!('focusGroup' in HTMLElement.prototype)) {
-      const setTabStop = current => buttons.forEach(button=>{button.tabIndex=button===current?0:-1;});
-      setTabStop(previous);
-      toolbar.addEventListener('focusin',event=>{if(buttons.includes(event.target))setTabStop(event.target);},{signal});
-      toolbar.addEventListener('keydown',event=>{
-        const index = buttons.indexOf(event.target);
-        if (index < 0) return;
-        const rtl = getComputedStyle(toolbar).direction === 'rtl';
-        const direction = {ArrowRight:rtl?-1:1,ArrowLeft:rtl?1:-1}[event.key];
-        const target = event.key==='Home'?0:event.key==='End'?buttons.length-1:
-          direction?(index+direction+buttons.length)%buttons.length:null;
-        if (target===null) return;
-        event.preventDefault();
-        buttons[target].focus();
-      },{signal});
-    }
+    keyboardTarget.addEventListener('keydown',event=>{
+      if (event.defaultPrevented || event.altKey || event.target.closest('input,select,textarea,[contenteditable]')) return;
+      const key = event.key;
+      let control;
+      if (event.ctrlKey || event.metaKey) {
+        if (key === '+' || key === '=') control = larger;
+        if (key === '-' || key === '−') control = smaller;
+      } else {
+        if (key === 'ArrowLeft' || key === 'ArrowUp') control = previous;
+        if (key === 'ArrowRight' || key === 'ArrowDown') control = next;
+      }
+      if (!control) return;
+      event.preventDefault();
+      control.click();
+    },{signal});
     toolbar.hidden = false;
     let dimensions = view.clientWidth + 'x' + view.clientHeight;
     observer = new ResizeObserver(()=>{

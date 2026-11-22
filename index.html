@@ -7,7 +7,7 @@
   <title>Sungrow E-learning</title>
   <link rel="icon" href="sungrow-edu-favicon.ico" type="image/x-icon" sizes="16x16">
   <link rel="preload" href="v5-assets/deb3edc82cb2.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="mobile.css?v=20261122-reflow">
+  <link rel="stylesheet" href="mobile.css?v=20261122-viewer-controls">
   <script src="platform.js?v=20261121-private-media"></script>
   <script src="admin-authoring.js?v=7"></script>
 </head>
@@ -2961,12 +2961,37 @@ body.v5 .v5-single-course .v5-video-stage{
   aspect-ratio:16/9;
   border-radius:14px;
 }
-.v5-media{display:grid;gap:6px;min-inline-size:0}
-.v5-media-toolbar{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:4px 8px;border:1px solid var(--sg-line);border-radius:10px;background:var(--sg-glass-base)}
-.v5-media-toolbar span[data-lesson-position]{color:var(--sg-muted);font-size:var(--sg-type-detail)}
-.v5-media-toolbar .button{display:inline-flex;align-items:center;justify-content:center;gap:8px}
-.v5-media-toolbar svg{inline-size:16px;block-size:16px;flex:none}
-body.v5 .v5-media:fullscreen{grid-template-rows:minmax(0,1fr) auto;padding:8px;background:#142238}
+.v5-media{display:grid;position:relative;container-type:inline-size;min-inline-size:0}
+.v5-media-toolbar{
+  position:absolute;z-index:2;inset:auto 0 8px;
+  display:flex;flex-wrap:wrap;justify-content:center;align-items:center;
+  inline-size:max-content;max-inline-size:calc(100% - 12px);
+  margin-inline:auto;padding:3px;gap:4px;
+  border:1px solid #ffffff42;border-radius:12px;
+  background:#142238de;color:#fff;backdrop-filter:blur(10px);
+  opacity:0;pointer-events:none;
+}
+.v5-media-toolbar:has(> [data-pdf-toolbar][hidden]){inset:8px 8px auto auto;margin:0}
+.v5-media[data-controls-visible] > .v5-media-toolbar,.v5-media-toolbar:has(:focus-visible){
+  opacity:1;pointer-events:auto;
+}
+@media (hover:hover){
+  .v5-media-toolbar:hover{opacity:1;pointer-events:auto}
+}
+@media (prefers-reduced-motion:no-preference){
+  .v5-media-toolbar{transition:opacity 180ms ease}
+}
+body.v5 .v5-media-toolbar .button{
+  display:inline-grid;place-items:center;min-inline-size:38px;min-block-size:38px;
+  padding:0;border:1px solid transparent;border-radius:8px;background:#ffffff19;
+  color:#fff;font-size:1.2rem;line-height:1;
+}
+body.v5 .v5-media-toolbar .button:hover{background:#ffffff32}
+body.v5 .v5-media-toolbar .button:focus-visible,.v5-media .v5-pdf-scroll:focus-visible{
+  outline:2px solid #fff;outline-offset:-3px;
+}
+.v5-media-toolbar svg{inline-size:18px;block-size:18px}
+body.v5 .v5-media:fullscreen{grid-template-rows:minmax(0,1fr);background:#142238}
 body.v5 .v5-media:fullscreen .v5-video-stage{aspect-ratio:auto;border-radius:0}
 .v5-current-lesson{margin:0;padding:4px 8px;overflow-wrap:anywhere}
 .v5-lesson-navigation{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:8px 0 0;border-top:1px solid var(--sg-line)}
@@ -3698,15 +3723,17 @@ body.v5 .tab-countdown{inline-size:88px;margin:20px auto 0;padding:12px;border-r
 <style>body>.header{display:none!important}body:has(#bootView:not([hidden])) main{display:grid;place-items:center;min-height:100dvh;width:100%;max-width:none}#bootView{margin:auto}.v5-course-viewer .v5-video-stage{position:relative;min-inline-size:0}.v5-course-viewer .v5-media-player{position:absolute;inset:0;display:block;inline-size:100%;block-size:100%;border:0;object-fit:contain}
 .v5-media-feedback{display:grid;justify-items:center;gap:12px;padding:20px;text-align:center;color:#fff}
 .v5-media-feedback p{margin:0}
-.v5-media-toolbar{flex-wrap:wrap}
 .v5-pdf-scroll{position:absolute;inset:0;box-sizing:border-box;overflow:auto;padding:10px}
 .v5-pdf-scroll canvas{display:block;margin-inline:auto;background:#fff}
 .v5-pdf-toolbar:not([hidden]),.v5-pdf-toolbar [role=group]{display:flex;flex-wrap:wrap;align-items:center;gap:4px}
-.v5-pdf-toolbar:not([hidden]){gap:4px 10px}
-.v5-pdf-toolbar [role=status]{min-inline-size:3em;text-align:center;font-size:var(--sg-type-detail,.9rem);white-space:nowrap}
-.v5-pdf-toolbar .button{min-inline-size:38px;min-block-size:38px;padding:0 7px;font-size:1.15rem}
+.v5-pdf-toolbar:not([hidden]){justify-content:center}
+.v5-pdf-toolbar [role=status]{text-align:center;font-size:.8125rem;white-space:nowrap;font-variant-numeric:tabular-nums}
 .v5-pdf-toolbar [aria-disabled=true]{opacity:.5;cursor:default}
-@media(pointer:coarse){.v5-pdf-toolbar .button{min-inline-size:44px;min-block-size:44px}}
+@media(pointer:coarse){body.v5 .v5-media-toolbar .button{min-inline-size:44px;min-block-size:44px}}
+@container(max-width:365px){
+  .v5-pdf-toolbar:not([hidden]),.v5-pdf-toolbar [role=group],.v5-media-toolbar{gap:2px}
+  .v5-pdf-zoom-level{position:absolute;inline-size:1px;block-size:1px;overflow:hidden;clip-path:inset(50%)}
+}
 .v5-course-actions h4{margin:0;font-size:var(--sg-type-detail,0.9rem)}
 .v5-lesson-list{display:grid;gap:8px;margin:0;padding:0;list-style:none}
 .v5-lesson-list li{display:grid;grid-template-columns:minmax(0,1fr) 44px;align-items:stretch;border:1px solid var(--sg-line);border-radius:10px;background:var(--sg-glass-base)}
@@ -6583,11 +6610,9 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
      <div class="v5-media">
        <div class="v5-video-stage"></div>
        <div class="v5-media-toolbar" role="group" aria-label="Điều khiển khung xem" hidden>
-         <span data-lesson-position></span>
          <div class="v5-pdf-toolbar" data-pdf-toolbar hidden></div>
-         <button type="button" class="button secondary-button" data-fullscreen>
+         <button type="button" class="button secondary-button" data-fullscreen aria-label="Toàn màn hình" title="Toàn màn hình">
            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 9V4h5m6 0h5v5m0 6v5h-5m-6 0H4v-5"/></svg>
-           <span>Toàn màn hình</span>
          </button>
        </div>
      </div>
@@ -6622,6 +6647,36 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
    const previous=$('[data-previous-lesson]',navigation);
    const next=$('[data-next-lesson]',navigation);
    const fullscreen=$('[data-fullscreen]',toolbar);
+   let controlsTimer;
+   function revealControls(){
+     media.dataset.controlsVisible='';
+     clearTimeout(controlsTimer);
+     controlsTimer=setTimeout(()=>delete media.dataset.controlsVisible,3000);
+   }
+   for(const event of ['pointermove','pointerdown','focusin','keydown']){
+     media.addEventListener(event,revealControls);
+   }
+   media.addEventListener('keydown',event=>{
+     if (!(player instanceof HTMLVideoElement) || event.defaultPrevented ||
+         event.ctrlKey || event.metaKey || event.altKey ||
+         event.target.closest('input,select,textarea,[contenteditable]')) return;
+     const key=event.key;
+     if(key==='ArrowLeft'||key==='ArrowRight'){
+       if(!Number.isFinite(player.duration))return;
+       const offset=key==='ArrowRight'?5:-5;
+       player.currentTime=Math.max(0,Math.min(player.duration,player.currentTime+offset));
+     }else if(key==='ArrowUp'||key==='ArrowDown'){
+       const volume=player.muted?0:player.volume;
+       const offset=key==='ArrowUp' ? .1 : -.1;
+       player.volume=Math.max(0,Math.min(1,volume+offset));
+       if(player.volume>0)player.muted=false;
+     }else{
+       return;
+     }
+     event.preventDefault();
+     event.stopPropagation();
+     revealControls();
+   },{capture:true});
    fullscreen.hidden=!document.fullscreenEnabled||typeof media.requestFullscreen!=='function';
    fullscreen.addEventListener('click',async()=>{
      try{
@@ -6630,7 +6685,10 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
      }catch{status.textContent='Trình duyệt chưa mở được chế độ toàn màn hình.';}
    });
    media.addEventListener('fullscreenchange',()=>{
-     $('span',fullscreen).textContent=document.fullscreenElement===media?'Thoát toàn màn hình':'Toàn màn hình';
+     const label=document.fullscreenElement===media?'Thoát toàn màn hình':'Toàn màn hình';
+     fullscreen.setAttribute('aria-label',label);
+     fullscreen.title=label;
+     revealControls();
    });
    let completed=done;
    let currentIndex=-1;
@@ -6653,6 +6711,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
    const playerCleanup=new MutationObserver(()=>{
      if(course.isConnected)return;
      playerCleanup.disconnect();
+     clearTimeout(controlsTimer);
      clearPlayer();
    });
    async function loadLesson(lesson,index){
@@ -6692,14 +6751,14 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
        if(ticket.protocol!=='https:'||!ticket.hostname.endsWith('.workers.dev')||!ticket.pathname.startsWith('/lesson/'))
          throw new Error('Địa chỉ trình xem không hợp lệ.');
        const response=await fetch(ticket,{signal:controller.signal,credentials:'omit',referrerPolicy:'no-referrer',redirect:'error'});
-       const media=await response.json();
-       if(!response.ok)throw new Error(media.message||'Chưa mở được tài liệu.');
+       const playback=await response.json();
+       if(!response.ok)throw new Error(playback.message||'Chưa mở được tài liệu.');
        if(!active())return;
-       const source=new URL(media.src,ticket.origin);
+       const source=new URL(playback.src,ticket.origin);
        if(source.origin!==ticket.origin||source.pathname!==ticket.pathname.replace(/^\/lesson\//,'/media/'))
          throw new Error('Địa chỉ tài liệu không hợp lệ.');
-       if(media.type==='application/pdf'){
-         const {showLessonPdf}=await import('./lesson-pdf.mjs?v=20261122-pdf');
+       if(playback.type==='application/pdf'){
+         const {showLessonPdf}=await import('./lesson-pdf.mjs?v=20261122-viewer-controls');
          if(!active())return;
          const view=document.createElement('div');
          view.className='v5-pdf-scroll';
@@ -6708,15 +6767,16 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
          view.setAttribute('aria-label','Nội dung tài liệu');
          player=view;
          stage.append(view);
-         await showLessonPdf({url:source.href,view,toolbar:pdfToolbar,label:lesson.label,signal:controller.signal,
+         await showLessonPdf({url:source.href,view,toolbar:pdfToolbar,keyboardTarget:media,label:lesson.label,signal:controller.signal,
            onError:()=>showError('Chưa mở được trang tài liệu. Vui lòng thử lại.')});
          if(active()){
            loading.remove();
            stage.removeAttribute('aria-busy');
+           revealControls();
          }
          return;
        }
-       if(String(media.type).startsWith('video/')){
+       if(String(playback.type).startsWith('video/')){
          player=document.createElement('video');
          player.controls=true;
          player.playsInline=true;
@@ -6724,6 +6784,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
          player.width=1280;
          player.height=720;
          player.setAttribute('aria-label',lesson.label);
+       player.setAttribute('aria-keyshortcuts','ArrowLeft ArrowRight ArrowUp ArrowDown');
        }else{
          throw new Error('Tài liệu chưa có định dạng hỗ trợ xem.');
        }
@@ -6745,8 +6806,8 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
      currentIndex=index;
      lesson.button.setAttribute('aria-current','true');
      loadLesson(lesson,index);
-     $('[data-lesson-position]',toolbar).textContent='Bài '+(index+1)+' / '+lessons.length;
      toolbar.hidden=false;
+     revealControls();
      caption.textContent=lesson.label;
      caption.hidden=false;
      updateNavigation(previous,lessons[index-1]);
