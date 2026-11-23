@@ -2831,11 +2831,10 @@ body.v5 .v5-library-panel{
   gap:14px;
   border-color:#57778926;
 }
-body.v5.v4 .v5-library-panel .catalog-tools{
+body.v5.v4 .v5-learner-pagehead .catalog-tools{
   display:grid;
   grid-template-columns:minmax(0,1fr) minmax(10rem,15rem);
   align-items:end;
-  flex:none;
   gap:8px 16px;
   margin:0;
   padding:0;
@@ -2843,8 +2842,8 @@ body.v5.v4 .v5-library-panel .catalog-tools{
   background:none;
   box-shadow:none;
 }
-body.v5 .v5-library-panel .catalog-tools label{min-inline-size:0}
-body.v5 .v5-library-panel .catalog-tools :is(input,select){
+body.v5 .v5-learner-pagehead .catalog-tools label{min-inline-size:0}
+body.v5 .v5-learner-pagehead .catalog-tools :is(input,select){
   min-block-size:40px;
   inline-size:100%;
   margin:0;
@@ -2945,8 +2944,8 @@ body.v5 .v5-library-panel .catalog-grid::-webkit-scrollbar-thumb:hover{backgroun
   body.v5 .v5-library-panel{flex:none}
   body.v5 .v5-library-panel .catalog-grid{max-block-size:60svh}
 }
-@media(max-width:560px){
-  body.v5 .v5-library-panel .catalog-tools{grid-template-columns:minmax(0,1fr)}
+@container learner-heading (max-width:32rem){
+  body.v5.v4 .v5-learner-pagehead .catalog-tools{grid-template-columns:minmax(0,1fr)}
 }
 
 body.v5 .v5-course-header{
@@ -3095,9 +3094,8 @@ body.v5.v4 .v5-exam-panel{
   border-color:#57778926;
   container-type:inline-size;
 }
-body.v5.v4 #learningExams .v5-exam-panel .v2-exam-tools{
+body.v5.v4 #learningExams .v5-learner-pagehead .v2-exam-tools{
   grid-template-columns:minmax(0,1fr) minmax(8rem,12rem) minmax(8rem,12rem);
-  flex:none;
   border:0;
   border-radius:0;
   background:none;
@@ -3105,7 +3103,7 @@ body.v5.v4 #learningExams .v5-exam-panel .v2-exam-tools{
   backdrop-filter:none;
   padding:0;
 }
-body.v5 .v5-exam-panel .v2-exam-tools :is(input,select){
+body.v5 .v5-learner-pagehead .v2-exam-tools :is(input,select){
   min-inline-size:0;
   inline-size:100%;
   border-color:#9bb4c4;
@@ -3164,11 +3162,11 @@ body.v5 .v5-exam-panel #courseGrid::-webkit-scrollbar-thumb{background:#6a8d9f;b
     max-block-size:65svh;
   }
 }
-@media(max-width:620px){
-  body.v5.v4 #learningExams .v5-exam-panel .v2-exam-tools{
+@container learner-heading (max-width:36rem){
+  body.v5.v4 #learningExams .v5-learner-pagehead .v2-exam-tools{
     grid-template-columns:repeat(2,minmax(0,1fr))!important;
   }
-  body.v5 .v5-exam-panel .v2-exam-tools label:first-child{grid-column:1/-1}
+  body.v5 .v5-learner-pagehead .v2-exam-tools label:first-child{grid-column:1/-1}
 }
 
 body.v5.v4 dialog.v5-candidate-dialog{
@@ -3375,6 +3373,14 @@ body.v5 .v5-admin-dashboard .v5-title{flex:1 1 18rem}
 body.v5 .v5-admin-dashboard .v5-title h2{white-space:normal}
 body.v5 .v5-admin-dashboard .v5-head-actions{margin-inline-start:auto;flex-wrap:wrap}
 body.v5 .v5-learner-pagehead .v5-head-actions:empty{display:none}
+body.v5 .v5-learner-pagehead{container:learner-heading / inline-size}
+body.v5 .v5-learner-pagehead>:is(.catalog-tools,.v2-exam-tools){
+  flex:0 0 100%;
+  min-inline-size:0;
+  margin:0;
+}
+body.v5 .v5-learner-pagehead :is(.catalog-tools,.v2-exam-tools) :is(input,select){font-weight:400}
+body.v5 .v5-learner-pagehead .v4-description{margin:6px 0 0}
 body.v5 .v5-admin-dashboard .v5-admin-status:not([hidden]){
   display:block;
   max-inline-size:65ch;
@@ -7216,8 +7222,10 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
          if(node.nodeType===Node.TEXT_NODE)node.remove();
        }
      }
-     pagehead(content,heading).classList.add('v5-learner-pagehead');
-     panel.append(tools,count,catalog,pages);
+     const header=pagehead(content,heading);
+     header.classList.add('v5-learner-pagehead');
+     header.append(tools);
+     panel.append(count,catalog,pages);
      scrollPanel(catalog,'Danh sách khóa học có thể cuộn');
      catalog.setAttribute('role','region');
      const resetListScroll=()=>{catalog.scrollTop=0;};
@@ -7241,7 +7249,15 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
  const overview=$('.v2-overview',content);if(overview&&!overview.dataset.v5)setupOverview(overview);
  const catalog=$('.catalog-grid',content);if(catalog)setupCourseLibrary(content,catalog);
  setupCombinedResults(content);
- if($('.v4-profile-grid',content))pagehead(content,$(':scope>h2',content))?.classList.add('v5-learner-pagehead');
+ if($('.v4-profile-grid',content)){
+   const heading=$(':scope>h2',content);
+   if(heading){
+     const description=$(':scope>.v4-description',content);
+     const header=pagehead(content,heading);
+     header.classList.add('v5-learner-pagehead');
+     if(description)heading.after(description);
+   }
+ }
  const generic=$(':scope>.learning-card',content);
  if(generic)renderSingleCourse(content,generic);
  }
@@ -7272,8 +7288,10 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
      empty.setAttribute('role','status');
      empty.textContent='Không tìm thấy bài kiểm tra phù hợp.';
      empty.hidden=true;
-     pagehead(exams,heading).classList.add('v5-learner-pagehead');
-     panel.append(tools,examGrid,empty);
+     const header=pagehead(exams,heading);
+     header.classList.add('v5-learner-pagehead');
+     header.append(tools);
+     panel.append(examGrid,empty);
      oldHeading.remove();
      examGrid.classList.add('sg-exam-grid');
      scrollPanel(examGrid,'Danh sách bài kiểm tra');
