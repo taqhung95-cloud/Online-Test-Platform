@@ -1508,7 +1508,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 .v2-admin-nav button{display:flex;align-items:center;gap:8px;min-height:44px;padding:8px;border:0;background:none;border-radius:6px;text-align:left;cursor:pointer;color:var(--v2-text)}
 .v2-admin-nav button[aria-pressed=true]{background:#fff0e3;color:var(--v2-accent);font-weight:700}
 .v2-admin-main{min-width:0;display:grid;gap:16px}
-.v2-admin-main>h2{margin:0}
 .v2-admin-main>[hidden]{display:none}
 .v2-admin-main .learning-admin{margin:0}
 @media(max-width:1100px){.v2-overview{grid-template-columns:190px minmax(0,1fr)}.v2-journey{grid-column:1/-1}.course-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -2832,6 +2831,7 @@ body.v5 .v5-library-panel{
   border-color:#57778926;
 }
 body.v5 .v5-library-panel>h2{flex:none}
+body.v5 :is(.v5-library-panel>h2,.v5-admin-pagehead h2){font-size:24px;line-height:1.25}
 body.v5.v4 .v5-library-panel .catalog-tools{
   display:grid;
   grid-template-columns:minmax(0,1fr) minmax(10rem,15rem);
@@ -3359,19 +3359,21 @@ body.v5 .v5-answer-details .wrong-review-panel h3{margin:0 0 6px;font-size:var(-
 body.v5 .v5-answer-details .wrong-review-list p{margin-block-end:0}
 body.v5 .v5-answer-details>[data-close]{display:block;margin-inline-start:auto}
 
-body.v5 .v5-admin-dashboard>.v5-pagehead{
+body.v5 .v5-admin-dashboard .v5-admin-pagehead{
   min-block-size:0;
   max-block-size:none;
   flex-wrap:wrap;
   align-items:center;
   gap:8px 16px;
-  padding:12px 16px;
-  border-radius:var(--sg-glass-radius);
-  background:var(--sg-glass-nav);
+  padding:0;
+  margin:0 0 14px;
+  background:transparent;
+  border:0;
+  box-shadow:none;
 }
-body.v5 .v5-admin-dashboard .v5-title{flex:1 1 18rem}
-body.v5 .v5-admin-dashboard .v5-title h2{white-space:normal}
-body.v5 .v5-admin-dashboard .v5-head-actions{margin-inline-start:auto;flex-wrap:wrap}
+body.v5 .v5-admin-pagehead .v5-title{flex:1 1 16rem;min-inline-size:0}
+body.v5 .v5-admin-pagehead h2{margin:0;white-space:normal}
+body.v5 .v5-admin-pagehead .v5-head-actions{margin-inline-start:auto;flex-wrap:wrap}
 body.v5 .v5-admin-dashboard .v5-admin-status:not([hidden]){
   display:block;
   max-inline-size:65ch;
@@ -3436,11 +3438,9 @@ body.v5 .v5-admin-dashboard{
   --admin-form-gap:14px;
   --sg-control-height:44px;
 }
-body.v5 .v5-admin-dashboard>.v5-pagehead,
 body.v5 .v5-admin-dashboard :is(.toolbar,.tab-panel .section,.panel[data-admin-section]){
   padding:var(--admin-panel-padding);
 }
-body.v5 .v5-admin-dashboard>.v5-pagehead h2{font-size:clamp(1.25rem,1.1rem + .6vw,1.5rem);line-height:1.25}
 body.v5 .v5-admin-dashboard :is(.panel,.section) :is(h3,h4){
   font-size:1rem;
   line-height:1.35;
@@ -3653,12 +3653,6 @@ body.v5 .v5-admin-dashboard #schedulePanel{container:schedule / inline-size}
   body.v5 .v5-admin-dashboard #scheduleSave{grid-column:auto}
 }
 body.v5 .v5-admin-dashboard #scheduleMessage{margin:10px 0 0}
-body.v5 .v5-admin-dashboard :is(#learningAdmin,#schedulePanel)>.v5-pagehead{
-  padding:0;
-  margin:0 0 16px;
-  max-block-size:none;
-  background:transparent;
-}
 body.v5 .v5-admin-dashboard #learningAdmin .learning-content{padding-block-start:0}
 body.v5 :is(#learningAdmin,[data-admin-section=exam-authoring]).v5-panel-scroll{
   --admin-scroll-thumb:#627f92;
@@ -4198,7 +4192,6 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
     <section id="resultView" hidden aria-live="polite"></section>
   <section id="dashboardView" class="dashboard" hidden>
       <div class="v2-admin-main">
-      <h2 id="v2AdminTitle">Báo cáo đào tạo</h2>
       <p id="portalNavigationStatus" role="status"></p>
       <details id="learningAdmin" class="panel learning-admin" data-admin-section="learning" hidden>
         <summary>Quản lý khóa học, video và chứng nhận</summary>
@@ -4219,7 +4212,11 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
         <ul class="enrollment-review-list" data-enrollment-requests></ul>
       </section>
       <div data-admin-section="reports">
-      <section class="panel toolbar">
+      <section class="panel toolbar" aria-labelledby="v2AdminTitle">
+        <header class="v5-pagehead v5-admin-pagehead">
+          <div class="v5-title"><h2 id="v2AdminTitle" tabindex="-1">Báo cáo đào tạo</h2></div>
+          <div class="v5-head-actions"></div>
+        </header>
         <div class="filters">
           <div>
             <label for="courseFilter" data-i18n="course">Khóa học</label>
@@ -7280,8 +7277,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
  if($('#dashboardView:not([hidden])')){
    const root=$('.v2-admin-main');
    root.classList.add('v5-admin-dashboard');
-   const adminTitle=$('#v2AdminTitle');
-   const header=adminTitle.closest('.v5-pagehead')||pagehead(root,adminTitle);
+   const header=$('.v5-admin-pagehead',root);
    const actions=$('.v5-head-actions',header);
    const status=$('#dashboardStatus');
    const statusText=status.textContent.trim();
@@ -8061,6 +8057,8 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
 (() => {
 
   const content = dashboardView.querySelector('.v2-admin-main');
+  const title = document.getElementById('v2AdminTitle');
+  const header = title.closest('.v5-admin-pagehead');
   function selectAdminFeature(button) {
     const target = button.dataset.adminPage;
     for(const item of adminItems())item.dataset.selected=String(item===button);
@@ -8069,7 +8067,15 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
         (section.id==='learningAdmin'&&section.dataset.available!=='true');
       if(section instanceof HTMLDetailsElement)section.open=!section.hidden;
     }
-    document.getElementById('v2AdminTitle').textContent=button.textContent.trim();
+    const panel = content.querySelector(target === 'reports'
+      ? '[data-admin-section=reports] > .toolbar' : `[data-admin-section~="${CSS.escape(target)}"]:not([hidden])`);
+    if (panel && header.parentElement !== panel) {
+      const summary = panel.querySelector(':scope > summary');
+      if (summary) summary.after(header);
+      else panel.prepend(header);
+      panel.scrollTop = 0;
+    }
+    title.textContent=button.textContent.trim();
   }
   window.portalAdmin.openFeature=button=>{
     if(!adminVerified||button.hidden||!window.canOpenAdminWorkspace())return;
@@ -8077,8 +8083,6 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
     selectAdminFeature(button);
     showAdminPanel();
     if(button.dataset.adminPage==='enrollments')window.refreshLearningEnrollments();
-    const title=document.getElementById('v2AdminTitle');
-    title.tabIndex=-1;
     title.focus({preventScroll:true});
   };
   window.updateAdminWorkspace=ready=>{
