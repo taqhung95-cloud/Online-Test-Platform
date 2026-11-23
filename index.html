@@ -10,13 +10,21 @@
   <link rel="stylesheet" href="mobile.css?v=20261122-viewer-controls">
   <script src="platform.js?v=20261122-enrollments"></script>
   <script src="admin-authoring.js?v=7"></script>
-  <script src="enrollment-review.js?v=20261122"></script>
+  <script src="enrollment-review.js?v=20261123-bulk"></script>
   <style>
     .enrollment-review-list{list-style:none;margin:0;padding:0}
     .enrollment-review-row{flex-wrap:wrap;overflow-wrap:anywhere}
     .enrollment-review-row p,.enrollment-review-row time{margin:4px 0}
     .enrollment-review-row small{display:block}
     .enrollment-review-actions{display:flex;flex-wrap:wrap;gap:8px}
+    .enrollment-review-bulk{display:flex;align-items:center;gap:8px 16px;flex-wrap:wrap;margin-block:8px}
+    .enrollment-review-bulk[hidden],.enrollment-review-choice[hidden]{display:none}
+    .enrollment-review-choice,.enrollment-review-bulk label{display:inline-flex;align-items:center;gap:8px;min-block-size:44px;cursor:pointer}
+    .enrollment-review-choice{justify-content:center;min-inline-size:44px}
+    #enrollmentReview input[type=checkbox]{inline-size:1.25em;block-size:1.25em;min-height:0;margin:0;accent-color:#934618}
+    .enrollment-review-identity{flex:1 1 12rem;min-width:0}
+    .enrollment-review-row .enrollment-review-actions{margin-inline-start:auto}
+    .enrollment-review-error{color:#8d2929}
   </style>
 </head>
 <body class="learner-v2">
@@ -2902,6 +2910,15 @@ body.v5.v4 .v5-library-panel .catalog-card:not(:has(progress)){
   grid-template-rows:auto auto minmax(min-content,1fr) auto;
 }
 body.v5 .v5-library-panel .catalog-card-end .button{margin-inline-start:auto}
+body.v5 .v5-library-panel .catalog-enrollment-state{
+  margin-inline-start:auto;
+  color:#2f614b;
+  font-weight:600;
+}
+body.v5 .v5-library-panel .catalog-enrollment-error{
+  flex:1 1 100%;
+  color:#8d2929;
+}
 @media (max-width:720px), (pointer:coarse){
   body.v5 .v5-library-panel .catalog-card-end .button{min-block-size:44px}
 }
@@ -4183,6 +4200,10 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
           <button type="button" class="button secondary-button" data-refresh-enrollments>Tải lại yêu cầu</button>
         </div>
         <p role="status"></p>
+        <div class="enrollment-review-bulk" data-enrollment-bulk hidden>
+          <label><input type="checkbox">Chọn tất cả yêu cầu có thể duyệt</label>
+          <button type="button" class="button" disabled>Duyệt đã chọn</button>
+        </div>
         <ul class="enrollment-review-list" data-enrollment-requests></ul>
       </section>
       <div data-admin-section="reports">
@@ -5890,6 +5911,10 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
     let home;
     let homeExpiresAt=0, homeRequest, homeRevision=0;
     let selectedCourse = '';
+    const enrollmentWrites = new Set();
+    const enrollmentErrors = new Map();
+    let updateCourseLibrary, enrollmentTimer, enrollmentRefresh;
+    const enrollmentRefreshDelay = 20_000;
     function seed(data){
       home=data;
       homeExpiresAt=Date.now()+60_000;
@@ -5913,6 +5938,8 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
     }
     function cancelNavigation(){
       generation++;
+      updateCourseLibrary = null;
+      clearTimeout(enrollmentTimer);
       releaseContentLoad?.();
       content.replaceChildren();
       status.textContent='';
@@ -5927,8 +5954,9 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
       const filter = content.querySelector('#catalogFilter');
       const grid = content.querySelector('.catalog-grid');
       const pages = content.querySelector('.catalog-pages');
-      const pageSize = title === 'Thư viện khóa học' ? Math.max(items.length, 1) : 12;
+      const isCourseLibrary = title === 'Thư viện khóa học';
       function show(page = 0) {
+        const pageSize = isCourseLibrary ? Math.max(items.length, 1) : 12;
         const query = search.value.trim().toLocaleLowerCase('vi');
         const matches = items.filter(item => item.title.toLocaleLowerCase('vi').includes(query) && (!filter.value || item.status === filter.value));
         const count = Math.ceil(matches.length / pageSize);
@@ -5944,8 +5972,60 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
       }
       search.oninput = filter.onchange = () => show();
       show();
+      return updatedItems => {
+        const scrollTop = grid.scrollTop;
+        const focusedCard = grid.contains(document.activeElement)
+          ? document.activeElement.closest('[data-catalog-course]') : null;
+        items = updatedItems;
+        show();
+        grid.scrollTop = scrollTop;
+        if (focusedCard) {
+          const replacement = grid.querySelector(`[data-catalog-course="${CSS.escape(focusedCard.dataset.catalogCourse)}"] button:not(:disabled)`);
+          (replacement || search).focus({preventScroll:true});
+        }
+      };
     }
     const request = (action, data = {}) => callApi(action, {...data, deviceId:state.deviceId});
+    function courseLibraryEntries() {
+      return home.courses.map(course => {
+        const done = course.lessons.filter(lesson => lesson.completed).length;
+        const total = course.lessons.length;
+        const status = {NONE:'available',PENDING:'pending',REJECTED:'rejected'}[course.enrollmentStatus]
+          || (done && done === total ? 'done' : done ? 'active' : 'new');
+        return {...course, done, total, status};
+      });
+    }
+    function canRefreshEnrollment() {
+      return updateCourseLibrary && !document.hidden && !document.getElementById('courseView').hidden
+        && !enrollmentWrites.size && home?.courses.some(course => course.enrollmentStatus === 'PENDING');
+    }
+    function scheduleEnrollmentRefresh() {
+      clearTimeout(enrollmentTimer);
+      if (canRefreshEnrollment()) enrollmentTimer = setTimeout(refreshEnrollments, enrollmentRefreshDelay);
+    }
+    async function refreshEnrollments() {
+      clearTimeout(enrollmentTimer);
+      if (!canRefreshEnrollment() || enrollmentRefresh) return;
+      const library = updateCourseLibrary;
+      const previous = new Map(home.courses.map(course => [course.id, course.enrollmentStatus]));
+      const pending = getLearningHome();
+      enrollmentRefresh = pending;
+      try {
+        if (!await pending || library !== updateCourseLibrary) return;
+        if (previous.size !== home.courses.length
+          || home.courses.some(course => previous.get(course.id) !== course.enrollmentStatus)) {
+          library(courseLibraryEntries());
+        }
+      } catch {
+        // Keep the last confirmed status while the connection is unavailable.
+        return;
+      } finally {
+        if (enrollmentRefresh === pending) enrollmentRefresh = null;
+        scheduleEnrollmentRefresh();
+      }
+    }
+    document.addEventListener('visibilitychange', refreshEnrollments);
+    window.addEventListener('focus', refreshEnrollments);
     const history = items => items.length ? items.map(item => `
       <button class="learning-row" type="button" data-result="${escape(item.id)}">
         <span><strong>${escape(item.title)}</strong><small>${escape(item.submittedAt)}</small></span>
@@ -6003,22 +6083,18 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
       if (active === 'courses') {
         const current = home.courses.find(course => course.id === selectedCourse && course.enrollmentStatus === 'APPROVED');
         if (!current) {
-          const courses = home.courses.map(course => {
-            const done = course.lessons.filter(lesson => lesson.completed).length;
-            const total = course.lessons.length;
-            const status = {NONE:'available',PENDING:'pending',REJECTED:'rejected'}[course.enrollmentStatus]
-              || (done && done === total ? 'done' : done ? 'active' : 'new');
-            return {...course, done, total, status};
-          });
-          catalog('Thư viện khóa học', courses, 'Trạng thái', '<option value="available">Có thể yêu cầu</option><option value="pending">Chờ duyệt</option><option value="rejected">Không được duyệt</option><option value="new">Chưa học</option><option value="active">Đang học</option><option value="done">Hoàn thành</option>', course => `
-            <article class="catalog-card"><div class="catalog-card-top">${portalIcon('course')}<span class="v2-chip">${{available:'Chưa đăng ký',pending:'Chờ duyệt',rejected:'Không được duyệt',new:'Chưa học',active:'Đang học',done:'Hoàn thành'}[course.status]}</span></div>
+          updateCourseLibrary = catalog('Thư viện khóa học', courseLibraryEntries(), 'Trạng thái', '<option value="available">Có thể yêu cầu</option><option value="pending">Chờ duyệt</option><option value="rejected">Không được duyệt</option><option value="new">Chưa học</option><option value="active">Đang học</option><option value="done">Hoàn thành</option>', course => `
+            <article class="catalog-card" data-catalog-course="${escape(course.id)}"><div class="catalog-card-top">${portalIcon('course')}<span class="v2-chip">${{available:'Chưa đăng ký',pending:'Chờ duyệt',rejected:'Không được duyệt',new:'Chưa học',active:'Đang học',done:'Hoàn thành'}[course.status]}</span></div>
               <h3>${escape(course.title)}</h3><p>${escape(course.description)}</p>
               <footer class="catalog-card-end">
                 ${course.enrollmentStatus === 'APPROVED' ? `<span>${course.total ? `${course.done}/${course.total} bài hoàn thành` : 'Chưa có bài học'}</span>
                   <button class="button secondary-button" type="button" data-learning-course="${escape(course.id)}">Vào học</button>`
-                  : course.enrollmentStatus === 'NONE' ? `<button class="button secondary-button" type="button" data-request-learning="${escape(course.id)}" aria-label="Xin tham gia ${escape(course.title)}">Xin tham gia</button>` : ''}
+                  : course.enrollmentStatus === 'PENDING' ? '<span class="catalog-enrollment-state" role="status">✓ Đã gửi yêu cầu</span>'
+                  : ['NONE','REJECTED'].includes(course.enrollmentStatus) ? `<button class="button secondary-button" type="button" data-request-learning="${escape(course.id)}" aria-label="${enrollmentWrites.has(course.id) ? 'Đang gửi yêu cầu cho' : 'Xin tham gia'} ${escape(course.title)}" ${enrollmentWrites.has(course.id) ? 'disabled aria-busy="true"' : ''}>${enrollmentWrites.has(course.id) ? 'Đang gửi…' : 'Xin tham gia'}</button>
+                    ${enrollmentErrors.has(course.id) ? `<p class="catalog-enrollment-error" role="alert">${escape(enrollmentErrors.get(course.id))}</p>` : ''}` : ''}
               </footer>
             </article>`);
+          scheduleEnrollmentRefresh();
           return;
         }
         content.innerHTML = '<button type="button" class="button secondary-button" data-learning-tab="courses">Về thư viện khóa học</button>' + [current].map(course => {
@@ -6076,6 +6152,8 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
 
     async function select(tab, courseId = '') {
       const id = ++generation;
+      updateCourseLibrary = null;
+      clearTimeout(enrollmentTimer);
       releaseContentLoad?.();
       active = tab; window.setActiveNav?.(tab);
       selectedCourse = courseId;
@@ -6100,8 +6178,10 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
       const endLoading=Portal.contentLoading(content);
       releaseContentLoad=endLoading;
       try {
-        const fresh = await getLearningHome();
-        if (!fresh||id !== generation || document.getElementById('courseView').hidden) return;
+        while (!await getLearningHome()) {
+          if (id !== generation || document.getElementById('courseView').hidden) return;
+        }
+        if (id !== generation || document.getElementById('courseView').hidden) return;
         render();
         status.textContent = '';
       } catch (error) {
@@ -6114,23 +6194,38 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
       if (!button) return;
       if (button.dataset.learningTab) return select(button.dataset.learningTab);
       if (button.dataset.requestLearning) {
-        const currentGeneration = generation;
+        const epoch = state.authEpoch;
         const learningId = button.dataset.requestLearning;
+        if (enrollmentWrites.has(learningId)) return;
+        enrollmentWrites.add(learningId);
+        enrollmentErrors.delete(learningId);
+        clearTimeout(enrollmentTimer);
+        button.closest('footer').querySelector('.catalog-enrollment-error')?.remove();
+        button.textContent = 'Đang gửi…';
         button.disabled = true;
-        status.textContent = 'Đang gửi yêu cầu…';
+        button.setAttribute('aria-busy', 'true');
+        button.setAttribute('aria-label', 'Đang gửi yêu cầu');
+        let alreadyApproved = false;
         try {
           const result = await request('requestLearningEnrollment', {learningId});
+          if (epoch !== state.authEpoch) return;
+          if (!['PENDING','APPROVED','REJECTED'].includes(result.status)) throw new Error('Chưa xác nhận được yêu cầu. Vui lòng thử lại.');
           invalidate();
-          if (currentGeneration !== generation) return;
-          await select('courses');
-          if (generation !== currentGeneration + 1) return;
-          content.querySelector('#catalogSearch')?.focus({preventScroll:true});
-          status.textContent = {PENDING:'Đã gửi yêu cầu. Hãy chờ Sungrow duyệt.',APPROVED:'Bạn đã được duyệt học khóa này.',
-            REJECTED:'Yêu cầu học khóa này đã bị từ chối.'}[result.status] || 'Đã ghi nhận yêu cầu.';
+          alreadyApproved = result.status === 'APPROVED';
+          const course = home?.courses.find(course => course.id === learningId);
+          // An approved card needs the lesson data from learningHome.
+          if (course && course.enrollmentStatus !== 'APPROVED') {
+            course.enrollmentStatus = alreadyApproved ? 'PENDING' : result.status;
+          }
         } catch (error) {
-          if (currentGeneration === generation) status.textContent = error.message;
+          if (epoch === state.authEpoch) enrollmentErrors.set(learningId, error.message || 'Gửi yêu cầu chưa thành công. Vui lòng thử lại.');
         } finally {
-          button.disabled = false;
+          if (epoch === state.authEpoch) {
+            enrollmentWrites.delete(learningId);
+            updateCourseLibrary?.(courseLibraryEntries());
+            if (alreadyApproved) void refreshEnrollments();
+            else scheduleEnrollmentRefresh();
+          }
         }
         return;
       }
@@ -6187,7 +6282,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
     }
     window.LearningPortal = {getHome:()=>home,completeLesson,select,seed,invalidate,cancelNavigation,
       getPlayback:(learningId,lessonId)=>request('getLearningPlayback',{learningId,lessonId}),
-      open:()=>select('overview'),close:()=>{cancelNavigation();invalidate();home=null;}};
+      open:()=>select('overview'),close:()=>{cancelNavigation();invalidate();home=null;enrollmentWrites.clear();enrollmentErrors.clear();}};
   }
 
 })();
