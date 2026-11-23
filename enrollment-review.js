@@ -1,6 +1,8 @@
 (() => {
   function mount(panel, request, currentEpoch) {
-    const status = panel.querySelector('[role=status]');
+    const status = panel.querySelector('[data-enrollment-feedback]');
+    const count = panel.querySelector('[data-enrollment-count]');
+    const filter = panel.querySelector('[data-enrollment-filter]');
     const refreshButton = panel.querySelector('[data-refresh-enrollments]');
     const list = panel.querySelector('[data-enrollment-requests]');
     const bulk = panel.querySelector('[data-enrollment-bulk]');
@@ -11,14 +13,30 @@
     });
     let busy = false;
     const entries = new Map();
+    const normalize = value => value.toLocaleLowerCase('vi').normalize('NFD').replace(/\p{M}/gu,'').replaceAll('đ','d');
 
     function syncControls() {
-      const eligible = [...entries.values()].filter(entry => entry.row.canApprove);
+      const query = normalize(filter.value.trim());
+      let visible = 0;
+      const eligible = [];
+      for (const [item,entry] of entries) {
+        item.hidden = !entry.searchText.includes(query);
+        if (item.hidden) {
+          entry.checkbox.checked = false;
+          continue;
+        }
+        visible++;
+        if (entry.row.canApprove) eligible.push(entry);
+      }
+      const summary = query && entries.size
+        ? (visible ? `${visible}/${entries.size} yêu cầu` : 'Không có yêu cầu phù hợp')
+        : `${entries.size} yêu cầu chờ duyệt`;
+      if (count.textContent !== summary) count.textContent = summary;
       const selected = eligible.filter(entry => entry.checkbox.checked).length;
-      bulk.hidden = !eligible.length;
+      bulk.hidden = !entries.size;
       selectAll.checked = selected > 0 && selected === eligible.length;
       selectAll.indeterminate = selected > 0 && selected < eligible.length;
-      selectAll.disabled = busy;
+      selectAll.disabled = busy || !eligible.length;
       approveSelected.disabled = busy || selected === 0;
       approveSelected.textContent = busy ? 'Đang xử lý…' : selected ? `Duyệt đã chọn (${selected})` : 'Duyệt đã chọn';
       refreshButton.disabled = busy;
@@ -76,7 +94,8 @@
         message.className = 'enrollment-review-error';
         identity.append(message);
         const [approve,reject] = actions.children;
-        entries.set(item,{row,checkbox,approve,reject,message});
+        const searchText = normalize([row.company,row.name,row.email].filter(Boolean).join(' '));
+        entries.set(item,{row,checkbox,approve,reject,message,searchText});
         item.append(choice,identity,actions);
         list.append(item);
       }
@@ -92,7 +111,7 @@
         const {requests} = await request('adminLearningEnrollments');
         if (epoch !== currentEpoch()) return;
         render(requests);
-        status.textContent = requests.length ? requests.length + ' yêu cầu chờ duyệt.' : 'Không có yêu cầu chờ duyệt.';
+        status.textContent = '';
       } catch (error) {
         if (epoch === currentEpoch()) status.textContent = error.message;
       } finally {
@@ -136,7 +155,7 @@
           busy = false;
           syncControls();
           if (restoreFocus && !panel.hidden && document.activeElement === document.body) {
-            const target = approveSelected.disabled ? list.querySelector('button:not(:disabled)') || refreshButton : approveSelected;
+            const target = approveSelected.disabled ? list.querySelector('li:not([hidden]) button:not(:disabled)') || refreshButton : approveSelected;
             target.focus();
           }
         }
@@ -144,16 +163,18 @@
     }
 
     refreshButton.onclick = refresh;
+    filter.oninput = syncControls;
     selectAll.onchange = () => {
-      for (const {row,checkbox} of entries.values()) {
-        if (row.canApprove) checkbox.checked = selectAll.checked;
+      for (const [item,{row,checkbox}] of entries) {
+        if (!item.hidden && row.canApprove) checkbox.checked = selectAll.checked;
       }
       syncControls();
     };
-    approveSelected.onclick = () => review([...entries].filter(([,entry]) => entry.checkbox.checked)
+    approveSelected.onclick = () => review([...entries].filter(([item,entry]) => !item.hidden && entry.checkbox.checked)
       .map(([item]) => item),'APPROVED');
     return {refresh,clear() {
       busy = false;
+      filter.value = '';
       render([]);
       syncControls();
       status.textContent = '';

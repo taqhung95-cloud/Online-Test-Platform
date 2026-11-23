@@ -10,15 +10,31 @@
   <link rel="stylesheet" href="mobile.css?v=20261122-viewer-controls">
   <script src="platform.js?v=20261122-enrollments"></script>
   <script src="admin-authoring.js?v=7"></script>
-  <script src="enrollment-review.js?v=20261123-bulk"></script>
+  <script src="enrollment-review.js?v=20261123-filter"></script>
   <style>
     .enrollment-review-list{list-style:none;margin:0;padding:0}
     .enrollment-review-row{flex-wrap:wrap;overflow-wrap:anywhere}
     .enrollment-review-row p,.enrollment-review-row time{margin:4px 0}
     .enrollment-review-row small{display:block}
     .enrollment-review-actions{display:flex;flex-wrap:wrap;gap:8px}
-    .enrollment-review-bulk{display:flex;align-items:center;gap:8px 16px;flex-wrap:wrap;margin-block:8px}
-    .enrollment-review-bulk[hidden],.enrollment-review-choice[hidden]{display:none}
+    .enrollment-review-controls,.enrollment-review-bulk{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap}
+    .enrollment-review-controls{margin-block-end:8px}
+    .enrollment-review-count{margin:0;font-weight:600}
+    .enrollment-review-controls input[type=search]{
+      flex:1 1 15rem;
+      min-inline-size:min(100%,15rem);
+      min-block-size:44px;
+      padding:8px 12px;
+      font:inherit;
+      color:inherit;
+      background:var(--sg-input,#fff);
+      border:1px solid var(--sg-line,#a6b9c9);
+      border-radius:var(--sg-control-radius,8px);
+    }
+    .enrollment-review-controls button{min-block-size:44px;margin:0}
+    .enrollment-review-feedback{margin:0}
+    .enrollment-review-feedback:not(:empty){margin-block-end:8px}
+    .enrollment-review-row[hidden],.enrollment-review-bulk[hidden],.enrollment-review-choice[hidden]{display:none}
     .enrollment-review-choice,.enrollment-review-bulk label{display:inline-flex;align-items:center;gap:8px;min-block-size:44px;cursor:pointer}
     .enrollment-review-choice{justify-content:center;min-inline-size:44px}
     #enrollmentReview input[type=checkbox]{inline-size:1.25em;block-size:1.25em;min-height:0;margin:0;accent-color:#934618}
@@ -3465,12 +3481,6 @@ body.v5 .v5-admin-dashboard textarea{min-block-size:5.5rem;resize:vertical}
 body.v5 .v5-admin-dashboard :is(#scheduleSave,.filter-actions button,form>button[type=submit],[data-refresh-enrollments]){
   min-block-size:44px;
 }
-body.v5 .v5-admin-dashboard .v5-admin-panel-actions{
-  display:flex;
-  justify-content:flex-end;
-  flex-wrap:wrap;
-  gap:8px;
-}
 body.v5 .v5-admin-dashboard :is(#learningAdmin,#schedulePanel){
   flex:0 1 auto;
   min-inline-size:0;
@@ -4196,14 +4206,16 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
         <div class="learning-content"></div>
       </details>
       <section id="enrollmentReview" class="panel" data-admin-section="enrollments" aria-labelledby="v2AdminTitle" hidden>
-        <div class="v5-admin-panel-actions">
-          <button type="button" class="button secondary-button" data-refresh-enrollments>Tải lại yêu cầu</button>
+        <div class="enrollment-review-controls">
+          <p class="enrollment-review-count" data-enrollment-count role="status"></p>
+          <input type="search" data-enrollment-filter aria-label="Lọc theo công ty, tên hoặc email" placeholder="Công ty, tên hoặc email">
+          <div class="enrollment-review-bulk" data-enrollment-bulk hidden>
+            <label><input type="checkbox" aria-label="Chọn tất cả yêu cầu có thể duyệt đang hiển thị">Chọn tất cả</label>
+            <button type="button" class="button" disabled>Duyệt đã chọn</button>
+          </div>
+          <button type="button" class="button secondary-button" data-refresh-enrollments>Tải lại</button>
         </div>
-        <p role="status"></p>
-        <div class="enrollment-review-bulk" data-enrollment-bulk hidden>
-          <label><input type="checkbox">Chọn tất cả yêu cầu có thể duyệt</label>
-          <button type="button" class="button" disabled>Duyệt đã chọn</button>
-        </div>
+        <p class="enrollment-review-feedback" data-enrollment-feedback role="status"></p>
         <ul class="enrollment-review-list" data-enrollment-requests></ul>
       </section>
       <div data-admin-section="reports">
