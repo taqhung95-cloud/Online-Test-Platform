@@ -3021,11 +3021,18 @@ body.v5 .v5-single-course .v5-video-stage{
   opacity:0;pointer-events:none;
 }
 .v5-media-toolbar:has(> [data-pdf-toolbar][hidden]){inset:8px 8px auto auto;margin:0}
-.v5-media[data-controls-visible] > .v5-media-toolbar,.v5-media-toolbar:has(:focus-visible){
+.v5-media-toolbar:is([data-pointer-over],[data-touch-open],:has(:focus-visible)){
   opacity:1;pointer-events:auto;
 }
-@media (hover:hover){
-  .v5-media-toolbar:hover{opacity:1;pointer-events:auto}
+.v5-media-toggle{display:none}
+@media (hover:none), (any-pointer:coarse){
+  body.v5 .v5-media .v5-media-toggle:not([hidden]){
+    display:grid;place-items:center;position:absolute;z-index:3;
+    inset-block-start:8px;inset-inline-start:8px;
+    min-inline-size:44px;min-block-size:44px;margin:0;padding:0;
+    border:1px solid #ffffff42;border-radius:10px;
+    background:#142238de;color:#fff;font-size:1.2rem;
+  }
 }
 @media (prefers-reduced-motion:no-preference){
   .v5-media-toolbar{transition:opacity 180ms ease}
@@ -6924,7 +6931,9 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
    course.innerHTML=`<section class="panel v5-course-viewer" aria-label="Nội dung khóa học">
      <div class="v5-media">
        <div class="v5-video-stage"></div>
-       <div class="v5-media-toolbar" role="group" aria-label="Điều khiển khung xem" hidden>
+       <button type="button" class="button v5-media-toggle" aria-label="Công cụ trình chiếu"
+         aria-controls="lesson-media-toolbar" aria-expanded="false" hidden><span aria-hidden="true">⋯</span></button>
+       <div id="lesson-media-toolbar" class="v5-media-toolbar" role="group" aria-label="Điều khiển khung xem" hidden>
          <div class="v5-pdf-toolbar" data-pdf-toolbar hidden></div>
          <button type="button" class="button secondary-button" data-fullscreen aria-label="Toàn màn hình" title="Toàn màn hình">
            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 9V4h5m6 0h5v5m0 6v5h-5m-6 0H4v-5"/></svg>
@@ -6956,21 +6965,26 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
    status.setAttribute('role','status');
    const media=$('.v5-media',course);
    const toolbar=$('.v5-media-toolbar',course);
+   const touchToggle=$('.v5-media-toggle',media);
    const pdfToolbar=$('[data-pdf-toolbar]',toolbar);
    const caption=$('.v5-current-lesson',course);
    const navigation=$('.v5-lesson-navigation',course);
    const previous=$('[data-previous-lesson]',navigation);
    const next=$('[data-next-lesson]',navigation);
    const fullscreen=$('[data-fullscreen]',toolbar);
-   let controlsTimer;
-   function revealControls(){
-     media.dataset.controlsVisible='';
-     clearTimeout(controlsTimer);
-     controlsTimer=setTimeout(()=>delete media.dataset.controlsVisible,3000);
+   function setTouchToolbar(open){
+     toolbar.removeAttribute('data-pointer-over');
+     toolbar.toggleAttribute('data-touch-open',open);
+     touchToggle.setAttribute('aria-expanded',String(open));
    }
-   for(const event of ['pointermove','pointerdown','focusin','keydown']){
-     media.addEventListener(event,revealControls);
-   }
+   touchToggle.addEventListener('click',()=>setTouchToolbar(!toolbar.hasAttribute('data-touch-open')));
+   media.addEventListener('pointermove',event=>{
+     if(event.pointerType!=='mouse'||toolbar.hidden)return;
+     const {left,right,top,bottom}=toolbar.getBoundingClientRect();
+     toolbar.toggleAttribute('data-pointer-over',
+       !touchToggle.contains(event.target)&&event.clientX>=left&&event.clientX<=right&&event.clientY>=top&&event.clientY<=bottom);
+   });
+   media.addEventListener('pointerleave',()=>toolbar.removeAttribute('data-pointer-over'));
    media.addEventListener('keydown',event=>{
      if (!(player instanceof HTMLVideoElement) || event.defaultPrevented ||
          event.ctrlKey || event.metaKey || event.altKey ||
@@ -6990,7 +7004,6 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
      }
      event.preventDefault();
      event.stopPropagation();
-     revealControls();
    },{capture:true});
    fullscreen.hidden=!document.fullscreenEnabled||typeof media.requestFullscreen!=='function';
    fullscreen.addEventListener('click',async()=>{
@@ -7003,7 +7016,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
      const label=document.fullscreenElement===media?'Thoát toàn màn hình':'Toàn màn hình';
      fullscreen.setAttribute('aria-label',label);
      fullscreen.title=label;
-     revealControls();
+     toolbar.removeAttribute('data-pointer-over');
    });
    let completed=done;
    let currentIndex=-1;
@@ -7026,7 +7039,6 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
    const playerCleanup=new MutationObserver(()=>{
      if(course.isConnected)return;
      playerCleanup.disconnect();
-     clearTimeout(controlsTimer);
      clearPlayer();
    });
    async function loadLesson(lesson,index){
@@ -7087,7 +7099,7 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
          if(active()){
            loading.remove();
            stage.removeAttribute('aria-busy');
-           revealControls();
+           toolbar.hidden=touchToggle.hidden=false;
          }
          return;
        }
@@ -7121,8 +7133,8 @@ body.v4:has([data-portal-loading]:not([hidden], [hidden] *)) #portalContentLoade
      currentIndex=index;
      lesson.button.setAttribute('aria-current','true');
      loadLesson(lesson,index);
-     toolbar.hidden=false;
-     revealControls();
+     toolbar.hidden=touchToggle.hidden=fullscreen.hidden;
+     setTouchToolbar(false);
      caption.textContent=lesson.label;
      caption.hidden=false;
      updateNavigation(previous,lessons[index-1]);
